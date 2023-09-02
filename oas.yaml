@@ -89,6 +89,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/PostSchema'
 
+  /posts{post_id}:
+    parameters:
+      - in: path
+        name: post_id
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: d222e7a3-6afb-463a-9709-38eb70cc670d
+    get:
+      summary: Returns the details of a specific post
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/PostSchema'
+        '404':
+          description: The post is not found
+          $ref: '#/components/responses/NotFound'
+
 components:
   responses:
     Unauthenticated:
@@ -124,8 +147,11 @@ components:
         - code
         - message
 
-    CreatePostSchema:
+    BasePostSchema:
       type: object
+      required:
+        - title
+        - body
       properties:
         title:
           type: string
@@ -136,7 +162,13 @@ components:
           example: 'Well Python has many types but...'
           minLength: 1
 
+    CreatePostSchema:
+      allOf:
+        - $ref: '#/components/schemas/BasePostSchema'
+
     PostSchema:
+      allOf:
+        - $ref: '#/components/schemas/BasePostSchema'
       type: object
       properties:
         id:
@@ -145,19 +177,9 @@ components:
         created:
           type: string
           format: date-time
-        title:
-          type: string
-          example: 'The most used Python built-in type'
-          minLength: 1
-        body:
-          type: string
-          example: 'Well Python has many types but...'
-          minLength: 1
       required:
         - id
         - created
-        - title
-        - body
 
     PostsSchema:
       type: object
