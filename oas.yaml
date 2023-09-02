@@ -3,7 +3,7 @@ openapi: 3.0.3
 info:
   title: Fast Blog
   description: A RESTful blog created with FastAPI
-  version: 0.1.0
+  version: 1.0.0
   contact:
     name: Mahdi Haghverdi
     email: mahdihaghverdiliewpl@gmail.com
