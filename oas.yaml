@@ -46,7 +46,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [name, date]
+            enum: [ name, date ]
             default: date
         - name: order
           in: query
@@ -54,7 +54,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [asc, desc]
+            enum: [ asc, desc ]
             default: 1
       responses:
         '200':
@@ -110,6 +110,25 @@ paths:
                   - $ref: '#/components/schemas/PostSchema'
         '404':
           description: The post is not found
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      summary: Replace an existing post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostSchema'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostSchema'
+        '404':
+          description: NotFound
           $ref: '#/components/responses/NotFound'
 
 components:
