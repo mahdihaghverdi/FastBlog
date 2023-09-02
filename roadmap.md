@@ -13,15 +13,20 @@ These are the in-development versions of the blog, nothing is completed yet.
 ### `v1.0.0`
 In this version, the basic API of the blog is written, no advance feature is implemented.
 Available features:
+- Blog Posts
+  - Create/Read/Update/Delete blog posts.
+
+
+----
+### `v2.0.0`
+Users will come to the blog. Now a user can create an account, do CRUD on his/her account.
 - User accounts
   - Account creation.
   - logging in/out.
   - accessing the limited resources through authorization.
-- Blog Posts
-  - Create/Read/Update/Delete blog posts.
 
 ----
-### `v2.0.0`
+### `v3.0.0`
 A tag system will be added to the posts.
 
 With this feature posts can be:
@@ -31,13 +36,13 @@ With this feature posts can be:
 **Note:** with this feature, a post recommendation can be implemented in the future versions.
 
 ----
-### `v3.0.0`
+### `v4.0.0`
 Post recommendation system will be implemented.
 
 Now the most recent posts with similarities in tags will be shown to the user.
 
 ----
-### `v4.0.0`
+### `v5.0.0`
 Comments will arrive in the third version of `FastBlog`.
 
 Now users can comment on each other's posts.
