@@ -3,7 +3,7 @@ default_language_version:
 
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: d20d9444dfc759ebeeff1643f213132bb4dd491f
+    rev: v4.4.0
     hooks:
     -   id: check-added-large-files
     -   id: check-toml
@@ -19,20 +19,20 @@ repos:
     -   id: add-trailing-comma
 
 -   repo: https://github.com/asottile/pyupgrade
-    rev: c21b4c4d153be0633357686c7697f539ac194868
+    rev: v3.10.1
     hooks:
     -   id: pyupgrade
         args:
         - --py310-plus
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: 294ccdf82ae2398d845cae0547345b27beca0d8b
+  rev: v0.0.287
   hooks:
     - id: ruff
       args:
           - --fix
 
 -   repo: https://github.com/psf/black
-    rev: 47676bf5939ae5c8e670d947917bc8af4732eab6
+    rev: 23.7.0
     hooks:
     -   id: black
