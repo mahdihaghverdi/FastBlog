@@ -1,0 +1,168 @@
+openapi: 3.0.3
+
+info:
+  title: Fast Blog
+  description: A RESTful blog created with FastAPI
+  version: 0.1.0
+  contact:
+    name: Mahdi Haghverdi
+    email: mahdihaghverdiliewpl@gmail.com
+    url: https://github.com/mahdihaghverdi/
+  license:
+    name: GPLv3
+    url: https://www.gnu.org/licenses/gpl-3.0.html
+
+servers:
+  - url: https://fastblog.io
+    description: Main servers
+  - url: http://localhost:8000/
+    description: Local development server
+
+paths:
+  /posts:
+    get:
+      summary: Retrieves all the posts.
+      parameters:
+        - name: page
+          in: query
+          description: page number of the pagination
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: perPage
+          in: query
+          description: number of posts per page
+          required: false
+          schema:
+            type: integer
+            default: 5
+            minimum: 1
+            maximum: 30
+        - name: sort
+          in: query
+          description: sorts the returned posts
+          required: false
+          schema:
+            type: string
+            enum: [name, date]
+            default: date
+        - name: order
+          in: query
+          description: page number of the pagination
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: 1
+      responses:
+        '200':
+          description: OK. A JSON array of the posts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostsSchema'
+        '401':
+          description: Unauthenticated request, the client is not logged in.
+          $ref: '#/components/responses/Unauthenticated'
+        '404':
+          description: Not found resource OR an unauthorised request is made by client.
+          $ref: '#/components/responses/NotFound'
+        '5XX':
+          description: Unexpected error.
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      summary: Create a post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostSchema'
+      responses:
+        '201':
+          description: A JSON repr of the created post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostSchema'
+
+components:
+  responses:
+    Unauthenticated:
+      description: The client is not logged in.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: The resource is not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServerError:
+      description: Some unknown error in the server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          example: '404'
+        detail:
+          type: string
+          example: 'Resource is not Found'
+      required:
+        - code
+        - message
+
+    CreatePostSchema:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'The most used Python built-in type'
+          minLength: 1
+        body:
+          type: string
+          example: 'Well Python has many types but...'
+          minLength: 1
+
+    PostSchema:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        created:
+          type: string
+          format: date-time
+        title:
+          type: string
+          example: 'The most used Python built-in type'
+          minLength: 1
+        body:
+          type: string
+          example: 'Well Python has many types but...'
+          minLength: 1
+      required:
+        - id
+        - created
+        - title
+        - body
+
+    PostsSchema:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostSchema'
