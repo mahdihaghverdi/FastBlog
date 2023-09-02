@@ -99,7 +99,7 @@ paths:
           format: uuid
           example: d222e7a3-6afb-463a-9709-38eb70cc670d
     get:
-      summary: Returns the details of a specific post
+      summary: Return the details of a specific post
       responses:
         '200':
           description: OK
@@ -122,13 +122,20 @@ paths:
               $ref: '#/components/schemas/CreatePostSchema'
       responses:
         '200':
-          description: OK
+          description: The post is updated successfully.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PostSchema'
         '404':
-          description: NotFound
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: Delete a specific post
+      responses:
+        '204':
+          description: The resource is deleted successfully.
+        '404':
           $ref: '#/components/responses/NotFound'
 
 components:
