@@ -55,7 +55,7 @@ paths:
           schema:
             type: string
             enum: [ asc, desc ]
-            default: 1
+            default: desc
       responses:
         '200':
           description: OK. A JSON array of the posts
@@ -63,9 +63,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PostsSchema'
-        '401':
-          description: Unauthenticated request, the client is not logged in.
-          $ref: '#/components/responses/Unauthenticated'
         '404':
           description: Not found resource OR an unauthorised request is made by client.
           $ref: '#/components/responses/NotFound'
@@ -140,12 +137,6 @@ paths:
 
 components:
   responses:
-    Unauthenticated:
-      description: The client is not logged in.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
     NotFound:
       description: The resource is not found
       content:
