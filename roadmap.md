@@ -25,6 +25,12 @@ Users will come to the blog. Now a user can create an account, do CRUD on his/he
   - logging in/out.
   - accessing the limited resources through authorization.
 
+#### `2.1.0`
+Draft posts will be available for users.
+
+with this release, users can write some of the post,
+and save it in drafts, then edit and publish it later.
+
 ----
 ### `v3.0.0`
 A tag system will be added to the posts.
