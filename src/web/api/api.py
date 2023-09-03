@@ -34,3 +34,8 @@ async def get_posts(
     ] = Order.DESC,
 ):
     """Retrieve all the posts"""
+
+
+@app.post("/posts")
+async def create_post():
+    """Create a post"""
