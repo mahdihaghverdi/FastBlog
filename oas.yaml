@@ -21,7 +21,7 @@ servers:
 paths:
   /posts:
     get:
-      summary: Retrieves all the posts.
+      summary: Retrieve all the posts.
       parameters:
         - name: page
           in: query
@@ -31,7 +31,7 @@ paths:
             type: integer
             default: 1
             minimum: 1
-        - name: perPage
+        - name: per-page
           in: query
           description: number of posts per page
           required: false
@@ -50,7 +50,7 @@ paths:
             default: date
         - name: order
           in: query
-          description: page number of the pagination
+          description: the order of the sorted posts
           required: false
           schema:
             type: string
@@ -66,9 +66,6 @@ paths:
         '404':
           description: Not found resource OR an unauthorised request is made by client.
           $ref: '#/components/responses/NotFound'
-        '5XX':
-          description: Unexpected error.
-          $ref: '#/components/responses/ServerError'
 
     post:
       summary: Create a post
