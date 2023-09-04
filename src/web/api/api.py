@@ -1,12 +1,17 @@
 from typing import Annotated
 
 from fastapi import Query
+from starlette import status
 
-from src.web.api.schemas import Sort, Order
+from src.web.api.schemas import Sort, Order, PostSchema, CreatePostSchema
 from src.web.app import app
 
 
-@app.get("/posts")
+@app.get(
+    "/posts",
+    response_model=list[PostSchema],
+    status_code=status.HTTP_200_OK,
+)
 async def get_posts(
     page: Annotated[
         int,
@@ -36,6 +41,10 @@ async def get_posts(
     """Retrieve all the posts"""
 
 
-@app.post("/posts")
-async def create_post():
+@app.post(
+    "/posts",
+    response_model=PostSchema,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_post(post: CreatePostSchema):
     """Create a post"""
