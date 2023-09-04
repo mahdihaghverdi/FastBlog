@@ -10,7 +10,7 @@ class Sort(Enum):
     DATE = "date"
 
 
-class Order(Enum):
+class SortOrder(Enum):
     ASC = "asc"
     DESC = "desc"
 

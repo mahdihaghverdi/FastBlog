@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Query
 from starlette import status
 
-from src.web.api.schemas import Sort, Order, PostSchema, CreatePostSchema
+from src.web.api.schemas import Sort, SortOrder, PostSchema, CreatePostSchema
 from src.web.app import app
 
 
@@ -34,9 +34,9 @@ async def get_posts(
         Query(description="sorts the returned posts"),
     ] = Sort.DATE,
     order: Annotated[
-        Order,
+        SortOrder,
         Query(description="order of the sorted posts"),
-    ] = Order.DESC,
+    ] = SortOrder.DESC,
 ):
     """Retrieve all the posts"""
 
