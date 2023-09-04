@@ -18,6 +18,11 @@ class PostModel(Base):
     title: Mapped[str]
     body: Mapped[str]
 
+    def __getattr__(self, item):
+        if item == "date":
+            return self.created
+        raise AttributeError(f"{self.__class__!r} object has no attribute {item!r}")
+
     def dict(self):
         return PostSchema(
             id=self.id,
