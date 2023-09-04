@@ -161,7 +161,7 @@ components:
           example: 'Resource is not Found'
       required:
         - code
-        - message
+        - detail
 
     BasePostSchema:
       type: object
