@@ -49,7 +49,7 @@ Now the most recent posts with similarities in tags will be shown to the user.
 
 ----
 ### `v5.0.0`
-Comments will arrive in the third version of `FastBlog`.
+Comments will arrive in this version of `FastBlog`.
 
 Now users can comment on each other's posts.
 
