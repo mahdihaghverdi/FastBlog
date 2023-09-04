@@ -62,7 +62,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PostsSchema'
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostSchema'
         '404':
           description: Not found resource OR an unauthorised request is made by client.
           $ref: '#/components/responses/NotFound'
@@ -194,11 +196,3 @@ components:
       required:
         - id
         - created
-
-    PostsSchema:
-      type: object
-      properties:
-        posts:
-          type: array
-          items:
-            $ref: '#/components/schemas/PostSchema'
