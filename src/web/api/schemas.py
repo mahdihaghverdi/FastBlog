@@ -6,7 +6,7 @@ from pydantic import BaseModel, constr
 
 
 class Sort(Enum):
-    NAME = "name"
+    TITLE = "title"
     DATE = "date"
 
 
