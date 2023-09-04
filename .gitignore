@@ -176,6 +176,4 @@ pyrightconfig.json
 # possible node modules to install
 node_modules
 
-# data directory
-.database
 # End of https://www.toptal.com/developers/gitignore/api/python
