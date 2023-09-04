@@ -48,14 +48,16 @@ paths:
             type: string
             enum: [ name, date ]
             default: date
-        - name: order
+        - name: desc
           in: query
-          description: the order of the sorted posts
+          description: >
+            the order of the sorted posts.
+            if true (default) -> the returned result is in desc order
+            ascending otherwise.
           required: false
           schema:
-            type: string
-            enum: [ asc, desc ]
-            default: desc
+            type: boolean
+            default: true
       responses:
         '200':
           description: OK. A JSON array of the posts
