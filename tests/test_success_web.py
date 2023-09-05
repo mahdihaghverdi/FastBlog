@@ -107,3 +107,12 @@ def test_update_post(client):
     data = response.json()
     assert data["title"] == new_title
     assert data["body"] == new_body
+
+
+def test_delete_post(client):
+    title, body = "a", "b"
+    post_id = client.post("/posts", json={"title": title, "body": body}).json()["id"]
+
+    response = client.delete(f"/posts/{post_id}")
+    assert response.status_code == 204, response.text
+    assert client.get(f"/posts{post_id}").status_code == 404
