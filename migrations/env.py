@@ -13,9 +13,9 @@ config = context.config
 
 # this will overwrite the ini-file sqlalchemy.url path
 # with the path given in the config of the main code
-from src.web.dependencies import get_settings  # noqa: E402
+from src.web.dependencies import settings  # noqa: E402
 
-config.set_main_option("sqlalchemy.url", str(get_settings().database_url))
+config.set_main_option("sqlalchemy.url", str(settings.database_url))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
