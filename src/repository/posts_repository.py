@@ -60,3 +60,9 @@ class PostsRepository:
         for key, value in post_detail.items():
             setattr(post, key, value)
         return Post(**post.dict(), post_model=post)
+
+    async def delete(self, post_id: UUID) -> bool | None:
+        post = await self._get(post_id)
+        if post is None:
+            return False
+        await self.session.delete(post)

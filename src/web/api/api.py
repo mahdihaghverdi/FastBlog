@@ -113,3 +113,22 @@ async def update_post(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=error.__str__(),
             )
+
+
+@app.delete("/posts/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_post(
+    post_id: UUID,
+    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+):
+    """Delete a specific post"""
+    async with UnitOfWork(asessionmaker) as uow:
+        repo = PostsRepository(uow.session)
+        service = PostsService(repo)
+        try:
+            await service.delete_post(post_id)
+            await uow.commit()
+        except PostNotFoundError as error:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=error.__str__(),
+            )
