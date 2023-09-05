@@ -32,6 +32,10 @@ def random_string():
 
 
 def test_get_posts(client):
+    response = client.get("/posts")
+    assert response.status_code == 200, response.text
+    assert response.json() == []
+
     posts = [
         [{"title": random_string(), "body": random_string()} for _ in range(5)]
         for _ in range(5)
@@ -45,7 +49,6 @@ def test_get_posts(client):
     # default query params: page = 1, per-page = 5, sort = date, desc = true
     # pages
     response = client.get("/posts")
-    assert response.status_code == 200, response.text
     assert len(response.json()) == 5
 
     response = client.get("/posts", params={"page": 2})
