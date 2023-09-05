@@ -1,3 +1,5 @@
+import itertools
+
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,17 +25,18 @@ class PostsRepository:
         This function paginates the results according to page and per_page
         This function sorts the results according to `Sort` and `SortOrder` values
         """
+        order_by_column = PostModel.title if sort is Sort.TITLE else PostModel.created
         stmt = (
             select(PostModel)
             .offset((page - 1) * per_page)
             .limit(per_page)
             .order_by(
-                desc(getattr(PostModel, sort.value))
-                if desc_
-                else getattr(PostModel, sort.value),
+                desc(order_by_column) if desc_ else order_by_column,
             )
         )
-        records = await self.session.execute(stmt)
+        records = list(
+            itertools.chain.from_iterable((await self.session.execute(stmt)).all()),
+        )
         return [Post(**record.dict()) for record in records]
 
     async def add(self, post: dict):
