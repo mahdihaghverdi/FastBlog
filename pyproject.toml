@@ -1,9 +1,11 @@
 [tool.poetry]
 name = "fastblog"
 version = "0.1.0"
-description = ""
+description = "A RESTful blog system built with Python and FastAPI ⚡"
 authors = ["MahdiHaghverdi <mahdihaghverdliewpl@gmail.com>"]
+license = 'GPLv3'
 readme = "README.md"
+repository = 'https://github.com/mahdihaghverdi/FastBlog'
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -16,6 +18,9 @@ asyncpg = "~0.28.0"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "~3.3.3"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/mahdihaghverdi/FastBlog/issues"
 
 [build-system]
 requires = ["poetry-core"]
