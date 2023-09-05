@@ -1,6 +1,7 @@
 from typing import Annotated
+from uuid import UUID
 
-from fastapi import Query, Depends
+from fastapi import Query, Depends, HTTPException
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
 
@@ -10,6 +11,7 @@ from src.service.posts_service import PostsService
 from src.web.api.schemas import Sort, PostSchema, CreatePostSchema
 from src.web.app import app
 from src.web.dependencies import get_async_sessionmaker
+from src.web.exceptions import PostNotFoundError
 
 
 @app.get(
@@ -72,3 +74,21 @@ async def create_post(
         payload = await post.dict()
 
     return payload
+
+
+@app.get("/posts/{post_id}")
+async def get_post(
+    post_id: UUID,
+    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+):
+    """Return details of a specific post"""
+    async with UnitOfWork(asessionmaker) as uow:
+        repo = PostsRepository(uow.session)
+        service = PostsService(repo)
+        try:
+            return await (await service.get_post(post_id)).dict()
+        except PostNotFoundError as error:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=error.__str__(),
+            )

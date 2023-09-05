@@ -1,5 +1,6 @@
 from src.service.posts import Post
 from src.web.api.schemas import Sort
+from src.web.exceptions import PostNotFoundError
 
 
 class PostsService:
@@ -23,3 +24,9 @@ class PostsService:
 
     async def create_post(self, post: dict) -> Post:
         return await self.posts_repository.add(post)
+
+    async def get_post(self, post_id) -> Post:
+        post = await self.posts_repository.get(post_id)
+        if post is None:
+            raise PostNotFoundError(f"post with id: '{post_id}' is not found")
+        return post

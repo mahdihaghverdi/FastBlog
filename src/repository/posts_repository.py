@@ -1,4 +1,5 @@
 import itertools
+from uuid import UUID
 
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -43,3 +44,11 @@ class PostsRepository:
         record = PostModel(**post)
         self.session.add(record)
         return Post(**record.dict(), post_model=record)
+
+    async def _get(self, id_: UUID) -> PostModel | None:
+        return await self.session.get(PostModel, id_)
+
+    async def get(self, post_id: UUID) -> Post | None:
+        post = await self._get(post_id)
+        if post is not None:
+            return Post(**post.dict())
