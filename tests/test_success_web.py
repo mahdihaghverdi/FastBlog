@@ -2,7 +2,7 @@ import random
 import string
 
 
-def test_create_a_post(client):
+def test_create_post(client):
     title, body = "Python 3.11", "Wow, such a release!"
     response = client.post(
         "/posts",
@@ -31,7 +31,7 @@ def random_string():
     return "".join(random.choices(string.ascii_lowercase, k=1))
 
 
-def test_list_posts(client):
+def test_get_posts(client):
     posts = [
         [{"title": random_string(), "body": random_string()} for _ in range(5)]
         for _ in range(5)
@@ -80,3 +80,15 @@ def test_list_posts(client):
     # desc
     response = client.get("/posts", params={"per-page": len(posts), "desc": "false"})
     assert response.json() == posts
+
+
+def test_get_post(client):
+    title, body = "a", "b"
+    post_id = client.post("/posts", json={"title": title, "body": body}).json()["id"]
+
+    response = client.get(f"/posts/{post_id}")
+    assert response.status_code == 200, response.text
+
+    data = response.json()
+    assert data["title"] == title
+    assert data["body"] == body
