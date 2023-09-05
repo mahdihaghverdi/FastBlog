@@ -52,3 +52,11 @@ class PostsRepository:
         post = await self._get(post_id)
         if post is not None:
             return Post(**post.dict())
+
+    async def update(self, post_id: UUID, post_detail: dict) -> Post | None:
+        post = await self._get(post_id)
+        if post is None:
+            return
+        for key, value in post_detail.items():
+            setattr(post, key, value)
+        return Post(**post.dict(), post_model=post)

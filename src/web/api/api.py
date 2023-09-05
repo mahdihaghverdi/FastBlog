@@ -76,7 +76,7 @@ async def create_post(
     return payload
 
 
-@app.get("/posts/{post_id}")
+@app.get("/posts/{post_id}", response_model=PostSchema)
 async def get_post(
     post_id: UUID,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
@@ -87,6 +87,27 @@ async def get_post(
         service = PostsService(repo)
         try:
             return await (await service.get_post(post_id)).dict()
+        except PostNotFoundError as error:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=error.__str__(),
+            )
+
+
+@app.put("/posts/{post_id}", response_model=PostSchema)
+async def update_post(
+    post_id: UUID,
+    post_detail: CreatePostSchema,
+    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+):
+    """Replace an existing post"""
+    async with UnitOfWork(asessionmaker) as uow:
+        repo = PostsRepository(uow.session)
+        service = PostsService(repo)
+        try:
+            post = await service.update_post(post_id, post_detail.model_dump())
+            await uow.commit()
+            return await post.dict()
         except PostNotFoundError as error:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
