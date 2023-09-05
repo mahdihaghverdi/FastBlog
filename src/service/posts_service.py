@@ -6,7 +6,7 @@ class PostsService:
     def __init__(self, posts_repository):
         self.posts_repository = posts_repository
 
-    def list_posts(
+    async def list_posts(
         self,
         *,
         page: int,
@@ -14,12 +14,12 @@ class PostsService:
         sort: Sort,
         desc_: bool,
     ) -> list[Post]:
-        return self.posts_repository.list(
+        return await self.posts_repository.list(
             page=page,
             per_page=per_page,
             sort=sort,
             desc_=desc_,
         )
 
-    def create_post(self, post: dict) -> Post:
-        return self.posts_repository.add(post)
+    async def create_post(self, post: dict) -> Post:
+        return await self.posts_repository.add(post)
