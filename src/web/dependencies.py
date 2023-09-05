@@ -1,9 +1,6 @@
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from src.web.config import Settings
-
-settings = Settings()
-sqlalchemy_engine = create_async_engine(str(settings.database_url))
+from src.web.database import sqlalchemy_engine
 
 
 def get_async_sessionmaker() -> async_sessionmaker:

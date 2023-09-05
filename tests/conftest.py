@@ -1,16 +1,16 @@
 import asyncio
+import pathlib
+import sys
 
 import pytest
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette.testclient import TestClient
 
-from src.repository.models import Base
-from src.web.app import app
-from src.web.config import Settings
-from src.web.dependencies import get_async_sessionmaker
-
-settings = Settings()
-engine = create_async_engine(str(settings.database_url))
+sys.path.append(str(pathlib.Path(__file__).parent.parent))
+from src.repository.models import Base  # noqa: E402
+from src.web.app import app  # noqa: E402
+from src.web.dependencies import get_async_sessionmaker  # noqa: E402
+from src.web.database import sqlalchemy_engine as engine  # noqa: E402
 
 
 async def create_all():
