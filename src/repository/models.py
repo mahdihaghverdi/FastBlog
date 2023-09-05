@@ -1,12 +1,11 @@
 import uuid
 from datetime import datetime
 
+from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from src.web.api.schemas import PostSchema
 
-
-class Base(DeclarativeBase):
+class Base(AsyncAttrs, DeclarativeBase):
     pass
 
 
@@ -18,15 +17,10 @@ class PostModel(Base):
     title: Mapped[str]
     body: Mapped[str]
 
-    def __getattr__(self, item):
-        if item == "date":
-            return self.created
-        raise AttributeError(f"{self.__class__!r} object has no attribute {item!r}")
-
     def dict(self):
-        return PostSchema(
-            id=self.id,
-            created=self.created,
-            title=self.title,
-            body=self.body,
-        ).model_dump(mode="json")
+        return {
+            "id": self.id,
+            "created": self.created,
+            "title": self.title,
+            "body": self.body,
+        }
