@@ -1,7 +1,7 @@
 import itertools
 from uuid import UUID
 
-from sqlalchemy import select, desc
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repository.models import PostModel
