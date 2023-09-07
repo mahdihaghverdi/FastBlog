@@ -2,7 +2,7 @@ from uuid import UUID
 
 from src.service.posts import Post
 from src.web.api.schemas import Sort
-from src.web.exceptions import PostNotFoundError
+from src.common.exceptions import PostNotFoundError
 
 
 class PostsService:

@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import Query, Depends, HTTPException
+from fastapi import Query, Depends
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
 
@@ -11,7 +11,6 @@ from src.service.posts_service import PostsService
 from src.web.api.schemas import Sort, PostSchema, CreatePostSchema
 from src.web.app import app
 from src.web.dependencies import get_async_sessionmaker
-from src.web.exceptions import PostNotFoundError
 
 
 @app.get(
@@ -85,13 +84,7 @@ async def get_post(
     async with UnitOfWork(asessionmaker) as uow:
         repo = PostsRepository(uow.session)
         service = PostsService(repo)
-        try:
-            return await (await service.get_post(post_id)).dict()
-        except PostNotFoundError as error:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=error.__str__(),
-            )
+        return await (await service.get_post(post_id)).dict()
 
 
 @app.put("/posts/{post_id}", response_model=PostSchema)
@@ -104,15 +97,9 @@ async def update_post(
     async with UnitOfWork(asessionmaker) as uow:
         repo = PostsRepository(uow.session)
         service = PostsService(repo)
-        try:
-            post = await service.update_post(post_id, post_detail.model_dump())
-            await uow.commit()
-            return await post.dict()
-        except PostNotFoundError as error:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=error.__str__(),
-            )
+        post = await service.update_post(post_id, post_detail.model_dump())
+        await uow.commit()
+        return await post.dict()
 
 
 @app.delete("/posts/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -124,11 +111,5 @@ async def delete_post(
     async with UnitOfWork(asessionmaker) as uow:
         repo = PostsRepository(uow.session)
         service = PostsService(repo)
-        try:
-            await service.delete_post(post_id)
-            await uow.commit()
-        except PostNotFoundError as error:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=error.__str__(),
-            )
+        await service.delete_post(post_id)
+        await uow.commit()
