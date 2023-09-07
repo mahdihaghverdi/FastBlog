@@ -21,7 +21,7 @@ jobs:
           cache: 'poetry'
   
       - name: Install dependencies
-        run: poetry install --with test --without dev
+        run: poetry install --no-ansi --no-interaction --with test --without dev
 
       - name: Test
         run: poetry run pytest --cov=src -v
