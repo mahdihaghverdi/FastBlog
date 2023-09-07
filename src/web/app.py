@@ -3,8 +3,11 @@ from starlette import status
 from starlette.responses import JSONResponse
 
 from src.common.exceptions import PostNotFoundError
+from src.web.api import posts
 
 app = FastAPI(debug=True)
+
+app.include_router(posts.router)
 
 
 @app.exception_handler(PostNotFoundError)
@@ -15,4 +18,4 @@ async def post_not_found_exception_handler(_, exc: PostNotFoundError):
     )
 
 
-from src.web.api import api  # noqa: E402, F401
+from src.web.api import posts  # noqa: E402, F401

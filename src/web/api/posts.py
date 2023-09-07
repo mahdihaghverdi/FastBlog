@@ -1,20 +1,21 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import Query, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
 
 from src.repository.posts_repository import PostsRepository
 from src.repository.unit_of_work import UnitOfWork
 from src.service.posts_service import PostsService
-from src.web.api.schemas import Sort, PostSchema, CreatePostSchema
-from src.web.app import app
+from src.web.api.schemas import CreatePostSchema, PostSchema, Sort
 from src.web.dependencies import get_async_sessionmaker
 
+router = APIRouter(prefix="/posts", tags=["posts"])
 
-@app.get(
-    "/posts",
+
+@router.get(
+    "/",
     response_model=list[PostSchema],
     status_code=status.HTTP_200_OK,
 )
@@ -55,8 +56,8 @@ async def get_posts(
         return posts
 
 
-@app.post(
-    "/posts",
+@router.post(
+    "/",
     response_model=PostSchema,
     status_code=status.HTTP_201_CREATED,
 )
@@ -75,7 +76,7 @@ async def create_post(
     return payload
 
 
-@app.get("/posts/{post_id}", response_model=PostSchema)
+@router.get("/{post_id}", response_model=PostSchema, status_code=status.HTTP_200_OK)
 async def get_post(
     post_id: UUID,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
@@ -87,7 +88,7 @@ async def get_post(
         return await (await service.get_post(post_id)).dict()
 
 
-@app.put("/posts/{post_id}", response_model=PostSchema)
+@router.put("/{post_id}", response_model=PostSchema, status_code=status.HTTP_200_OK)
 async def update_post(
     post_id: UUID,
     post_detail: CreatePostSchema,
@@ -102,7 +103,7 @@ async def update_post(
         return await post.dict()
 
 
-@app.delete("/posts/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(
     post_id: UUID,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
