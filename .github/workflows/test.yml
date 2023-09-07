@@ -1,8 +1,6 @@
 name: testing the app
 run-name: Test the app
-on:
-  push:
-    branches: [ $default-branch ]
+on: [push]
 env:
   DATABASE_URL: sqlite+aiosqlite:///
 
