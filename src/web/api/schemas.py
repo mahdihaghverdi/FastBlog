@@ -20,15 +20,27 @@ class Error(BaseModel):
     detail: str
 
 
-class BasePostSchema(BaseModel):
+class CreatePostSchema(BaseModel):
     title: constr(strip_whitespace=True, min_length=1)
     body: constr(strip_whitespace=True, min_length=1)
 
 
-class CreatePostSchema(BasePostSchema):
-    pass
-
-
-class PostSchema(BasePostSchema):
+class PostSchema(BaseModel):
     id: UUID
     created: datetime
+    title: constr(strip_whitespace=True, min_length=1)
+    body: constr(strip_whitespace=True, min_length=1)
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class UserSchema(BaseModel):
+    username: str
+    posts: list[PostSchema]
+
+
+class UserInDBSchema(UserSchema):
+    password: str
