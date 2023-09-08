@@ -22,6 +22,13 @@ class UserModel(Base):
         cascade="delete, delete-orphan",
     )
 
+    async def dict(self):
+        return {
+            "id": await self.awaitable_attrs.id,
+            "username": self.username,
+            "password": self.password,
+        }
+
 
 class PostModel(Base):
     __tablename__ = "posts"
