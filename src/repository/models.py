@@ -14,7 +14,7 @@ class UserModel(Base):
     __tablename__ = "users"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    username: Mapped[str]
+    username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
 
     posts: Mapped[list["PostModel"]] = relationship(
