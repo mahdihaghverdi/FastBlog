@@ -6,8 +6,8 @@ from src.web.api.schemas import Sort
 
 
 class PostService:
-    def __init__(self, posts_repository):
-        self.posts_repository = posts_repository
+    def __init__(self, post_repository):
+        self.posts_repository = post_repository
 
     async def list_posts(
         self,
