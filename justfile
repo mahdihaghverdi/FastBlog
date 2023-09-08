@@ -10,7 +10,7 @@ run-server $database_url=prod-database:
   uvicorn src.web.app:app --reload
 
 test $database_url=test-database:
-  pytest --no-header --no-summary --cov=src --cov-report=html --cov-report=term-missing
+  pytest --no-header --cov=src --cov-report=html --cov-report=term-missing
 
 migrate message $database_url=prod-database:
   alembic revision --autogenerate -m "{{message}}"
