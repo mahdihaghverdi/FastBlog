@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from src.web.database import sqlalchemy_engine
+from src.web.core.database import sqlalchemy_engine
 
 
 def get_async_sessionmaker() -> async_sessionmaker:

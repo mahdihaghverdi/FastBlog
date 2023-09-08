@@ -9,7 +9,7 @@ from src.repository.posts_repository import PostsRepository
 from src.repository.unit_of_work import UnitOfWork
 from src.service.posts_service import PostsService
 from src.web.api.schemas import CreatePostSchema, PostSchema, Sort
-from src.web.dependencies import get_async_sessionmaker
+from src.web.core.dependencies import get_async_sessionmaker
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
