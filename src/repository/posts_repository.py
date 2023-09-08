@@ -38,12 +38,12 @@ class PostsRepository:
         records = list(
             itertools.chain.from_iterable((await self.session.execute(stmt)).all()),
         )
-        return [Post(**record.dict()) for record in records]
+        return [Post(**(await record.dict())) for record in records]
 
     async def add(self, post: dict):
         record = PostModel(**post)
         self.session.add(record)
-        return Post(**record.dict(), post_model=record)
+        return Post(**(await record.dict()), post_model=record)
 
     async def _get(self, id_: UUID) -> PostModel | None:
         return await self.session.get(PostModel, id_)
@@ -51,7 +51,7 @@ class PostsRepository:
     async def get(self, post_id: UUID) -> Post | None:
         post = await self._get(post_id)
         if post is not None:
-            return Post(**post.dict())
+            return Post(**(await post.dict()))
 
     async def update(self, post_id: UUID, post_detail: dict) -> Post | None:
         post = await self._get(post_id)
@@ -59,7 +59,7 @@ class PostsRepository:
             return
         for key, value in post_detail.items():
             setattr(post, key, value)
-        return Post(**post.dict(), post_model=post)
+        return Post(**(await post.dict()), post_model=post)
 
     async def delete(self, post_id: UUID) -> bool | None:
         post = await self._get(post_id)

@@ -8,8 +8,8 @@ class Post:
 
     async def dict(self):
         return {
-            "id": self.id or (await self.post_model.awaitable_attrs.id),
-            "created": self.created or (await self.post_model.awaitable_attrs.created),
+            "id": self.id or (await self.post_model.dict())["id"],
+            "created": self.created or (await self.post_model.dict())["created"],
             "title": self.title,
             "body": self.body,
         }

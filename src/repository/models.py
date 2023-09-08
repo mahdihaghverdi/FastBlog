@@ -17,10 +17,10 @@ class PostModel(Base):
     title: Mapped[str]
     body: Mapped[str]
 
-    def dict(self):
+    async def dict(self):
         return {
-            "id": self.id,
-            "created": self.created,
+            "id": await self.awaitable_attrs.id,
+            "created": await self.awaitable_attrs.created,
             "title": self.title,
             "body": self.body,
         }
