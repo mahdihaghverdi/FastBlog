@@ -11,11 +11,11 @@ class BaseRepository(ABC):
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def _get(self, model: type[Base], id_: UUID) -> Base | None:
+    async def _get(self, model: type[Base], id_: UUID) -> type[Base] | None:
         return await self.session.get(model, id_)
 
     @abstractmethod
-    async def get(self, id_: UUID) -> type[Base] | None:
+    async def get(self, id_: UUID) -> BaseBusinessObject | None:
         raise NotImplementedError
 
     @abstractmethod
