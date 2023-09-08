@@ -1,10 +1,4 @@
-from abc import ABC, abstractmethod
-
-
-class BaseBusinessObject(ABC):
-    @abstractmethod
-    async def dict(self):
-        raise NotImplementedError
+from src.service import BaseBusinessObject
 
 
 class Post(BaseBusinessObject):
