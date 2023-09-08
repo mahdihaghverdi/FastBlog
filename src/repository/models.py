@@ -7,7 +7,8 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(AsyncAttrs, DeclarativeBase):
-    pass
+    async def dict(self):
+        pass
 
 
 class UserModel(Base):

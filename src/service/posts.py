@@ -1,4 +1,13 @@
-class Post:
+from abc import ABC, abstractmethod
+
+
+class BaseBusinessObject(ABC):
+    @abstractmethod
+    async def dict(self):
+        raise NotImplementedError
+
+
+class Post(BaseBusinessObject):
     def __init__(self, *, id, created, title, body, post_model=None):
         self.id = id
         self.created = created

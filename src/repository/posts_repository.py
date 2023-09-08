@@ -2,17 +2,14 @@ import itertools
 from uuid import UUID
 
 from sqlalchemy import desc, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.repository import BaseRepository
 from src.repository.models import PostModel
 from src.service.posts import Post
 from src.web.api.schemas import Sort
 
 
-class PostsRepository:
-    def __init__(self, session: AsyncSession):
-        self.session = session
-
+class PostsRepository(BaseRepository):
     async def list(
         self,
         *,
@@ -40,21 +37,18 @@ class PostsRepository:
         )
         return [Post(**(await record.dict())) for record in records]
 
-    async def add(self, post: dict):
+    async def add(self, post: dict) -> Post:
         record = PostModel(**post)
         self.session.add(record)
         return Post(**(await record.dict()), post_model=record)
 
-    async def _get(self, id_: UUID) -> PostModel | None:
-        return await self.session.get(PostModel, id_)
-
     async def get(self, post_id: UUID) -> Post | None:
-        post = await self._get(post_id)
+        post = await self._get(PostModel, post_id)
         if post is not None:
             return Post(**(await post.dict()))
 
     async def update(self, post_id: UUID, post_detail: dict) -> Post | None:
-        post = await self._get(post_id)
+        post = await self._get(PostModel, post_id)
         if post is None:
             return
         for key, value in post_detail.items():
@@ -62,7 +56,7 @@ class PostsRepository:
         return Post(**(await post.dict()), post_model=post)
 
     async def delete(self, post_id: UUID) -> bool | None:
-        post = await self._get(post_id)
+        post = await self._get(PostModel, post_id)
         if post is None:
             return False
         await self.session.delete(post)
