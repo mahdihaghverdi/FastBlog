@@ -9,7 +9,7 @@ from src.service.posts import Post
 from src.web.api.schemas import Sort
 
 
-class PostsRepository(BaseRepository):
+class PostRepository(BaseRepository):
     async def list(
         self,
         *,
