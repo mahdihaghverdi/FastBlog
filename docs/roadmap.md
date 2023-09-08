@@ -19,18 +19,31 @@ Available features:
 
 ----
 ### `v2.0.0`
-Users will come to the blog. Now a user can create an account, do CRUD on his/her account.
+Users will come to the blog. Now a user can create an account and do post CRUD on his/her account.
 - User accounts
   - Account creation.
   - logging in/out.
   - accessing the limited resources through authorization.
+    This means, users can:
+      - create a post
+      - see their post
+      - update their post
+      - delete their post
+
+       there is no mechanism for publishing the posts.
 
 #### `2.1.0`
-Draft posts will be available for users.
+Draft posts will be available.
 
 with this release, users can write some of the post,
 and save it in drafts, then edit and publish it later.
 
+#### `2.2.0`
+Publishing the posts will be available.
+
+With this release, users can publish their posts and
+respectively other users can use the global link of posts
+and get the post.
 ----
 ### `v3.0.0`
 A tag system will be added to the posts.
