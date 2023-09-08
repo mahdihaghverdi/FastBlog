@@ -5,7 +5,7 @@ from src.service.posts import Post
 from src.web.api.schemas import Sort
 
 
-class PostsService:
+class PostService:
     def __init__(self, posts_repository):
         self.posts_repository = posts_repository
 
