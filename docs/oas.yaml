@@ -1,5 +1,4 @@
-openapi: 3.0.3
-
+openapi: 3.1.0
 info:
   title: Fast Blog
   description: A RESTful blog created with FastAPI
@@ -19,178 +18,239 @@ servers:
     description: Local development server
 
 paths:
-  /posts:
+  "/posts":
     get:
-      summary: Retrieve all the posts.
+      summary: Get Posts
+      description: Retrieve all the posts
       parameters:
-        - name: page
-          in: query
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
           description: page number of the pagination
-          required: false
-          schema:
-            type: integer
-            default: 1
-            minimum: 1
-        - name: per-page
-          in: query
+          default: 1
+          title: Page
+        description: page number of the pagination
+      - name: per-page
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 30
+          minimum: 1
           description: number of posts per page
-          required: false
-          schema:
-            type: integer
-            default: 5
-            minimum: 1
-            maximum: 30
-        - name: sort
-          in: query
+          default: 5
+          title: Per-Page
+        description: number of posts per page
+      - name: sort
+        in: query
+        required: false
+        schema:
+          allOf:
+          - "$ref": "#/components/schemas/Sort"
           description: sorts the returned posts
-          required: false
-          schema:
-            type: string
-            enum: [ title, date ]
-            default: date
-        - name: desc
-          in: query
-          description: >
-            the order of the sorted posts.
-            if true (default) -> the returned result is in desc order
-            ascending otherwise.
-          required: false
-          schema:
-            type: boolean
-            default: true
+          default: date
+          title: Sort
+        description: sorts the returned posts
+      - name: desc
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: order of the sorted posts
+          default: true
+          title: Desc
+        description: order of the sorted posts
       responses:
         '200':
-          description: OK. A JSON array of the posts
+          description: Successful Response
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PostSchema'
-        '404':
-          description: Not found resource OR an unauthorised request is made by client.
-          $ref: '#/components/responses/NotFound'
-
+                  "$ref": "#/components/schemas/PostSchema"
+                title: Response Get Posts Posts  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
     post:
-      summary: Create a post
+      summary: Create Post
+      description: Create a post
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreatePostSchema'
+              "$ref": "#/components/schemas/CreatePostSchema"
       responses:
         '201':
-          description: A JSON repr of the created post.
+          description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PostSchema'
-
-  /posts/{post_id}:
-    parameters:
-      - in: path
-        name: post_id
+                "$ref": "#/components/schemas/PostSchema"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/posts/{post_id}":
+    get:
+      summary: Get Post
+      description: Return details of a specific post
+      parameters:
+      - name: post_id
+        in: path
         required: true
         schema:
           type: string
           format: uuid
-          example: d222e7a3-6afb-463a-9709-38eb70cc670d
-    get:
-      summary: Return details of a specific post
+          title: Post Id
       responses:
         '200':
-          description: OK
+          description: Successful Response
           content:
             application/json:
               schema:
-                anyOf:
-                  - $ref: '#/components/schemas/PostSchema'
-        '404':
-          description: The post is not found or you are unauthorized
-          $ref: '#/components/responses/NotFound'
-
+                "$ref": "#/components/schemas/PostSchema"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
     put:
-      summary: Replace an existing post
+      summary: Update Post
+      description: Replace an existing post
+      parameters:
+      - name: post_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Post Id
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreatePostSchema'
+              "$ref": "#/components/schemas/CreatePostSchema"
       responses:
         '200':
-          description: The post is updated successfully.
+          description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PostSchema'
-        '404':
-          $ref: '#/components/responses/NotFound'
-
+                "$ref": "#/components/schemas/PostSchema"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
     delete:
-      summary: Delete a specific post
+      summary: Delete Post
+      description: Delete a specific post
+      parameters:
+      - name: post_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Post Id
       responses:
         '204':
-          description: The resource is deleted successfully.
-        '404':
-          $ref: '#/components/responses/NotFound'
-
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
 components:
-  responses:
-    NotFound:
-      description: The resource is not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-    ServerError:
-      description: Some unknown error in the server
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-
   schemas:
-    Error:
-      type: object
-      properties:
-        message:
-          type: string
-          example: 'Resource is not Found'
-      required:
-        - message
-
-    BasePostSchema:
-      type: object
-      required:
-        - title
-        - body
+    CreatePostSchema:
       properties:
         title:
           type: string
-          example: 'The most used Python built-in type'
           minLength: 1
+          title: Title
         body:
           type: string
-          example: 'Well Python has many types but...'
           minLength: 1
-
-    CreatePostSchema:
-      allOf:
-        - $ref: '#/components/schemas/BasePostSchema'
-
-    PostSchema:
-      allOf:
-        - $ref: '#/components/schemas/BasePostSchema'
+          title: Body
       type: object
+      required:
+      - title
+      - body
+      title: CreatePostSchema
+    HTTPValidationError:
       properties:
+        detail:
+          items:
+            "$ref": "#/components/schemas/ValidationError"
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    PostSchema:
+      properties:
+        title:
+          type: string
+          minLength: 1
+          title: Title
+        body:
+          type: string
+          minLength: 1
+          title: Body
         id:
           type: string
           format: uuid
+          title: Id
         created:
           type: string
           format: date-time
+          title: Created
+      type: object
       required:
-        - id
-        - created
+      - title
+      - body
+      - id
+      - created
+      title: PostSchema
+    Sort:
+      type: string
+      enum:
+      - title
+      - date
+      title: Sort
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
