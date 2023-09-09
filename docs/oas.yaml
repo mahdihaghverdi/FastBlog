@@ -18,10 +18,13 @@ servers:
     description: Local development server
 
 paths:
-  "/posts":
+  "/posts/":
     get:
+      tags:
+      - posts
       summary: Get Posts
       description: Retrieve all the posts
+      operationId: get_posts_posts__get
       parameters:
       - name: page
         in: query
@@ -80,8 +83,11 @@ paths:
               schema:
                 "$ref": "#/components/schemas/HTTPValidationError"
     post:
+      tags:
+      - posts
       summary: Create Post
       description: Create a post
+      operationId: create_post_posts__post
       requestBody:
         required: true
         content:
@@ -103,8 +109,11 @@ paths:
                 "$ref": "#/components/schemas/HTTPValidationError"
   "/posts/{post_id}":
     get:
+      tags:
+      - posts
       summary: Get Post
       description: Return details of a specific post
+      operationId: get_post_posts__post_id__get
       parameters:
       - name: post_id
         in: path
@@ -127,8 +136,11 @@ paths:
               schema:
                 "$ref": "#/components/schemas/HTTPValidationError"
     put:
+      tags:
+      - posts
       summary: Update Post
       description: Replace an existing post
+      operationId: update_post_posts__post_id__put
       parameters:
       - name: post_id
         in: path
@@ -157,8 +169,11 @@ paths:
               schema:
                 "$ref": "#/components/schemas/HTTPValidationError"
     delete:
+      tags:
+      - posts
       summary: Delete Post
       description: Delete a specific post
+      operationId: delete_post_posts__post_id__delete
       parameters:
       - name: post_id
         in: path
@@ -176,8 +191,118 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/HTTPValidationError"
+  "/users/signup":
+    post:
+      tags:
+      - users
+      summary: Signup User
+      operationId: signup_user_users_signup_post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              "$ref": "#/components/schemas/Body_signup_user_users_signup_post"
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserSchema"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/users/me":
+    get:
+      tags:
+      - users
+      summary: Read Users Me
+      operationId: read_users_me_users_me_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserSchema"
+      security:
+      - OAuth2PasswordBearer: []
+  "/auth/access-token":
+    post:
+      tags:
+      - auth
+      summary: Login For Access Token
+      operationId: login_for_access_token_auth_access_token_post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              "$ref": "#/components/schemas/Body_login_for_access_token_auth_access_token_post"
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TokenSchema"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
 components:
   schemas:
+    Body_login_for_access_token_auth_access_token_post:
+      properties:
+        grant_type:
+          type: string
+          pattern: password
+          title: Grant Type
+        username:
+          type: string
+          title: Username
+        password:
+          type: string
+          title: Password
+        scope:
+          type: string
+          title: Scope
+          default: ''
+        client_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Id
+        client_secret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Secret
+      type: object
+      required:
+      - grant_type
+      - username
+      - password
+      title: Body_login_for_access_token_auth_access_token_post
+    Body_signup_user_users_signup_post:
+      properties:
+        username:
+          type: string
+          title: Username
+        password:
+          type: string
+          title: Password
+      type: object
+      required:
+      - username
+      - password
+      title: Body_signup_user_users_signup_post
     CreatePostSchema:
       properties:
         title:
@@ -204,14 +329,6 @@ components:
       title: HTTPValidationError
     PostSchema:
       properties:
-        title:
-          type: string
-          minLength: 1
-          title: Title
-        body:
-          type: string
-          minLength: 1
-          title: Body
         id:
           type: string
           format: uuid
@@ -220,12 +337,20 @@ components:
           type: string
           format: date-time
           title: Created
+        title:
+          type: string
+          minLength: 1
+          title: Title
+        body:
+          type: string
+          minLength: 1
+          title: Body
       type: object
       required:
-      - title
-      - body
       - id
       - created
+      - title
+      - body
       title: PostSchema
     Sort:
       type: string
@@ -233,6 +358,34 @@ components:
       - title
       - date
       title: Sort
+    TokenSchema:
+      properties:
+        access_token:
+          type: string
+          title: Access Token
+        token_type:
+          type: string
+          title: Token Type
+      type: object
+      required:
+      - access_token
+      - token_type
+      title: TokenSchema
+    UserSchema:
+      properties:
+        username:
+          type: string
+          title: Username
+        posts:
+          items:
+            "$ref": "#/components/schemas/PostSchema"
+          type: array
+          title: Posts
+      type: object
+      required:
+      - username
+      - posts
+      title: UserSchema
     ValidationError:
       properties:
         loc:
@@ -254,3 +407,10 @@ components:
       - msg
       - type
       title: ValidationError
+  securitySchemes:
+    OAuth2PasswordBearer:
+      type: oauth2
+      flows:
+        password:
+          scopes: {}
+          tokenUrl: "/auth/access-token"
