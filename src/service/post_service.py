@@ -11,6 +11,7 @@ class PostService:
 
     async def list_posts(
         self,
+        user_id,
         *,
         page: int,
         per_page: int,
@@ -18,6 +19,7 @@ class PostService:
         desc_: bool,
     ) -> list[Post]:
         return await self.posts_repository.list(
+            user_id,
             page=page,
             per_page=per_page,
             sort=sort,

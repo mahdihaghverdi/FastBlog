@@ -12,6 +12,7 @@ from src.web.core.schemas import Sort
 class PostRepo(BaseRepo):
     async def list(
         self,
+        user_id,
         *,
         page: int,
         per_page: int,
@@ -26,6 +27,7 @@ class PostRepo(BaseRepo):
         order_by_column = PostModel.title if sort is Sort.TITLE else PostModel.created
         stmt = (
             select(PostModel)
+            .where(PostModel.user_id == user_id)
             .offset((page - 1) * per_page)
             .limit(per_page)
             .order_by(

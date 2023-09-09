@@ -15,6 +15,27 @@ from src.web.core.dependencies import get_async_sessionmaker, get_current_user
 router = APIRouter(prefix="/posts", tags=["posts"])
 
 
+@router.post(
+    "/",
+    response_model=PostSchema,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_post(
+    post: CreatePostSchema,
+    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    user: Annotated[User, Depends(get_current_user)],
+):
+    """Create a post"""
+    async with UnitOfWork(asessionmaker) as uow:
+        repo = PostRepo(uow.session)
+        service = PostService(repo)
+        post = await service.create_post(user.id, post.model_dump())
+        await uow.commit()
+        payload = await post.dict()
+
+    return payload
+
+
 @router.get(
     "/",
     response_model=list[PostSchema],
@@ -22,6 +43,7 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 )
 async def get_posts(
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    user: Annotated[User, Depends(get_current_user)],
     page: Annotated[
         int,
         Query(description="page number of the pagination", ge=1),
@@ -49,33 +71,13 @@ async def get_posts(
         repo = PostRepo(uow.session)
         service = PostService(repo)
         posts = await service.list_posts(
+            user.id,
             page=page,
             per_page=per_page,
             sort=sort,
             desc_=desc,
         )
         return posts
-
-
-@router.post(
-    "/",
-    response_model=PostSchema,
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_post(
-    post: CreatePostSchema,
-    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
-    user: Annotated[User, Depends(get_current_user)],
-):
-    """Create a post"""
-    async with UnitOfWork(asessionmaker) as uow:
-        repo = PostRepo(uow.session)
-        service = PostService(repo)
-        post = await service.create_post(user.id, post.model_dump())
-        await uow.commit()
-        payload = await post.dict()
-
-    return payload
 
 
 @router.get("/{post_id}", response_model=PostSchema, status_code=status.HTTP_200_OK)
