@@ -43,4 +43,5 @@ class UserSchema(BaseModel):
 
 
 class UserInDBSchema(UserSchema):
+    id: UUID
     password: str
