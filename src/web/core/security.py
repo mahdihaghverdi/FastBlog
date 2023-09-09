@@ -16,14 +16,9 @@ def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(
-            minutes=settings.access_token_expire_minutes,
-        )
+    expire = datetime.utcnow() + timedelta(minutes=settings.access_token_expire_minutes)
     to_encode["exp"] = expire
     encoded_jwt = jwt.encode(to_encode, key=settings.secret_key)
     return encoded_jwt

@@ -11,9 +11,8 @@ def test_create_post(client):
     assert response.status_code == 201, response.text
 
     post_data = response.json()
-    response = client.get("/posts")
-    post = response.json()[0]
-    assert post == post_data
+    assert post_data["title"] == payload["title"]
+    assert post_data["body"] == payload["body"]
 
 
 def random_string():

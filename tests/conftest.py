@@ -5,7 +5,7 @@ import sys
 import pytest
 from starlette.testclient import TestClient
 
-sys.path.append(str(pathlib.Path(__file__).parent.parent.parent))
+sys.path.append(str(pathlib.Path(__file__).parent.parent))
 from src.repository.models import Base  # noqa: E402
 from src.web.app import app  # noqa: E402
 from src.web.core.database import sqlalchemy_engine as engine  # noqa: E402
