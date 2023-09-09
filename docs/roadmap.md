@@ -22,7 +22,7 @@ Available features:
 Users will come to the blog. Now a user can create an account and do post CRUD on his/her account.
 - User accounts
   - Account creation.
-  - logging in/out.
+  - Authorize with JWT tokens
   - accessing the limited resources through authorization.
     This means, users can:
       - create a post

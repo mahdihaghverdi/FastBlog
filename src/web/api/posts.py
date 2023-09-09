@@ -8,8 +8,9 @@ from starlette import status
 from src.repository.post_repository import PostRepo
 from src.repository.unit_of_work import UnitOfWork
 from src.service.post_service import PostService
+from src.service.users import User
 from src.web.core.schemas import CreatePostSchema, PostSchema, Sort
-from src.web.core.dependencies import get_async_sessionmaker
+from src.web.core.dependencies import get_async_sessionmaker, get_current_user
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -64,12 +65,13 @@ async def get_posts(
 async def create_post(
     post: CreatePostSchema,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    user: Annotated[User, Depends(get_current_user)],
 ):
     """Create a post"""
     async with UnitOfWork(asessionmaker) as uow:
         repo = PostRepo(uow.session)
         service = PostService(repo)
-        post = await service.create_post(post.model_dump())
+        post = await service.create_post(user.id, post.model_dump())
         await uow.commit()
         payload = await post.dict()
 

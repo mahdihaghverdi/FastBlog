@@ -37,8 +37,8 @@ class PostRepo(BaseRepo):
         )
         return [Post(**(await record.dict())) for record in records]
 
-    async def add(self, post: dict) -> Post:
-        record = PostModel(**post)
+    async def add(self, user_id, post: dict) -> Post:
+        record = PostModel(**post, user_id=user_id)
         self.session.add(record)
         return Post(**(await record.dict()), post_model=record)
 

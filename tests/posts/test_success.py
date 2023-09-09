@@ -1,18 +1,43 @@
 import random
 import string
 
+from src.web.core.config import settings
+
+
+def signup_and_auth(client):
+    client.post("/users/signup", data={"username": "string", "password": "password"})
+    access_token = client.post(
+        f"/auth/{settings.access_token_url}",
+        data={"grant_type": "password", "username": "string", "password": "password"},
+    ).json()["access_token"]
+    headers = {"Authorization": f"Bearer {access_token}"}
+    return headers
+
 
 def test_create_post(client):
     payload = {
         "title": "Python 3.11",
         "body": "Wow, such a release!",
     }
-    response = client.post("/posts", json=payload)
-    assert response.status_code == 201, response.text
 
+    # not authenticated
+    response = client.post("/posts", json=payload)
+    assert response.status_code == 401
+
+    # authenticate and create a post
+    headers = signup_and_auth(client)
+
+    response = client.post("/posts", json=payload, headers=headers)
+    assert response.status_code == 201, response.text
     post_data = response.json()
     assert post_data["title"] == payload["title"]
     assert post_data["body"] == payload["body"]
+
+    # ensure that it is saved in database
+    # response = client.get('/posts', headers=headers)
+    # data = response.json()[0]
+    # assert data['title'] == payload['title']
+    # assert data['body'] == payload['body']
 
 
 def random_string():

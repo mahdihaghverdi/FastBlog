@@ -24,8 +24,8 @@ class PostService:
             desc_=desc_,
         )
 
-    async def create_post(self, post: dict) -> Post:
-        return await self.posts_repository.add(post)
+    async def create_post(self, user_id, post: dict) -> Post:
+        return await self.posts_repository.add(user_id, post)
 
     async def get_post(self, post_id) -> Post:
         post = await self.posts_repository.get(post_id)
