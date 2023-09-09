@@ -28,6 +28,7 @@ class UserModel(Base):
             "id": await self.awaitable_attrs.id,
             "username": self.username,
             "password": self.password,
+            "posts": await self.awaitable_attrs.posts,
         }
 
 

@@ -1,9 +1,11 @@
 from uuid import UUID
 
+
 from src.repository import BaseRepo
 from src.repository.models import UserModel
 from src.service.posts import BaseBusinessObject
 from src.service.users import User
+from src.web.core.security import hash_password
 
 
 class UserRepo(BaseRepo):
@@ -13,7 +15,11 @@ class UserRepo(BaseRepo):
             return User(**(await user.dict()))
 
     async def add(self, data: dict) -> BaseBusinessObject:
-        pass
+        data = data.copy()
+        data["password"] = hash_password(data["password"])
+        record = UserModel(**data)
+        self.session.add(record)
+        return User(**(await record.dict()), user_model=record)
 
     async def update(self, id_: UUID, data: dict) -> BaseBusinessObject | None:
         pass

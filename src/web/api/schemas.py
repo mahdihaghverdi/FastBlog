@@ -32,9 +32,14 @@ class PostSchema(BaseModel):
     body: constr(strip_whitespace=True, min_length=1)
 
 
-class Token(BaseModel):
+class TokenSchema(BaseModel):
     access_token: str
     token_type: str
+
+
+class UserSignUpSchema(BaseModel):
+    username: str
+    password: constr(strip_whitespace=True, min_length=8)
 
 
 class UserSchema(BaseModel):

@@ -8,3 +8,7 @@ class PostNotFoundError(ResourceNotFoundError):
 
 class UserNotFoundError(ResourceNotFoundError):
     pass
+
+
+class DuplicateUsernameError(Exception):
+    pass
