@@ -84,12 +84,13 @@ async def get_posts(
 async def get_post(
     post_id: UUID,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    user: Annotated[User, Depends(get_current_user)],
 ):
     """Return details of a specific post"""
     async with UnitOfWork(asessionmaker) as uow:
         repo = PostRepo(uow.session)
         service = PostService(repo)
-        return await (await service.get_post(post_id)).dict()
+        return await (await service.get_post(user.id, post_id)).dict()
 
 
 @router.put("/{post_id}", response_model=PostSchema, status_code=status.HTTP_200_OK)

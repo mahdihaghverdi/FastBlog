@@ -29,8 +29,8 @@ class PostService:
     async def create_post(self, user_id, post: dict) -> Post:
         return await self.posts_repository.add(user_id, post)
 
-    async def get_post(self, post_id) -> Post:
-        post = await self.posts_repository.get(post_id)
+    async def get_post(self, user_id, post_id) -> Post:
+        post = await self.posts_repository.get(user_id, post_id)
         if post is None:
             raise PostNotFoundError(f"post with id: '{post_id}' is not found")
         return post

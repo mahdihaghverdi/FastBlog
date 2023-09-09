@@ -120,9 +120,17 @@ def test_get_posts(client):
 
 def test_get_post(client):
     title, body = "a", "b"
-    post_id = client.post("/posts", json={"title": title, "body": body}).json()["id"]
+    response = client.post("/posts", json={"title": title, "body": body})
+    assert response.status_code == 401, response.text
 
-    response = client.get(f"/posts/{post_id}")
+    headers = signup_and_auth(client)
+    post_id = client.post(
+        "/posts",
+        json={"title": title, "body": body},
+        headers=headers,
+    ).json()["id"]
+
+    response = client.get(f"/posts/{post_id}", headers=headers)
     assert response.status_code == 200, response.text
 
     data = response.json()

@@ -13,6 +13,7 @@ class PostRepo(BaseRepo):
     async def list(
         self,
         user_id,
+        /,
         *,
         page: int,
         per_page: int,
@@ -39,15 +40,20 @@ class PostRepo(BaseRepo):
         )
         return [Post(**(await record.dict())) for record in records]
 
-    async def add(self, user_id, post: dict) -> Post:
+    async def add(self, user_id, /, post: dict) -> Post:
         record = PostModel(**post, user_id=user_id)
         self.session.add(record)
         return Post(**(await record.dict()), post_model=record)
 
-    async def get(self, post_id: UUID) -> Post | None:
-        post = await self._get(PostModel, post_id)
+    async def get(self, user_id, /, post_id: UUID) -> Post | None:
+        stmt = (
+            select(PostModel)
+            .where(PostModel.user_id == user_id)
+            .where(PostModel.id == post_id)
+        )
+        post = (await self.session.execute(stmt)).first()
         if post is not None:
-            return Post(**(await post.dict()))
+            return Post(**(await post[0].dict()))
 
     async def update(self, post_id: UUID, post_detail: dict) -> Post | None:
         post = await self._get(PostModel, post_id)
