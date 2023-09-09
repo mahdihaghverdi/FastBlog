@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
 
 from src.repository.unit_of_work import UnitOfWork
-from src.repository.user_repository import UserRepository
+from src.repository.user_repository import UserRepo
 from src.service.user_service import UserService
 from src.service.users import User
 from src.web.core.config import settings
@@ -25,8 +25,8 @@ async def get_user(
     asession: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user_id,
 ) -> User:
-    with UnitOfWork(asession) as uow:
-        repo = UserRepository(uow.session)
+    async with UnitOfWork(asession) as uow:
+        repo = UserRepo(uow.session)
         service = UserService(repo)
         return await service.get_user(user_id)
 

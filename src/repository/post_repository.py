@@ -3,13 +3,13 @@ from uuid import UUID
 
 from sqlalchemy import desc, select
 
-from src.repository import BaseRepository
+from src.repository import BaseRepo
 from src.repository.models import PostModel
 from src.service.posts import Post
 from src.web.api.schemas import Sort
 
 
-class PostRepository(BaseRepository):
+class PostRepo(BaseRepo):
     async def list(
         self,
         *,

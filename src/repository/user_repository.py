@@ -1,12 +1,12 @@
 from uuid import UUID
 
-from src.repository import BaseRepository
+from src.repository import BaseRepo
 from src.repository.models import UserModel
 from src.service.posts import BaseBusinessObject
 from src.service.users import User
 
 
-class UserRepository(BaseRepository):
+class UserRepo(BaseRepo):
     async def get(self, id_: UUID) -> BaseBusinessObject | None:
         user = await self._get(UserModel, id_)
         if user is not None:

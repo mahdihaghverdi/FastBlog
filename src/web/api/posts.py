@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
 
-from src.repository.post_repository import PostRepository
+from src.repository.post_repository import PostRepo
 from src.repository.unit_of_work import UnitOfWork
 from src.service.post_service import PostService
 from src.web.api.schemas import CreatePostSchema, PostSchema, Sort
@@ -45,7 +45,7 @@ async def get_posts(
 ):
     """Retrieve all the posts"""
     async with UnitOfWork(asessionmaker) as uow:
-        repo = PostRepository(uow.session)
+        repo = PostRepo(uow.session)
         service = PostService(repo)
         posts = await service.list_posts(
             page=page,
@@ -67,7 +67,7 @@ async def create_post(
 ):
     """Create a post"""
     async with UnitOfWork(asessionmaker) as uow:
-        repo = PostRepository(uow.session)
+        repo = PostRepo(uow.session)
         service = PostService(repo)
         post = await service.create_post(post.model_dump())
         await uow.commit()
@@ -83,7 +83,7 @@ async def get_post(
 ):
     """Return details of a specific post"""
     async with UnitOfWork(asessionmaker) as uow:
-        repo = PostRepository(uow.session)
+        repo = PostRepo(uow.session)
         service = PostService(repo)
         return await (await service.get_post(post_id)).dict()
 
@@ -96,7 +96,7 @@ async def update_post(
 ):
     """Replace an existing post"""
     async with UnitOfWork(asessionmaker) as uow:
-        repo = PostRepository(uow.session)
+        repo = PostRepo(uow.session)
         service = PostService(repo)
         post = await service.update_post(post_id, post_detail.model_dump())
         await uow.commit()
@@ -110,7 +110,7 @@ async def delete_post(
 ):
     """Delete a specific post"""
     async with UnitOfWork(asessionmaker) as uow:
-        repo = PostRepository(uow.session)
+        repo = PostRepo(uow.session)
         service = PostService(repo)
         await service.delete_post(post_id)
         await uow.commit()

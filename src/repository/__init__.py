@@ -7,7 +7,7 @@ from src.repository.models import Base
 from src.service.posts import BaseBusinessObject
 
 
-class BaseRepository(ABC):
+class BaseRepo(ABC):
     def __init__(self, session: AsyncSession):
         self.session = session
 
