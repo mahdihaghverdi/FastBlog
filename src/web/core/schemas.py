@@ -42,6 +42,10 @@ class UserSignUpSchema(BaseModel):
     password: constr(strip_whitespace=True, min_length=8)
 
 
+class UserLoginSchema(UserSignUpSchema):
+    pass
+
+
 class UserSchema(BaseModel):
     username: str
     posts: list[PostSchema]

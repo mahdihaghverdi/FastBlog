@@ -8,7 +8,7 @@ from starlette import status
 from src.repository.post_repository import PostRepo
 from src.repository.unit_of_work import UnitOfWork
 from src.service.post_service import PostService
-from src.web.api.schemas import CreatePostSchema, PostSchema, Sort
+from src.web.core.schemas import CreatePostSchema, PostSchema, Sort
 from src.web.core.dependencies import get_async_sessionmaker
 
 router = APIRouter(prefix="/posts", tags=["posts"])

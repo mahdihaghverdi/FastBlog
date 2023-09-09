@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from sqlalchemy import select
 
 from src.repository import BaseRepo
 from src.repository.models import UserModel
@@ -9,12 +10,18 @@ from src.web.core.security import hash_password
 
 
 class UserRepo(BaseRepo):
-    async def get(self, id_: UUID) -> BaseBusinessObject | None:
+    async def get(self, id_: UUID) -> User | None:
         user = await self._get(UserModel, id_)
         if user is not None:
             return User(**(await user.dict()))
 
-    async def add(self, data: dict) -> BaseBusinessObject:
+    async def get_by_username(self, username) -> User | None:
+        stmt = select(UserModel).where(UserModel.username == username)
+        user = (await self.session.execute(stmt)).first()
+        if user is not None:
+            return User(**(await user[0].dict()))
+
+    async def add(self, data: dict) -> User:
         data = data.copy()
         data["password"] = hash_password(data["password"])
         record = UserModel(**data)

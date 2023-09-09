@@ -1,7 +1,6 @@
 default: run-server
 
-export secret_key := 'a'
-export algorithm := 'b'
+export secret_key := 'a30de51667c19a70a5c098f4dea65d23d4884340bca29e854c1becfbe1a49de1'
 
 prod-database := 'postgresql+asyncpg://postgres:postgres@0.0.0.0:5432'
 test-database := 'sqlite+aiosqlite:///'

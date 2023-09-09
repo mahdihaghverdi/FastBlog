@@ -12,3 +12,11 @@ class UserNotFoundError(ResourceNotFoundError):
 
 class DuplicateUsernameError(Exception):
     pass
+
+
+class UnAuthorizedError(Exception):
+    pass
+
+
+class UnAuthorizedLoginError(UnAuthorizedError):
+    pass

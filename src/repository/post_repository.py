@@ -6,7 +6,7 @@ from sqlalchemy import desc, select
 from src.repository import BaseRepo
 from src.repository.models import PostModel
 from src.service.posts import Post
-from src.web.api.schemas import Sort
+from src.web.core.schemas import Sort
 
 
 class PostRepo(BaseRepo):

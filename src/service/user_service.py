@@ -1,5 +1,6 @@
-from src.common.exceptions import UserNotFoundError
+from src.common.exceptions import UserNotFoundError, UnAuthorizedLoginError
 from src.service.users import User
+from src.web.core.security import verify_password
 
 
 class UserService:
@@ -14,3 +15,13 @@ class UserService:
 
     async def create_user(self, user_data: dict) -> User:
         return await self.user_repository.add(user_data)
+
+    async def authenticate(self, user_data: dict) -> User:
+        username, password = user_data["username"], user_data["password"]
+        user = await self.user_repository.get_by_username(username)
+        if user is None:
+            raise UnAuthorizedLoginError()
+        verify = verify_password(password, user.password)
+        if not verify:
+            raise UnAuthorizedLoginError()
+        return user
