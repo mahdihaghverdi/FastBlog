@@ -35,8 +35,8 @@ class PostService:
             raise PostNotFoundError(f"post with id: '{post_id}' is not found")
         return post
 
-    async def update_post(self, post_id: UUID, post_detail: dict):
-        post = await self.posts_repository.update(post_id, post_detail)
+    async def update_post(self, user_id, post_id: UUID, post_detail: dict):
+        post = await self.posts_repository.update(user_id, post_id, post_detail)
         if post is None:
             raise PostNotFoundError(f"post with id: '{post_id}' is not found")
         return post

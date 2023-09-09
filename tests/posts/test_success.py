@@ -140,11 +140,20 @@ def test_get_post(client):
 
 def test_update_post(client):
     title, body, new_title, new_body = "a", "b", "b", "a"
-    post_id = client.post("/posts", json={"title": title, "body": body}).json()["id"]
+    response = client.post("/posts", json={"title": title, "body": body})
+    assert response.status_code == 401, response.text
+
+    headers = signup_and_auth(client)
+    post_id = client.post(
+        "/posts",
+        json={"title": title, "body": body},
+        headers=headers,
+    ).json()["id"]
 
     response = client.put(
         f"/posts/{post_id}",
         json={"title": new_title, "body": new_body},
+        headers=headers,
     )
     assert response.status_code == 200, response.text
 

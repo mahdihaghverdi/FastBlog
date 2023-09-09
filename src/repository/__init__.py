@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repository.models import Base
@@ -13,6 +14,10 @@ class BaseRepo(ABC):
 
     async def _get(self, model: type[Base], id_: UUID) -> type[Base] | None:
         return await self.session.get(model, id_)
+
+    async def _get_related(self, model, user_id, self_id) -> tuple[type[Base]] | None:
+        stmt = select(model).where(model.user_id == user_id).where(model.id == self_id)
+        return (await self.session.execute(stmt)).first()
 
     @abstractmethod
     async def get(self, id_: UUID) -> BaseBusinessObject | None:

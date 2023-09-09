@@ -98,12 +98,13 @@ async def update_post(
     post_id: UUID,
     post_detail: CreatePostSchema,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    user: Annotated[User, Depends(get_current_user)],
 ):
     """Replace an existing post"""
     async with UnitOfWork(asessionmaker) as uow:
         repo = PostRepo(uow.session)
         service = PostService(repo)
-        post = await service.update_post(post_id, post_detail.model_dump())
+        post = await service.update_post(user.id, post_id, post_detail.model_dump())
         await uow.commit()
         return await post.dict()
 

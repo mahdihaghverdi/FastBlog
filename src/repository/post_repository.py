@@ -46,19 +46,15 @@ class PostRepo(BaseRepo):
         return Post(**(await record.dict()), post_model=record)
 
     async def get(self, user_id, /, post_id: UUID) -> Post | None:
-        stmt = (
-            select(PostModel)
-            .where(PostModel.user_id == user_id)
-            .where(PostModel.id == post_id)
-        )
-        post = (await self.session.execute(stmt)).first()
+        post = self._get_related(PostModel, user_id, post_id)
         if post is not None:
             return Post(**(await post[0].dict()))
 
-    async def update(self, post_id: UUID, post_detail: dict) -> Post | None:
-        post = await self._get(PostModel, post_id)
+    async def update(self, user_id, post_id: UUID, post_detail: dict) -> Post | None:
+        post = await self._get_related(PostModel, user_id, post_id)
         if post is None:
             return
+        post = post[0]
         for key, value in post_detail.items():
             setattr(post, key, value)
         return Post(**(await post.dict()), post_model=post)
