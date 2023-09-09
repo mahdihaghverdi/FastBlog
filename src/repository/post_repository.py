@@ -46,9 +46,10 @@ class PostRepo(BaseRepo):
         return Post(**(await record.dict()), post_model=record)
 
     async def get(self, user_id, /, post_id: UUID) -> Post | None:
-        post = self._get_related(PostModel, user_id, post_id)
+        post = await self._get_related(PostModel, user_id, post_id)
         if post is not None:
-            return Post(**(await post[0].dict()))
+            post = post[0]
+            return Post(**(await post.dict()))
 
     async def update(self, user_id, post_id: UUID, post_detail: dict) -> Post | None:
         post = await self._get_related(PostModel, user_id, post_id)
@@ -59,8 +60,9 @@ class PostRepo(BaseRepo):
             setattr(post, key, value)
         return Post(**(await post.dict()), post_model=post)
 
-    async def delete(self, post_id: UUID) -> bool | None:
-        post = await self._get(PostModel, post_id)
+    async def delete(self, user_id, post_id: UUID) -> bool | None:
+        post = await self._get_related(PostModel, user_id, post_id)
         if post is None:
             return False
+        post = post[0]
         await self.session.delete(post)

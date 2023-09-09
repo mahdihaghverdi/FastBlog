@@ -113,10 +113,11 @@ async def update_post(
 async def delete_post(
     post_id: UUID,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    user: Annotated[User, Depends(get_current_user)],
 ):
     """Delete a specific post"""
     async with UnitOfWork(asessionmaker) as uow:
         repo = PostRepo(uow.session)
         service = PostService(repo)
-        await service.delete_post(post_id)
+        await service.delete_post(user.id, post_id)
         await uow.commit()

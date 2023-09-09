@@ -41,7 +41,7 @@ class PostService:
             raise PostNotFoundError(f"post with id: '{post_id}' is not found")
         return post
 
-    async def delete_post(self, post_id):
-        deleted = await self.posts_repository.delete(post_id)
+    async def delete_post(self, user_id, post_id):
+        deleted = await self.posts_repository.delete(user_id, post_id)
         if deleted is False:
             raise PostNotFoundError(f"post with id: '{post_id}' is not found")
