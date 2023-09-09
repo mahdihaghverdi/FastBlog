@@ -3,6 +3,7 @@ run-name: Test the app
 on: [push]
 env:
   DATABASE_URL: sqlite+aiosqlite:///
+  SECRET_KEY: laskdjflaskdjfosdf98suidfjjksdf98sduf
 
 jobs:
   test:
