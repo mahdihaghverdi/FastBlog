@@ -5,12 +5,12 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
 
-from src.repository.post_repository import PostRepo
+from src.repository.post_repo import PostRepo
 from src.repository.unit_of_work import UnitOfWork
 from src.service.post_service import PostService
 from src.service.users import User
-from src.web.core.schemas import CreatePostSchema, PostSchema, Sort
 from src.web.core.dependencies import get_async_sessionmaker, get_current_user
+from src.web.core.schemas import CreatePostSchema, PostSchema, Sort
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
