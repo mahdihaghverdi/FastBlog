@@ -47,7 +47,6 @@ class PostRepo(RelatedObjectsRepoMixin, BaseRepo):
     async def get(self, user_id, /, post_id: UUID) -> Post | None:
         post = await self._get_related(PostModel, user_id, post_id)
         if post is not None:
-            post = post[0]
             return Post(**(await post.dict()))
 
     async def update(self, user_id, post_id: UUID, post_detail: dict) -> Post | None:
