@@ -19,12 +19,41 @@ servers:
 
 paths:
   "/posts/":
+    post:
+      tags:
+      - posts
+      summary: Create Post
+      description: Create a post
+      operationId: create_post_posts__post
+      security:
+      - OAuth2PasswordBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CreatePostSchema"
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/PostSchema"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
     get:
       tags:
       - posts
       summary: Get Posts
       description: Retrieve all the posts
       operationId: get_posts_posts__get
+      security:
+      - OAuth2PasswordBearer: []
       parameters:
       - name: page
         in: query
@@ -82,31 +111,6 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/HTTPValidationError"
-    post:
-      tags:
-      - posts
-      summary: Create Post
-      description: Create a post
-      operationId: create_post_posts__post
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/CreatePostSchema"
-      responses:
-        '201':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/PostSchema"
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                "$ref": "#/components/schemas/HTTPValidationError"
   "/posts/{post_id}":
     get:
       tags:
@@ -114,6 +118,8 @@ paths:
       summary: Get Post
       description: Return details of a specific post
       operationId: get_post_posts__post_id__get
+      security:
+      - OAuth2PasswordBearer: []
       parameters:
       - name: post_id
         in: path
@@ -141,6 +147,8 @@ paths:
       summary: Update Post
       description: Replace an existing post
       operationId: update_post_posts__post_id__put
+      security:
+      - OAuth2PasswordBearer: []
       parameters:
       - name: post_id
         in: path
@@ -174,6 +182,8 @@ paths:
       summary: Delete Post
       description: Delete a specific post
       operationId: delete_post_posts__post_id__delete
+      security:
+      - OAuth2PasswordBearer: []
       parameters:
       - name: post_id
         in: path
