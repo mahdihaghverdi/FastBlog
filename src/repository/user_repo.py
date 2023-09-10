@@ -4,7 +4,6 @@ from sqlalchemy import select
 
 from src.repository import BaseRepo
 from src.repository.models import UserModel
-from src.service.posts import BaseBusinessObject
 from src.service.users import User
 from src.web.core.security import hash_password
 
@@ -28,11 +27,11 @@ class UserRepo(BaseRepo):
         self.session.add(record)
         return User(**(await record.dict()), user_model=record)
 
-    async def update(self, id_: UUID, data: dict) -> BaseBusinessObject | None:
+    async def update(self, id_: UUID, data: dict) -> User | None:
         pass
 
-    async def delete(self, id_: UUID) -> BaseBusinessObject | None:
+    async def delete(self, id_: UUID) -> User | None:
         pass
 
-    async def list(self, **kwargs) -> list[BaseBusinessObject]:
+    async def list(self, **kwargs) -> list[User]:
         pass

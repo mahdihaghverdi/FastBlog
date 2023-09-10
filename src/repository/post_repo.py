@@ -3,17 +3,21 @@ from uuid import UUID
 
 from sqlalchemy import desc, select
 
-from src.repository import BaseRepo
+from src.repository import BaseRepo, RelatedObjectsRepoMixin
 from src.repository.models import PostModel
 from src.service.posts import Post
 from src.web.core.schemas import Sort
 
 
-class PostRepo(BaseRepo):
+class PostRepo(RelatedObjectsRepoMixin, BaseRepo):
+    async def add(self, user_id, /, post: dict) -> Post:
+        record = PostModel(**post, user_id=user_id)
+        self.session.add(record)
+        return Post(**(await record.dict()), post_model=record)
+
     async def list(
         self,
         user_id,
-        /,
         *,
         page: int,
         per_page: int,
@@ -39,11 +43,6 @@ class PostRepo(BaseRepo):
             itertools.chain.from_iterable((await self.session.execute(stmt)).all()),
         )
         return [Post(**(await record.dict())) for record in records]
-
-    async def add(self, user_id, /, post: dict) -> Post:
-        record = PostModel(**post, user_id=user_id)
-        self.session.add(record)
-        return Post(**(await record.dict()), post_model=record)
 
     async def get(self, user_id, /, post_id: UUID) -> Post | None:
         post = await self._get_related(PostModel, user_id, post_id)
