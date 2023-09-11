@@ -15,11 +15,6 @@ class PostRepo(RelatedObjectsRepoMixin, BaseRepo):
         object_ = Post
         super().__init__(session, model, object_)
 
-    async def add(self, user_id, /, post: dict) -> Post:
-        record = PostModel(**post, user_id=user_id)
-        self.session.add(record)
-        return Post(**(await record.dict()), post_model=record)
-
     async def list(
         self,
         user_id,

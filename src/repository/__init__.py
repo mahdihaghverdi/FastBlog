@@ -52,3 +52,8 @@ class RelatedObjectsRepoMixin(ABC, RepoProtocol):
         record = (await self.session.execute(stmt)).first()
         if record is not None:
             return record[0]
+
+    async def add(self, user_id, data: dict):
+        record = self.model(**data)
+        self.session.add(record)
+        return self.object(**(await record.dict()), model=record)

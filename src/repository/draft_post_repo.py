@@ -1,8 +1,10 @@
-from uuid import UUID
-
 from src.repository import BaseRepo, RelatedObjectsRepoMixin
+from src.repository.models import DraftPostModel
+from src.service.objects.draft_posts import DraftPost
 
 
 class DraftPostRepo(RelatedObjectsRepoMixin, BaseRepo):
-    async def add(self, user_id: UUID, post: dict):
-        pass
+    def __init__(self, session):
+        model = DraftPostModel
+        object_ = DraftPost
+        super().__init__(session, model, object_)
