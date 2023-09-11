@@ -55,13 +55,14 @@ def test_get_posts(client, endpoint):
     assert len(client.get(endpoint, headers=second).json()) == 1
     assert len(client.get(endpoint, headers=headers).json()) == 0
 
-    posts = [
+    test_posts = [
         [{"title": random_string(), "body": random_string()} for _ in range(5)]
         for _ in range(5)
     ]
+
     posts = [
         client.post(endpoint, json=post, headers=headers).json()
-        for post_list in posts
+        for post_list in test_posts
         for post in post_list
     ]
 

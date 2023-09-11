@@ -49,7 +49,7 @@ class UserModel(Base):
         cascade="delete, delete-orphan",
     )
 
-    draft_posts: Mapped[list["DraftPostModel"]] = relationship(
+    draft_posts: Mapped[list["DraftModel"]] = relationship(
         back_populates="user",
         cascade="delete, delete-orphan",
     )
@@ -67,7 +67,7 @@ class UserModel(Base):
         return d
 
 
-class DraftPostModel(Base):
+class DraftModel(Base):
     __tablename__ = "draft_posts"
 
     title: Mapped[str]

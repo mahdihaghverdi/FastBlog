@@ -6,6 +6,10 @@ class PostNotFoundError(ResourceNotFoundError):
     pass
 
 
+class DraftNotFoundError(ResourceNotFoundError):
+    pass
+
+
 class UserNotFoundError(ResourceNotFoundError):
     pass
 

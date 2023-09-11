@@ -20,9 +20,18 @@ database:
     -v fastblog-data:/var/lib/postgresql/data \
      postgres
 
-test where $database_url=test-database:
-  pytest --no-header --cov=src --cov-report=html --cov-report=term-missing tests/{{where}}
+test $database_url=test-database:
+  pytest --no-header --cov=src --cov-report=html --cov-report=term-missing tests
 # --cov=src --cov-report=html --cov-report=term-missing
+
+test-no-cov $database_url=test-database:
+  pytest --no-header tests
+
+test-spec where $database_url=test-database:
+  pytest --no-header --cov=src --cov-report=html --cov-report=term-missing tests/{{where}}
+
+test-spec-no-cov where $database_url=test-database:
+  pytest --no-header tests/{{where}}
 
 migrate message $database_url=prod-database:
   alembic revision --autogenerate -m "{{message}}"

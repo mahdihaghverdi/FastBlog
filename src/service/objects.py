@@ -16,5 +16,5 @@ class User(BusinessObject):
     pass
 
 
-class DraftPost(BusinessObject):
+class Draft(BusinessObject):
     pass
