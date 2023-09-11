@@ -48,6 +48,7 @@ class UserLoginSchema(UserSignUpSchema):
 
 class UserSchema(BaseModel):
     username: str
+    created: datetime
     posts: list[PostSchema]
 
 

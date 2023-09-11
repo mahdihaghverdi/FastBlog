@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repository.models import Base
-from src.service.objects import BaseBusinessObject
+from src.service.objects import BusinessObject
 
 
 class RepoProtocol(Protocol):
@@ -31,7 +31,7 @@ class BaseRepo(ABC, RepoProtocol):
         self,
         session: AsyncSession,
         model: type[Base],
-        object_: type[BaseBusinessObject],
+        object_: type[BusinessObject],
     ):
         self.model = model
         self.object = object_

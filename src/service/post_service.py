@@ -1,12 +1,12 @@
 from uuid import UUID
 
 from src.common.exceptions import PostNotFoundError
-from src.service import BaseService
+from src.service import Service
 from src.service.objects.posts import Post
 from src.web.core.schemas import Sort
 
 
-class PostService(BaseService):
+class PostService(Service):
     async def list_posts(
         self,
         user_id,

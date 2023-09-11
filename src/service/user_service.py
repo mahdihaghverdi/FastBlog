@@ -1,10 +1,10 @@
 from src.common.exceptions import UserNotFoundError, UnAuthorizedLoginError
-from src.service import BaseService
+from src.service import Service
 from src.service.objects.users import User
 from src.web.core.security import verify_password
 
 
-class UserService(BaseService):
+class UserService(Service):
     async def get_user(self, user_id) -> User:
         user = await self.repo.get(user_id)
         if user is None:
