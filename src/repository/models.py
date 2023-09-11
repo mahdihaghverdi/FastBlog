@@ -15,6 +15,7 @@ class UserModel(Base):
     __tablename__ = "users"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    created: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
 
@@ -30,6 +31,7 @@ class UserModel(Base):
     async def dict(self):
         return {
             "id": await self.awaitable_attrs.id,
+            "created": await self.awaitable_attrs.created,
             "username": self.username,
             "password": self.password,
             "posts": await self.awaitable_attrs.posts,
