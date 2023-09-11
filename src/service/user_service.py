@@ -1,6 +1,6 @@
 from src.common.exceptions import UserNotFoundError, UnAuthorizedLoginError
 from src.service import BaseService
-from src.service.users import User
+from src.service.objects.users import User
 from src.web.core.security import verify_password
 
 

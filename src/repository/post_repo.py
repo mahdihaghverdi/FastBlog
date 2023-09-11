@@ -5,7 +5,7 @@ from sqlalchemy import desc, select
 
 from src.repository import BaseRepo, RelatedObjectsRepoMixin
 from src.repository.models import PostModel
-from src.service.posts import Post
+from src.service.objects.posts import Post
 from src.web.core.schemas import Sort
 
 
