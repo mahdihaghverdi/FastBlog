@@ -1,5 +1,4 @@
 import itertools
-from uuid import UUID
 
 from sqlalchemy import desc, select
 
@@ -43,24 +42,3 @@ class PostRepo(RelatedObjectsRepoMixin, BaseRepo):
             itertools.chain.from_iterable((await self.session.execute(stmt)).all()),
         )
         return [Post(**(await record.dict())) for record in records]
-
-    async def get(self, user_id, /, post_id: UUID) -> Post | None:
-        post = await self._get_related(PostModel, user_id, post_id)
-        if post is not None:
-            return Post(**(await post.dict()))
-
-    async def update(self, user_id, post_id: UUID, post_detail: dict) -> Post | None:
-        post = await self._get_related(PostModel, user_id, post_id)
-        if post is None:
-            return
-        post = post[0]
-        for key, value in post_detail.items():
-            setattr(post, key, value)
-        return Post(**(await post.dict()), post_model=post)
-
-    async def delete(self, user_id, post_id: UUID) -> bool | None:
-        post = await self._get_related(PostModel, user_id, post_id)
-        if post is None:
-            return False
-        post = post[0]
-        await self.session.delete(post)

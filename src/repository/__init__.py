@@ -37,23 +37,43 @@ class BaseRepo(ABC, RepoProtocol):
         self.object = object_
         self.session = session
 
-    async def _get(self, self_id: UUID) -> type[Base] | None:
-        return await self.session.get(self.model, self_id)
+    async def get(self, self_id: UUID):
+        record = await self.session.get(self.model, self_id)
+        if record is not None:
+            return self.object(**(await record.dict()), model=record)
 
 
 class RelatedObjectsRepoMixin(ABC, RepoProtocol):
-    async def _get_related(
-        self,
-        model: type[Base],
-        user_id: UUID,
-        self_id: UUID,
-    ) -> type[Base] | None:
-        stmt = select(model).where(model.user_id == user_id).where(model.id == self_id)
+    async def _get_related(self, user_id: UUID, self_id: UUID) -> type[Base] | None:
+        stmt = (
+            select(self.model)
+            .where(self.model.user_id == user_id)
+            .where(self.model.id == self_id)
+        )
         record = (await self.session.execute(stmt)).first()
         if record is not None:
             return record[0]
 
     async def add(self, user_id, data: dict):
-        record = self.model(**data)
+        record = self.model(**data, user_id=user_id)
         self.session.add(record)
         return self.object(**(await record.dict()), model=record)
+
+    async def get(self, user_id, /, self_id):
+        record = await self._get_related(user_id, self_id)
+        if record is not None:
+            return self.object(**(await record.dict()), model=record)
+
+    async def update(self, user_id, /, self_id, data: dict):
+        record = await self._get_related(user_id, self_id)
+        if record is None:
+            return
+        for key, value in data.items():
+            setattr(record, key, value)
+        return self.object(**(await record.dict()), model=record)
+
+    async def delete(self, user_id: UUID, /, self_id):
+        record = await self._get_related(user_id, self_id)
+        if record is None:
+            return False
+        await self.session.delete(record)
