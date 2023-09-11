@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Protocol
 from uuid import UUID
 
@@ -9,25 +9,20 @@ from src.repository.models import Base
 
 
 class RepoProtocol(Protocol):
-    @abstractmethod
     async def get(self, *args, **kwargs):
-        raise NotImplementedError
+        ...
 
-    @abstractmethod
     async def list(self, *args, **kwargs):
-        raise NotImplementedError
+        ...
 
-    @abstractmethod
     async def add(self, *args, **kwargs):
-        raise NotImplementedError
+        ...
 
-    @abstractmethod
     async def update(self, *args, **kwargs):
-        raise NotImplementedError
+        ...
 
-    @abstractmethod
     async def delete(self, *args, **kwargs):
-        raise NotImplementedError
+        ...
 
 
 class BaseRepo(ABC, RepoProtocol):
