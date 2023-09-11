@@ -1,4 +1,3 @@
-from abc import ABC
 from typing import Protocol
 from uuid import UUID
 
@@ -26,7 +25,7 @@ class RepoProtocol(Protocol):
         ...
 
 
-class BaseRepo(ABC, RepoProtocol):
+class BaseRepo(RepoProtocol):
     def __init__(
         self,
         session: AsyncSession,
@@ -43,7 +42,7 @@ class BaseRepo(ABC, RepoProtocol):
             return self.object(**(await record.dict()), model=record)
 
 
-class RelatedObjectsRepoMixin(ABC, RepoProtocol):
+class RelatedObjectsRepoMixin(RepoProtocol):
     async def _get_related(self, user_id: UUID, self_id: UUID) -> type[Base] | None:
         stmt = (
             select(self.model)
