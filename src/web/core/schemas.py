@@ -46,12 +46,15 @@ class UserLoginSchema(UserSignUpSchema):
     pass
 
 
-class UserSchema(BaseModel):
+class UserOutSchema(BaseModel):
     username: str
     created: datetime
     posts: list[PostSchema]
 
 
-class UserInDBSchema(UserSchema):
+class UserInternalSchema(UserOutSchema):
     id: UUID
+
+
+class UserInDBSchema(UserInternalSchema):
     password: str

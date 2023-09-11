@@ -8,9 +8,8 @@ from starlette import status
 from src.repository.post_repo import PostRepo
 from src.repository.unit_of_work import UnitOfWork
 from src.service.post_service import PostService
-from src.service.objects import User
 from src.web.core.dependencies import get_async_sessionmaker, get_current_user
-from src.web.core.schemas import CreatePostSchema, PostSchema, Sort
+from src.web.core.schemas import CreatePostSchema, PostSchema, Sort, UserInternalSchema
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -23,7 +22,7 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 async def create_post(
     post: CreatePostSchema,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
-    user: Annotated[User, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
     """Create a post"""
     async with UnitOfWork(asessionmaker) as uow:
@@ -43,7 +42,7 @@ async def create_post(
 )
 async def get_posts(
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
-    user: Annotated[User, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user)],
     page: Annotated[
         int,
         Query(description="page number of the pagination", ge=1),
@@ -84,7 +83,7 @@ async def get_posts(
 async def get_post(
     post_id: UUID,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
-    user: Annotated[User, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
     """Return details of a specific post"""
     async with UnitOfWork(asessionmaker) as uow:
@@ -98,7 +97,7 @@ async def update_post(
     post_id: UUID,
     post_detail: CreatePostSchema,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
-    user: Annotated[User, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
     """Replace an existing post"""
     async with UnitOfWork(asessionmaker) as uow:
@@ -113,7 +112,7 @@ async def update_post(
 async def delete_post(
     post_id: UUID,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
-    user: Annotated[User, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
     """Delete a specific post"""
     async with UnitOfWork(asessionmaker) as uow:
