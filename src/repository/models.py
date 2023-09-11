@@ -17,34 +17,6 @@ class Base(AsyncAttrs, DeclarativeBase):
         }
 
 
-class UserModel(Base):
-    __tablename__ = "users"
-
-    username: Mapped[str] = mapped_column(unique=True)
-    password: Mapped[str]
-
-    posts: Mapped[list["PostModel"]] = relationship(
-        back_populates="user",
-        cascade="delete, delete-orphan",
-    )
-    draft_posts: Mapped[list["DraftPostModel"]] = relationship(
-        back_populates="user",
-        cascade="delete, delete-orphan",
-    )
-
-    async def dict(self):
-        d = await super().dict()
-        d.update(
-            {
-                "username": self.username,
-                "password": self.password,
-                "posts": await self.awaitable_attrs.posts,
-                "draft_posts": await self.awaitable_attrs.draft_posts,
-            },
-        )
-        return d
-
-
 class PostModel(Base):
     __tablename__ = "posts"
 
@@ -61,6 +33,35 @@ class PostModel(Base):
             {
                 "title": self.title,
                 "body": self.body,
+            },
+        )
+        return d
+
+
+class UserModel(Base):
+    __tablename__ = "users"
+
+    username: Mapped[str] = mapped_column(unique=True)
+    password: Mapped[str]
+
+    posts: Mapped[list["PostModel"]] = relationship(
+        back_populates="user",
+        cascade="delete, delete-orphan",
+    )
+
+    draft_posts: Mapped[list["DraftPostModel"]] = relationship(
+        back_populates="user",
+        cascade="delete, delete-orphan",
+    )
+
+    async def dict(self):
+        d = await super().dict()
+        d.update(
+            {
+                "username": self.username,
+                "password": self.password,
+                "posts": await self.awaitable_attrs.posts,
+                "draft_posts": await self.awaitable_attrs.draft_posts,
             },
         )
         return d
