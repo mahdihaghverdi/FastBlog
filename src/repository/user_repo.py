@@ -9,8 +9,13 @@ from src.web.core.security import hash_password
 
 
 class UserRepo(BaseRepo):
+    def __init__(self, session):
+        model = UserModel
+        object_ = User
+        super().__init__(session, model, object_)
+
     async def get(self, id_: UUID) -> User | None:
-        user = await self._get(UserModel, id_)
+        user = await self._get(id_)
         if user is not None:
             return User(**(await user.dict()))
 

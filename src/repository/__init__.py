@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repository.models import Base
+from src.service.objects import BaseBusinessObject
 
 
 class RepoProtocol(Protocol):
@@ -26,11 +27,18 @@ class RepoProtocol(Protocol):
 
 
 class BaseRepo(ABC, RepoProtocol):
-    def __init__(self, session: AsyncSession):
+    def __init__(
+        self,
+        session: AsyncSession,
+        model: type[Base],
+        object_: type[BaseBusinessObject],
+    ):
+        self.model = model
+        self.object = object_
         self.session = session
 
-    async def _get(self, model: type[Base], self_id: UUID) -> type[Base] | None:
-        return await self.session.get(model, self_id)
+    async def _get(self, self_id: UUID) -> type[Base] | None:
+        return await self.session.get(self.model, self_id)
 
 
 class RelatedObjectsRepoMixin(ABC, RepoProtocol):

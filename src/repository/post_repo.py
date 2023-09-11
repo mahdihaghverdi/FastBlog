@@ -10,6 +10,11 @@ from src.web.core.schemas import Sort
 
 
 class PostRepo(RelatedObjectsRepoMixin, BaseRepo):
+    def __init__(self, session):
+        model = PostModel
+        object_ = Post
+        super().__init__(session, model, object_)
+
     async def add(self, user_id, /, post: dict) -> Post:
         record = PostModel(**post, user_id=user_id)
         self.session.add(record)
