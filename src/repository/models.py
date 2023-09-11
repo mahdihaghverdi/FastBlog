@@ -7,15 +7,19 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(AsyncAttrs, DeclarativeBase):
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    created: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
     async def dict(self):
-        pass
+        return {
+            "id": await self.awaitable_attrs.id,
+            "created": await self.awaitable_attrs.created,
+        }
 
 
 class UserModel(Base):
     __tablename__ = "users"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    created: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
 
@@ -29,21 +33,21 @@ class UserModel(Base):
     )
 
     async def dict(self):
-        return {
-            "id": await self.awaitable_attrs.id,
-            "created": await self.awaitable_attrs.created,
-            "username": self.username,
-            "password": self.password,
-            "posts": await self.awaitable_attrs.posts,
-            "draft_posts": await self.awaitable_attrs.draft_posts,
-        }
+        d = await super().dict()
+        d.update(
+            {
+                "username": self.username,
+                "password": self.password,
+                "posts": await self.awaitable_attrs.posts,
+                "draft_posts": await self.awaitable_attrs.draft_posts,
+            },
+        )
+        return d
 
 
 class PostModel(Base):
     __tablename__ = "posts"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    created: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     title: Mapped[str]
     body: Mapped[str]
 
@@ -52,19 +56,19 @@ class PostModel(Base):
     user: Mapped["UserModel"] = relationship(back_populates="posts")
 
     async def dict(self):
-        return {
-            "id": await self.awaitable_attrs.id,
-            "created": await self.awaitable_attrs.created,
-            "title": self.title,
-            "body": self.body,
-        }
+        d = await super().dict()
+        d.update(
+            {
+                "title": self.title,
+                "body": self.body,
+            },
+        )
+        return d
 
 
 class DraftPostModel(Base):
     __tablename__ = "draft_posts"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    created: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     title: Mapped[str]
     body: Mapped[str]
 
@@ -72,9 +76,11 @@ class DraftPostModel(Base):
     user: Mapped["UserModel"] = relationship(back_populates="draft_posts")
 
     async def dict(self):
-        return {
-            "id": await self.awaitable_attrs.id,
-            "created": await self.awaitable_attrs.created,
-            "title": self.title,
-            "body": self.body,
-        }
+        d = await super().dict()
+        d.update(
+            {
+                "title": self.title,
+                "body": self.body,
+            },
+        )
+        return d
