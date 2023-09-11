@@ -6,3 +6,15 @@ class BusinessObject:
 
     async def dict(self):
         return await self.model.dict()
+
+
+class Post(BusinessObject):
+    pass
+
+
+class User(BusinessObject):
+    pass
+
+
+class DraftPost(BusinessObject):
+    pass

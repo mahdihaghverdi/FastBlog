@@ -1,6 +1,6 @@
 from src.repository import BaseRepo, RelatedObjectsRepoMixin
 from src.repository.models import DraftPostModel
-from src.service.objects.draft_posts import DraftPost
+from src.service.objects import DraftPost
 
 
 class DraftPostRepo(RelatedObjectsRepoMixin, BaseRepo):

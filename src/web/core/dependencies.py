@@ -10,7 +10,7 @@ from starlette import status
 from src.repository.unit_of_work import UnitOfWork
 from src.repository.user_repo import UserRepo
 from src.service.user_service import UserService
-from src.service.objects.users import User
+from src.service.objects import User
 from src.web.core.config import settings
 from src.web.core.database import sqlalchemy_engine
 
