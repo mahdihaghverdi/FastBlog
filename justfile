@@ -21,7 +21,7 @@ database:
      postgres
 
 test where $database_url=test-database:
-  pytest --no-header tests/{{where}}
+  pytest --no-header --cov=src --cov-report=html --cov-report=term-missing tests/{{where}}
 # --cov=src --cov-report=html --cov-report=term-missing
 
 migrate message $database_url=prod-database:
