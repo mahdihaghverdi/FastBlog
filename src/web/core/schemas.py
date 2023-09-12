@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from uuid import UUID
 
-from pydantic import BaseModel, constr
+from pydantic import BaseModel, constr, AnyHttpUrl
 
 
 class Sort(Enum):
@@ -23,6 +23,7 @@ class Error(BaseModel):
 class CreatePostSchema(BaseModel):
     title: constr(strip_whitespace=True, min_length=1)
     body: constr(strip_whitespace=True, min_length=1)
+    title_in_url: constr(strip_whitespace=True, min_length=1) | None
 
 
 class PostSchema(BaseModel):
@@ -30,6 +31,9 @@ class PostSchema(BaseModel):
     created: datetime
     title: constr(strip_whitespace=True, min_length=1)
     body: constr(strip_whitespace=True, min_length=1)
+    url: AnyHttpUrl
+    # the pattern for posts' url is like this: https://fastblog.io/@username/slugged-title
+    # this is generated automatically for posts that'll be published
 
 
 class TokenSchema(BaseModel):
