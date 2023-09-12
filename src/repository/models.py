@@ -34,6 +34,7 @@ class PostModel(Base):
             {
                 "title": self.title,
                 "body": self.body,
+                "url": self.url,
             },
         )
         return d

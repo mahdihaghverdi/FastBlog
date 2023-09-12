@@ -4,12 +4,14 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
+from starlette.requests import Request
 
 from src.repository.post_repo import PostRepo
 from src.repository.unit_of_work import UnitOfWork
 from src.service.post_service import PostService
 from src.web.core.dependencies import get_async_sessionmaker, get_current_user
 from src.web.core.schemas import CreatePostSchema, PostSchema, Sort, UserInternalSchema
+from . import give_domain
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -20,6 +22,7 @@ router = APIRouter(prefix="/posts", tags=["posts"])
     status_code=status.HTTP_201_CREATED,
 )
 async def create_post(
+    request: Request,
     post: CreatePostSchema,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
@@ -30,9 +33,7 @@ async def create_post(
         service = PostService(repo)
         post = await service.create_post(user.id, post.model_dump())
         await uow.commit()
-        payload = await post.dict()
-
-    return payload
+        return give_domain(str(request.base_url), await post.dict())
 
 
 @router.get(
@@ -41,6 +42,7 @@ async def create_post(
     status_code=status.HTTP_200_OK,
 )
 async def get_posts(
+    request: Request,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
     page: Annotated[
@@ -76,11 +78,13 @@ async def get_posts(
             sort=sort,
             desc_=desc,
         )
+        posts = give_domain(str(request.base_url), posts)
         return posts
 
 
 @router.get("/{post_id}", response_model=PostSchema, status_code=status.HTTP_200_OK)
 async def get_post(
+    request: Request,
     post_id: UUID,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
@@ -89,11 +93,14 @@ async def get_post(
     async with UnitOfWork(asessionmaker) as uow:
         repo = PostRepo(uow.session)
         service = PostService(repo)
-        return await (await service.get_post(user.id, post_id)).dict()
+        post = await service.get_post(user.id, post_id)
+        payload = give_domain(str(request.base_url), post)
+        return payload
 
 
 @router.put("/{post_id}", response_model=PostSchema, status_code=status.HTTP_200_OK)
 async def update_post(
+    request: Request,
     post_id: UUID,
     post_detail: CreatePostSchema,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
@@ -105,7 +112,7 @@ async def update_post(
         service = PostService(repo)
         post = await service.update_post(user.id, post_id, post_detail.model_dump())
         await uow.commit()
-        return await post.dict()
+        return give_domain(str(request.base_url), await post.dict())
 
 
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)

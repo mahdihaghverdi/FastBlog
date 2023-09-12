@@ -23,7 +23,7 @@ class Error(BaseModel):
 class CreatePostSchema(BaseModel):
     title: constr(strip_whitespace=True, min_length=1)
     body: constr(strip_whitespace=True, min_length=1)
-    title_in_url: constr(strip_whitespace=True, min_length=1) | None
+    title_in_url: constr(strip_whitespace=True, min_length=1) | None = None
 
 
 class PostSchema(BaseModel):
@@ -32,7 +32,7 @@ class PostSchema(BaseModel):
     title: constr(strip_whitespace=True, min_length=1)
     body: constr(strip_whitespace=True, min_length=1)
     url: AnyHttpUrl
-    # the pattern for posts' url is like this: https://fastblog.io/@username/slugged-title
+    # the pattern for posts' url is like this: https://fastblog.io/@username/slugged-title-somehash
     # this is generated automatically for posts that'll be published
 
 

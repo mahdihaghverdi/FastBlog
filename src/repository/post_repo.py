@@ -41,4 +41,10 @@ class PostRepo(RelatedObjectsRepoMixin, BaseRepo):
         records = list(
             itertools.chain.from_iterable((await self.session.execute(stmt)).all()),
         )
-        return [Post(**(await record.dict())) for record in records]
+        return [Post(**(await record.dict()), model=record) for record in records]
+
+    async def filter_get(self, **filters):
+        stmt = select(PostModel).filter_by(**filters)
+        post = (await self.session.execute(stmt)).first()[0]
+        if post is not None:
+            return Post(**(await post.dict()), model=post)
