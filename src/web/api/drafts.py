@@ -24,7 +24,7 @@ async def create_draft_post(
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
-    """Create a draft post"""
+    """Create a draft draft"""
     async with UnitOfWork(asessionmaker) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
@@ -65,7 +65,7 @@ async def get_posts(
         Query(description="order of the sorted posts"),
     ] = True,
 ):
-    """Retrieve all the posts"""
+    """Retrieve all the draft"""
     async with UnitOfWork(asessionmaker) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
@@ -79,44 +79,44 @@ async def get_posts(
         return posts
 
 
-@router.get("/{post_id}", response_model=PostSchema, status_code=status.HTTP_200_OK)
+@router.get("/{draft_id}", response_model=PostSchema, status_code=status.HTTP_200_OK)
 async def get_post(
-    post_id: UUID,
+    draft_id: UUID,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
-    """Return details of a specific post"""
+    """Return details of a specific draft"""
     async with UnitOfWork(asessionmaker) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
-        return await (await service.get_draft(user.id, post_id)).dict()
+        return await (await service.get_draft(user.id, draft_id)).dict()
 
 
-@router.put("/{post_id}", response_model=PostSchema, status_code=status.HTTP_200_OK)
+@router.put("/{draft_id}", response_model=PostSchema, status_code=status.HTTP_200_OK)
 async def update_post(
-    post_id: UUID,
+    draft_id: UUID,
     post_detail: CreatePostSchema,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
-    """Replace an existing post"""
+    """Replace an existing draft"""
     async with UnitOfWork(asessionmaker) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
-        post = await service.update_draft(user.id, post_id, post_detail.model_dump())
+        post = await service.update_draft(user.id, draft_id, post_detail.model_dump())
         await uow.commit()
         return await post.dict()
 
 
-@router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{draft_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(
-    post_id: UUID,
+    draft_id: UUID,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
-    """Delete a specific post"""
+    """Delete a specific draft"""
     async with UnitOfWork(asessionmaker) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
-        await service.delete_draft(user.id, post_id)
+        await service.delete_draft(user.id, draft_id)
         await uow.commit()
