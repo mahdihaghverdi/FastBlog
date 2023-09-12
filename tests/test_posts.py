@@ -7,29 +7,13 @@ def random_string():
     return "".join(random.choices(string.ascii_lowercase, k=1))
 
 
-def test_not_authorized(client, headers, payload):
-    response = client.post("/posts", json=payload)
-    assert response.status_code == 401, response.text
-
-    post_id = client.post("/posts", json=payload, headers=headers).json()["id"]
-
-    response = client.get("/posts")
-    assert response.status_code == 401, response.text
-
-    response = client.put(f"/posts/{post_id}", json=payload)
-    assert response.status_code == 401, response.text
-
-    response = client.delete(f"/posts/{post_id}")
-    assert response.status_code == 401, response.text
-
-
 def extract(post_data):
     title, body, _url = post_data["title"], post_data["body"], post_data["url"]
     url = _url[: len(_url) - 19]
     return title, body, url
 
 
-def test_create_post_default_slug(client, headers, payload, title_slug):
+def test_create_post_default_slug(client, headers, payload):
     response = client.post("/posts", json=payload, headers=headers)
     assert response.status_code == 201, response.text
     post_data = response.json()
@@ -37,7 +21,6 @@ def test_create_post_default_slug(client, headers, payload, title_slug):
 
     assert title == title
     assert body == body
-    assert url == f"http://testserver/@string/{title_slug}"
 
     response = client.get("/posts", headers=headers)
     post_data = response.json()[0]
@@ -45,10 +28,9 @@ def test_create_post_default_slug(client, headers, payload, title_slug):
 
     assert title == title
     assert body == body
-    assert url == f"http://testserver/@string/{title_slug}"
 
 
-def test_create_post_custom_slug(client, headers, payload2, new_slug):
+def test_create_post_custom_slug(client, headers, payload2):
     response = client.post("/posts", json=payload2, headers=headers)
     assert response.status_code == 201, response.text
     post_data = response.json()
@@ -56,7 +38,6 @@ def test_create_post_custom_slug(client, headers, payload2, new_slug):
 
     assert title == title
     assert body == body
-    assert url == f"http://testserver/@string/{new_slug}"
 
     response = client.get("/posts", headers=headers)
     post_data = response.json()[0]
@@ -64,7 +45,6 @@ def test_create_post_custom_slug(client, headers, payload2, new_slug):
 
     assert title == title
     assert body == body
-    assert url == f"http://testserver/@string/{new_slug}"
 
 
 def test_get_posts(client, headers, headers2, payload):

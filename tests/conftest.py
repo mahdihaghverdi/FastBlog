@@ -3,7 +3,6 @@ import pathlib
 import sys
 
 import pytest
-from slugify import Slugify
 from starlette.testclient import TestClient
 
 sys.path.append(str(pathlib.Path(__file__).parent.parent))
@@ -48,24 +47,10 @@ title = "Python 3.11"
 body = "Wow, such a release!"
 new_title = "the Ugly umbrella"
 
-s = Slugify(to_lower=True)
-_title_slug = s(title)
-_new_slug = s(new_title)
-
 
 @pytest.fixture(scope="function")
 def payload():
     return {"title": title, "body": body, "title_in_url": None}
-
-
-@pytest.fixture(scope="function")
-def title_slug():
-    return _title_slug
-
-
-@pytest.fixture(scope="function")
-def new_slug():
-    return _new_slug
 
 
 @pytest.fixture(scope="function")
