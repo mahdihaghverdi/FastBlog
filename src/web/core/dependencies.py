@@ -19,7 +19,7 @@ async def get_async_sessionmaker() -> async_sessionmaker:
     return async_sessionmaker(sqlalchemy_engine, expire_on_commit=False)
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"/auth/{settings.access_token_url}")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/access-token")
 
 
 async def get_user(

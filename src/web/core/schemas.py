@@ -26,6 +26,18 @@ class CreatePostSchema(BaseModel):
     title_in_url: constr(strip_whitespace=True, min_length=1) | None = None
 
 
+class CreateDraftSchema(BaseModel):
+    title: constr(strip_whitespace=True, min_length=1)
+    body: constr(strip_whitespace=True, min_length=1)
+
+
+class DraftSchema(BaseModel):
+    id: UUID
+    created: datetime
+    title: constr(strip_whitespace=True, min_length=1)
+    body: constr(strip_whitespace=True, min_length=1)
+
+
 class PostSchema(BaseModel):
     id: UUID
     created: datetime

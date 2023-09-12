@@ -21,17 +21,16 @@ database:
      postgres
 
 test $database_url=test-database:
-  pytest --no-header --cov=src --cov-report=html --cov-report=term-missing tests
-# --cov=src --cov-report=html --cov-report=term-missing
+  pytest --durations=5 --no-header --cov=src --cov-report=html --cov-report=term-missing tests
 
 test-no-cov $database_url=test-database:
-  pytest --no-header tests
+  pytest --durations=5 --no-header tests
 
 test-spec where $database_url=test-database:
-  pytest --no-header --cov=src --cov-report=html --cov-report=term-missing tests/{{where}}
+  pytest --durations=5 --no-header --cov=src --cov-report=html --cov-report=term-missing tests/{{where}}
 
 test-spec-no-cov where $database_url=test-database:
-  pytest --no-header tests/{{where}}
+  pytest --durations=5 --no-header tests/{{where}}
 
 migrate message $database_url=prod-database:
   alembic revision --autogenerate -m "{{message}}"

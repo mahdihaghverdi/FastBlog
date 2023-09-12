@@ -9,18 +9,23 @@ from src.repository.draft_repo import DraftRepo
 from src.repository.unit_of_work import UnitOfWork
 from src.service.draft_service import DraftService
 from src.web.core.dependencies import get_async_sessionmaker, get_current_user
-from src.web.core.schemas import PostSchema, CreatePostSchema, UserInternalSchema, Sort
+from src.web.core.schemas import (
+    CreateDraftSchema,
+    UserInternalSchema,
+    Sort,
+    DraftSchema,
+)
 
 router = APIRouter(prefix="/drafts", tags=["drafts"])
 
 
 @router.post(
     "/",
-    response_model=PostSchema,
+    response_model=DraftSchema,
     status_code=status.HTTP_201_CREATED,
 )
-async def create_draft_post(
-    post: CreatePostSchema,
+async def create_draft(
+    draft: CreateDraftSchema,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
@@ -28,19 +33,19 @@ async def create_draft_post(
     async with UnitOfWork(asessionmaker) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
-        post = await service.create_draft(user.id, post.model_dump())
+        draft = await service.create_draft(user.id, draft.model_dump())
         await uow.commit()
-        payload = await post.dict()
+        payload = await draft.dict()
 
     return payload
 
 
 @router.get(
     "/",
-    response_model=list[PostSchema],
+    response_model=list[DraftSchema],
     status_code=status.HTTP_200_OK,
 )
-async def get_posts(
+async def get_drafts(
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
     page: Annotated[
@@ -69,18 +74,18 @@ async def get_posts(
     async with UnitOfWork(asessionmaker) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
-        posts = await service.list_drafts(
+        drafts = await service.list_drafts(
             user.id,
             page=page,
             per_page=per_page,
             sort=sort,
             desc_=desc,
         )
-        return posts
+        return drafts
 
 
-@router.get("/{draft_id}", response_model=PostSchema, status_code=status.HTTP_200_OK)
-async def get_post(
+@router.get("/{draft_id}", response_model=DraftSchema, status_code=status.HTTP_200_OK)
+async def get_draft(
     draft_id: UUID,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
@@ -89,13 +94,13 @@ async def get_post(
     async with UnitOfWork(asessionmaker) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
-        return await (await service.get_draft(user.id, draft_id)).dict()
+        return await service.get_draft(user.id, draft_id)
 
 
-@router.put("/{draft_id}", response_model=PostSchema, status_code=status.HTTP_200_OK)
+@router.put("/{draft_id}", response_model=DraftSchema, status_code=status.HTTP_200_OK)
 async def update_post(
     draft_id: UUID,
-    post_detail: CreatePostSchema,
+    draft_detail: CreateDraftSchema,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
@@ -103,9 +108,9 @@ async def update_post(
     async with UnitOfWork(asessionmaker) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
-        post = await service.update_draft(user.id, draft_id, post_detail.model_dump())
+        draft = await service.update_draft(user.id, draft_id, draft_detail.model_dump())
         await uow.commit()
-        return await post.dict()
+        return await draft.dict()
 
 
 @router.delete("/{draft_id}", status_code=status.HTTP_204_NO_CONTENT)

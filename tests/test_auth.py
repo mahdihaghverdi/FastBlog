@@ -1,6 +1,3 @@
-from src.web.core.config import settings
-
-
 class TestAuth:
     username = "string"
     password = "12345678"
@@ -31,17 +28,11 @@ class TestAuth:
         )
 
     def test_access_token(self, client):
-        response = client.post(
-            f"/auth/{settings.access_token_url}",
-            data=self.access_token_data,
-        )
+        response = client.post("/auth/access-token", data=self.access_token_data)
         assert response.status_code == 401, response.text
 
         client.post("/users/signup", data=self.data)
-        response = client.post(
-            f"/auth/{settings.access_token_url}",
-            data=self.access_token_data,
-        )
+        response = client.post("/auth/access-token", data=self.access_token_data)
         assert response.status_code == 200, response.text
 
         data = response.json()
@@ -50,7 +41,7 @@ class TestAuth:
         assert token_type.lower() == "bearer"
 
         response = client.post(
-            f"/auth/{settings.access_token_url}",
+            "/auth/access-token",
             data={
                 "username": "hello",
                 "grant_type": "password",
@@ -62,7 +53,7 @@ class TestAuth:
     def test_users_me(self, client):
         client.post("/users/signup", data=self.data)
         access_token = client.post(
-            f"/auth/{settings.access_token_url}",
+            "/auth/access-token",
             data=self.access_token_data,
         ).json()["access_token"]
         response = client.get(

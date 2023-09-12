@@ -7,7 +7,7 @@ from src.common.exceptions import (
     DuplicateUsernameError,
     UnAuthorizedError,
 )
-from src.web.api import posts, users, auth, drafts, global_posts
+from src.web.api import posts, users, auth, drafts, globals as global_posts
 
 app = FastAPI(debug=True)
 
