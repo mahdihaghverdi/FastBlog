@@ -22,6 +22,7 @@ class PostModel(Base):
 
     title: Mapped[str]
     body: Mapped[str]
+    url: Mapped[str]
 
     # TODO: see cascading in database
     user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
