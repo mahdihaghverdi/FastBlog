@@ -70,7 +70,7 @@ class UserModel(Base):
 
 
 class DraftModel(Base):
-    __tablename__ = "draft_posts"
+    __tablename__ = "drafts"
 
     title: Mapped[str]
     body: Mapped[str]
