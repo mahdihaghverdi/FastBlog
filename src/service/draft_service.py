@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from src.common.exceptions import DraftNotFoundError
+from src.repository.user_repo import UserRepo
 from src.service import Service
 from src.service.objects import Draft
 from src.web.core.schemas import Sort
@@ -43,3 +44,10 @@ class DraftService(Service):
         deleted = await self.repo.delete(user_id, draft_id)
         if deleted is False:
             raise DraftNotFoundError(f"draft with id: '{draft_id}' is not found")
+
+    async def publish_draft(self, user_id, draft_id, title_in_url):
+        user = await UserRepo(self.repo.session).get(user_id)
+        post = await self.repo.publish(user, draft_id, title_in_url)
+        if post is None:
+            raise DraftNotFoundError(f"draft with id: '{draft_id}' is not found")
+        return post

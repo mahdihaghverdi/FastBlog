@@ -16,6 +16,9 @@ def test_not_authorized_drafts(client, headers, payload):
     response = client.delete(f"/drafts/{draft_id}")
     assert response.status_code == 401, response.text
 
+    response = client.post(f"/drafts/{draft_id}/publish")
+    assert response.status_code == 401, response.text
+
 
 def test_not_authorized_me(client, headers):
     response = client.get("/users/me")

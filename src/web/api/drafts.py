@@ -1,13 +1,15 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Form
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
+from starlette.requests import Request
 
 from src.repository.draft_repo import DraftRepo
 from src.repository.unit_of_work import UnitOfWork
 from src.service.draft_service import DraftService
+from src.web.api import give_domain
 from src.web.core.dependencies import get_async_sessionmaker, get_current_user
 from src.web.core.schemas import (
     CreateDraftSchema,
@@ -98,7 +100,7 @@ async def get_draft(
 
 
 @router.put("/{draft_id}", response_model=DraftSchema, status_code=status.HTTP_200_OK)
-async def update_post(
+async def update_draft(
     draft_id: UUID,
     draft_detail: CreateDraftSchema,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
@@ -114,7 +116,7 @@ async def update_post(
 
 
 @router.delete("/{draft_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_post(
+async def delete_draft(
     draft_id: UUID,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
@@ -125,3 +127,20 @@ async def delete_post(
         service = DraftService(repo)
         await service.delete_draft(user.id, draft_id)
         await uow.commit()
+
+
+@router.post("/{draft_id}/publish", status_code=status.HTTP_200_OK)
+async def publish_draft(
+    request: Request,
+    draft_id: UUID,
+    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    title_in_url: Annotated[str | None, Form()] = None,
+):
+    """Publish a draft post"""
+    async with UnitOfWork(asessionmaker) as uow:
+        repo = DraftRepo(uow.session)
+        service = DraftService(repo)
+        post = await service.publish_draft(user.id, draft_id, title_in_url)
+        await uow.commit()
+        return give_domain(str(request.base_url), await post.dict())

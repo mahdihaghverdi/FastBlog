@@ -7,7 +7,7 @@ def random_string():
     return "".join(random.choices(string.ascii_lowercase, k=1))
 
 
-def test_create_post(client, headers, payload):
+def test_create_draft(client, headers, payload):
     # not authenticated
     response = client.post("/drafts", json=payload)
     assert response.status_code == 401
@@ -25,7 +25,7 @@ def test_create_post(client, headers, payload):
     assert data["body"] == payload["body"]
 
 
-def test_get_posts(client, headers, payload, headers2):
+def test_get_drafts(client, headers, payload, headers2):
     # not authenticated
     response = client.get("/drafts")
     assert response.status_code == 401, response.text
@@ -38,14 +38,14 @@ def test_get_posts(client, headers, payload, headers2):
     assert len(client.get("/drafts", headers=headers2).json()) == 1
     assert len(client.get("/drafts", headers=headers).json()) == 0
 
-    test_posts = [
+    test_drafts = [
         [{"title": random_string(), "body": random_string()} for _ in range(5)]
         for _ in range(5)
     ]
 
     posts = [
         client.post("/drafts", json=post, headers=headers).json()
-        for post_list in test_posts
+        for post_list in test_drafts
         for post in post_list
     ]
 
@@ -96,13 +96,13 @@ def test_get_posts(client, headers, payload, headers2):
     assert response.json() == posts
 
 
-def test_get_post(client, headers, payload):
+def test_get_draft(client, headers, payload):
     response = client.post("/drafts", json=payload)
     assert response.status_code == 401, response.text
 
-    post_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
+    draft_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
 
-    response = client.get(f"/drafts/{post_id}", headers=headers)
+    response = client.get(f"/drafts/{draft_id}", headers=headers)
     assert response.status_code == 200, response.text
 
     data = response.json()
@@ -110,15 +110,15 @@ def test_get_post(client, headers, payload):
     assert data["body"] == payload["body"]
 
 
-def test_update_post(client, headers, payload):
+def test_update_draft(client, headers, payload):
     new_title, new_body = "a", "b"
     response = client.post("/drafts", json=payload)
     assert response.status_code == 401, response.text
 
-    post_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
+    draft_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
 
     response = client.put(
-        f"/drafts/{post_id}",
+        f"/drafts/{draft_id}",
         json={"title": new_title, "body": new_body},
         headers=headers,
     )
@@ -129,34 +129,74 @@ def test_update_post(client, headers, payload):
     assert data["body"] == new_body
 
 
-def test_delete_post(client, headers, payload):
+def test_delete_draft(client, headers, payload):
     response = client.post("/drafts", json=payload)
     assert response.status_code == 401, response.text
 
-    post_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
+    draft_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
 
-    response = client.delete(f"/drafts/{post_id}", headers=headers)
+    response = client.delete(f"/drafts/{draft_id}", headers=headers)
     assert response.status_code == 204, response.text
-    assert client.get(f"/posts{post_id}").status_code == 404
+    assert client.get(f"/posts{draft_id}").status_code == 404
 
 
-def test_get_post_fail(client, headers):
-    post_id = uuid.uuid4()
-    response = client.get(f"/drafts/{post_id}", headers=headers)
+def test_publish_draft(client, headers, payload):
+    draft_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
+    response = client.post(f"/drafts/{draft_id}/publish", headers=headers)
+    assert response.status_code == 200, response.text
+
+    drafts = client.get("/drafts", headers=headers).json()
+    assert not drafts
+
+    post_id = response.json()["id"]
+    new_post_data = client.get(f"/posts/{post_id}", headers=headers).json()
+    assert new_post_data["title"] == payload["title"]
+    assert new_post_data["body"] == payload["body"]
+    assert new_post_data["url"] == response.json()["url"]
+
+
+def test_publish_draft_custom_slug(client, headers, payload):
+    draft_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
+    response = client.post(
+        f"/drafts/{draft_id}/publish",
+        headers=headers,
+        data={"title_in_url": "an ugly umbrella"},
+    )
+    assert response.status_code == 200, response.text
+
+    drafts = client.get("/drafts", headers=headers).json()
+    assert not drafts
+
+    post_id = response.json()["id"]
+    new_post_data = client.get(f"/posts/{post_id}", headers=headers).json()
+    assert new_post_data["title"] == payload["title"]
+    assert new_post_data["body"] == payload["body"]
+    assert new_post_data["url"] == response.json()["url"]
+
+
+def test_get_draft_not_found(client, headers):
+    draft_id = uuid.uuid4()
+    response = client.get(f"/drafts/{draft_id}", headers=headers)
     assert response.status_code == 404, response.text
 
 
-def test_update_post_fail(client, headers):
-    post_id = uuid.uuid4()
+def test_update_draft_not_found(client, headers):
+    draft_id = uuid.uuid4()
     response = client.put(
-        f"/drafts/{post_id}",
+        f"/drafts/{draft_id}",
         json={"title": "a", "body": "b"},
         headers=headers,
     )
     assert response.status_code == 404, response.text
 
 
-def test_delete_post_fail(client, headers):
-    post_id = uuid.uuid4()
-    response = client.delete(f"/drafts/{post_id}", headers=headers)
+def test_delete_draft_not_found(client, headers):
+    draft_id = uuid.uuid4()
+    response = client.delete(f"/drafts/{draft_id}", headers=headers)
+    assert response.status_code == 404, response.text
+
+
+def test_publish_draft_not_found(client, headers):
+    draft_id = uuid.uuid4()
+    response = client.post(f"/drafts/{draft_id}/publish", headers=headers)
     assert response.status_code == 404, response.text

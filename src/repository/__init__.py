@@ -36,9 +36,11 @@ class BaseRepo(RepoProtocol):
         self.object = object_
         self.session = session
 
-    async def get(self, self_id: UUID):
+    async def get(self, self_id: UUID, /, raw: bool = False):
         record = await self.session.get(self.model, self_id)
         if record is not None:
+            if raw:
+                return record
             return self.object(**(await record.dict()), model=record)
 
 
