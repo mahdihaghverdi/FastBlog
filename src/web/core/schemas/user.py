@@ -22,7 +22,3 @@ class UserOutSchema(BaseModel):
 
 class UserInternalSchema(UserOutSchema):
     id: int
-
-
-class UserInDBSchema(UserInternalSchema):
-    password: str
