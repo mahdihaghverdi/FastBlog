@@ -4,7 +4,7 @@ from uuid import UUID
 from slugify import Slugify
 
 from src.common.exceptions import PostNotFoundError
-from src.repository.user_repo import UserRepo
+from src.repository.repos.user_repo import UserRepo
 from src.service import Service
 from src.service.objects import Post
 from src.web.core.schemas import Sort

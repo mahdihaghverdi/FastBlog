@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
 from starlette.requests import Request
 
-from src.repository.post_repo import PostRepo
+from src.repository.repos.post_repo import PostRepo
 from src.repository.unit_of_work import UnitOfWork
 from src.service.post_service import PostService
 from src.web.core.dependencies import get_async_sessionmaker, get_current_user

@@ -4,7 +4,7 @@ from datetime import datetime
 from slugify import Slugify
 from sqlalchemy import select, desc
 
-from src.repository import BaseRepo, RelatedObjectsRepoMixin
+from src.repository.repos import BaseRepo, RelatedObjectsRepoMixin
 from src.repository.models import DraftModel, UserModel, PostModel
 from src.service.objects import Draft, Post
 from src.web.core.schemas import Sort

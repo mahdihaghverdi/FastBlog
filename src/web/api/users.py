@@ -7,7 +7,7 @@ from starlette import status
 
 from src.common.exceptions import DuplicateUsernameError
 from src.repository.unit_of_work import UnitOfWork
-from src.repository.user_repo import UserRepo
+from src.repository.repos.user_repo import UserRepo
 from src.service.user_service import UserService
 from src.web.core.dependencies import get_async_sessionmaker, get_current_user
 from src.web.core.schemas import UserOutSchema, UserSignUpSchema, UserInternalSchema

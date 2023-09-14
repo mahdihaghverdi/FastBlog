@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
 
 from src.repository.unit_of_work import UnitOfWork
-from src.repository.user_repo import UserRepo
+from src.repository.repos.user_repo import UserRepo
 from src.service.user_service import UserService
 from src.service.objects import User
 from src.web.core.config import settings

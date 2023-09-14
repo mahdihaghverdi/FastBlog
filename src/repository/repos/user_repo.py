@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlalchemy import select
 
-from src.repository import BaseRepo
+from src.repository.repos import BaseRepo
 from src.repository.models import UserModel
 from src.service.objects import User
 from src.web.core.security import hash_password

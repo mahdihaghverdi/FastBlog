@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
 from starlette.requests import Request
 
-from src.repository.draft_repo import DraftRepo
+from src.repository.repos.draft_repo import DraftRepo
 from src.repository.unit_of_work import UnitOfWork
 from src.service.draft_service import DraftService
 from src.web.api import give_domain

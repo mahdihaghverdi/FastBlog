@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from src.common.exceptions import DraftNotFoundError
-from src.repository.user_repo import UserRepo
+from src.repository.repos.user_repo import UserRepo
 from src.service import Service
 from src.service.objects import Draft
 from src.web.core.schemas import Sort
