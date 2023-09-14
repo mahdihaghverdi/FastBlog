@@ -1,3 +1,4 @@
+---
 openapi: 3.1.0
 info:
   title: Fast Blog
@@ -18,6 +19,71 @@ servers:
     description: Local development server
 
 paths:
+  "/users/signup":
+    post:
+      tags:
+      - users
+      summary: Signup User
+      operationId: signup_user_users_signup_post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              "$ref": "#/components/schemas/Body_signup_user_users_signup_post"
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserOutSchema"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/users/me":
+    get:
+      tags:
+      - users
+      summary: Read Users Me
+      operationId: read_users_me_users_me_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserOutSchema"
+      security:
+      - OAuth2PasswordBearer: []
+  "/auth/access-token":
+    post:
+      tags:
+      - auth
+      summary: Login For Access Token
+      operationId: login_for_access_token_auth_access_token_post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              "$ref": "#/components/schemas/Body_login_for_access_token_auth_access_token_post"
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/TokenSchema"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
   "/posts/":
     post:
       tags:
@@ -201,65 +267,251 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/HTTPValidationError"
-  "/users/signup":
+  "/drafts/":
     post:
       tags:
-      - users
-      summary: Signup User
-      operationId: signup_user_users_signup_post
+      - drafts
+      summary: Create Draft
+      description: Create a draft draft
+      operationId: create_draft_drafts__post
+      security:
+      - OAuth2PasswordBearer: []
       requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              "$ref": "#/components/schemas/Body_signup_user_users_signup_post"
         required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CreateDraftSchema"
       responses:
         '201':
           description: Successful Response
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UserSchema"
+                "$ref": "#/components/schemas/DraftSchema"
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 "$ref": "#/components/schemas/HTTPValidationError"
-  "/users/me":
     get:
       tags:
-      - users
-      summary: Read Users Me
-      operationId: read_users_me_users_me_get
+      - drafts
+      summary: Get Drafts
+      description: Retrieve all the draft
+      operationId: get_drafts_drafts__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          description: page number of the pagination
+          default: 1
+          title: Page
+        description: page number of the pagination
+      - name: per-page
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 30
+          minimum: 1
+          description: number of posts per page
+          default: 5
+          title: Per-Page
+        description: number of posts per page
+      - name: sort
+        in: query
+        required: false
+        schema:
+          allOf:
+          - "$ref": "#/components/schemas/Sort"
+          description: sorts the returned posts
+          default: date
+          title: Sort
+        description: sorts the returned posts
+      - name: desc
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: order of the sorted posts
+          default: true
+          title: Desc
+        description: order of the sorted posts
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/UserSchema"
+                type: array
+                items:
+                  "$ref": "#/components/schemas/DraftSchema"
+                title: Response Get Drafts Drafts  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/drafts/{draft_id}":
+    get:
+      tags:
+      - drafts
+      summary: Get Draft
+      description: Return details of a specific draft
+      operationId: get_draft_drafts__draft_id__get
       security:
       - OAuth2PasswordBearer: []
-  "/auth/access-token":
+      parameters:
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Draft Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DraftSchema"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    put:
+      tags:
+      - drafts
+      summary: Update Draft
+      description: Replace an existing draft
+      operationId: update_draft_drafts__draft_id__put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Draft Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CreateDraftSchema"
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/DraftSchema"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    delete:
+      tags:
+      - drafts
+      summary: Delete Draft
+      description: Delete a specific draft
+      operationId: delete_draft_drafts__draft_id__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Draft Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/drafts/{draft_id}/publish":
     post:
       tags:
-      - auth
-      summary: Login For Access Token
-      operationId: login_for_access_token_auth_access_token_post
+      - drafts
+      summary: Publish Draft
+      description: Publish a draft post
+      operationId: publish_draft_drafts__draft_id__publish_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: draft_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Draft Id
       requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
-              "$ref": "#/components/schemas/Body_login_for_access_token_auth_access_token_post"
+              allOf:
+              - "$ref": "#/components/schemas/Body_publish_draft_drafts__draft_id__publish_post"
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/@{username}/{post_slug}":
+    get:
+      tags:
+      - global posts
+      summary: Get Global Post
+      operationId: get_global_post___username___post_slug__get
+      parameters:
+      - name: username
+        in: path
         required: true
+        schema:
+          type: string
+          title: Username
+      - name: post_slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Post Slug
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/TokenSchema"
+                "$ref": "#/components/schemas/PostSchema"
         '422':
           description: Validation Error
           content:
@@ -300,6 +552,15 @@ components:
       - username
       - password
       title: Body_login_for_access_token_auth_access_token_post
+    Body_publish_draft_drafts__draft_id__publish_post:
+      properties:
+        title_in_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title In Url
+      type: object
+      title: Body_publish_draft_drafts__draft_id__publish_post
     Body_signup_user_users_signup_post:
       properties:
         username:
@@ -313,7 +574,7 @@ components:
       - username
       - password
       title: Body_signup_user_users_signup_post
-    CreatePostSchema:
+    CreateDraftSchema:
       properties:
         title:
           type: string
@@ -327,7 +588,53 @@ components:
       required:
       - title
       - body
+      title: CreateDraftSchema
+    CreatePostSchema:
+      properties:
+        title:
+          type: string
+          minLength: 1
+          title: Title
+        body:
+          type: string
+          minLength: 1
+          title: Body
+        title_in_url:
+          anyOf:
+          - type: string
+            minLength: 1
+          - type: 'null'
+          title: Title In Url
+      type: object
+      required:
+      - title
+      - body
       title: CreatePostSchema
+    DraftSchema:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        created:
+          type: string
+          format: date-time
+          title: Created
+        title:
+          type: string
+          minLength: 1
+          title: Title
+        body:
+          type: string
+          minLength: 1
+          title: Body
+      type: object
+      required:
+      - id
+      - created
+      - title
+      - body
+      title: DraftSchema
     HTTPValidationError:
       properties:
         detail:
@@ -355,12 +662,18 @@ components:
           type: string
           minLength: 1
           title: Body
+        url:
+          type: string
+          minLength: 1
+          format: uri
+          title: Url
       type: object
       required:
       - id
       - created
       - title
       - body
+      - url
       title: PostSchema
     Sort:
       type: string
@@ -381,11 +694,15 @@ components:
       - access_token
       - token_type
       title: TokenSchema
-    UserSchema:
+    UserOutSchema:
       properties:
         username:
           type: string
           title: Username
+        created:
+          type: string
+          format: date-time
+          title: Created
         posts:
           items:
             "$ref": "#/components/schemas/PostSchema"
@@ -394,8 +711,9 @@ components:
       type: object
       required:
       - username
+      - created
       - posts
-      title: UserSchema
+      title: UserOutSchema
     ValidationError:
       properties:
         loc:
