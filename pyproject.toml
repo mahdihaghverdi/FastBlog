@@ -32,6 +32,10 @@ pytest-cov = "^4.1.0"
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/mahdihaghverdi/FastBlog/issues"
 
+[tool.ruff]
+exclude = [".venv"]
+extend-exclude = ["src/core/schemas/__init__.py"]
+
 [tool.coverage.run]
 branch = true
 
