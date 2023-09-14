@@ -1,6 +1,5 @@
 import random
 import string
-import uuid
 
 
 def random_string():
@@ -175,15 +174,13 @@ def test_publish_draft_custom_slug(client, headers, payload):
 
 
 def test_get_draft_not_found(client, headers):
-    draft_id = uuid.uuid4()
-    response = client.get(f"/drafts/{draft_id}", headers=headers)
+    response = client.get(f"/drafts/{random.randint(0, 1)}", headers=headers)
     assert response.status_code == 404, response.text
 
 
 def test_update_draft_not_found(client, headers):
-    draft_id = uuid.uuid4()
     response = client.put(
-        f"/drafts/{draft_id}",
+        f"/drafts/{random.randint(0, 1)}",
         json={"title": "a", "body": "b"},
         headers=headers,
     )
@@ -191,12 +188,10 @@ def test_update_draft_not_found(client, headers):
 
 
 def test_delete_draft_not_found(client, headers):
-    draft_id = uuid.uuid4()
-    response = client.delete(f"/drafts/{draft_id}", headers=headers)
+    response = client.delete(f"/drafts/{random.randint(0, 1)}", headers=headers)
     assert response.status_code == 404, response.text
 
 
 def test_publish_draft_not_found(client, headers):
-    draft_id = uuid.uuid4()
-    response = client.post(f"/drafts/{draft_id}/publish", headers=headers)
+    response = client.post(f"/drafts/{random.randint(0, 1)}/publish", headers=headers)
     assert response.status_code == 404, response.text

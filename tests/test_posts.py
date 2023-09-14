@@ -1,6 +1,5 @@
 import random
 import string
-import uuid
 
 
 def random_string():
@@ -152,15 +151,13 @@ def test_delete_post(client, headers, payload):
 
 
 def test_get_post_fail(client, headers):
-    post_id = uuid.uuid4()
-    response = client.get(f"/posts/{post_id}", headers=headers)
+    response = client.get(f"/posts/{random.randint(0, 1)}", headers=headers)
     assert response.status_code == 404, response.text
 
 
 def test_update_post_fail(client, headers):
-    post_id = uuid.uuid4()
     response = client.put(
-        f"/posts/{post_id}",
+        f"/posts/{random.randint(0, 1)}",
         json={"title": "a", "body": "b"},
         headers=headers,
     )
@@ -168,6 +165,5 @@ def test_update_post_fail(client, headers):
 
 
 def test_delete_post_fail(client, headers):
-    post_id = uuid.uuid4()
-    response = client.delete(f"/posts/{post_id}", headers=headers)
+    response = client.delete(f"/posts/{random.randint(0, 1)}", headers=headers)
     assert response.status_code == 404, response.text
