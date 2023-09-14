@@ -1,13 +1,12 @@
 from datetime import datetime
-from uuid import uuid4, UUID
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, BigInteger
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(AsyncAttrs, DeclarativeBase):
-    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     created: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     async def dict(self):
@@ -25,7 +24,7 @@ class PostModel(Base):
     url: Mapped[str]
 
     # TODO: see cascading in database
-    user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     user: Mapped["UserModel"] = relationship(back_populates="posts")
 
     async def dict(self):
@@ -75,7 +74,7 @@ class DraftModel(Base):
     title: Mapped[str]
     body: Mapped[str]
 
-    user_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     user: Mapped["UserModel"] = relationship(back_populates="draft_posts")
 
     async def dict(self):
