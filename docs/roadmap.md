@@ -67,4 +67,9 @@ Comments will arrive in this version of `FastBlog`.
 Now users can comment on each other's posts.
 
 ----
+
+### `v6.0.0`
+Scheduled publishing will be implemented for users.
+
+
 _This file will be updated_
