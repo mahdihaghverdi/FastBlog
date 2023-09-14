@@ -23,7 +23,6 @@ class PostModel(Base):
     body: Mapped[str]
     url: Mapped[str]
 
-    # TODO: see cascading in database
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     user: Mapped["UserModel"] = relationship(back_populates="posts")
 

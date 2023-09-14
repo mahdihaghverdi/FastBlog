@@ -1,5 +1,4 @@
 from typing import Protocol
-from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -36,7 +35,7 @@ class BaseRepo(RepoProtocol):
         self.object = object_
         self.session = session
 
-    async def get(self, self_id: UUID, /, raw: bool = False):
+    async def get(self, self_id, /, raw: bool = False):
         record = await self.session.get(self.model, self_id)
         if record is not None:
             if raw:
@@ -45,7 +44,7 @@ class BaseRepo(RepoProtocol):
 
 
 class RelatedObjectsRepoMixin(RepoProtocol):
-    async def _get_related(self, user_id: UUID, self_id: UUID) -> type[Base] | None:
+    async def _get_related(self, user_id, self_id) -> type[Base] | None:
         stmt = (
             select(self.model)
             .where(self.model.user_id == user_id)
@@ -73,7 +72,7 @@ class RelatedObjectsRepoMixin(RepoProtocol):
             setattr(record, key, value)
         return self.object(**(await record.dict()), model=record)
 
-    async def delete(self, user_id: UUID, /, self_id):
+    async def delete(self, user_id, /, self_id):
         record = await self._get_related(user_id, self_id)
         if record is None:
             return False

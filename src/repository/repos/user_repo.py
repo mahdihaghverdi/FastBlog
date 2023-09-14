@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from sqlalchemy import select
 
 from src.repository.repos import BaseRepo
@@ -26,12 +24,3 @@ class UserRepo(BaseRepo):
         record = UserModel(**data)
         self.session.add(record)
         return User(**(await record.dict()), model=record)
-
-    async def update(self, id_: UUID, data: dict) -> User | None:
-        pass
-
-    async def delete(self, id_: UUID) -> User | None:
-        pass
-
-    async def list(self, **kwargs) -> list[User]:
-        pass
