@@ -34,6 +34,7 @@ async def signup_user(
         try:
             await uow.commit()
         except IntegrityError:
+            raise
             raise DuplicateUsernameError(f"username: {user.username!r} already exists!")
         else:
             return await user.dict()

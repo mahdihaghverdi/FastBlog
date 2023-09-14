@@ -1,8 +1,8 @@
-"""recreate the migrations due to vary big database change.
+"""New migration
 
-Revision ID: 71326616951e
+Revision ID: 4fe7d032bab3
 Revises:
-Create Date: 2023-09-14 18:13:40.335780
+Create Date: 2023-09-14 18:30:34.854877
 
 """
 from collections.abc import Sequence
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "71326616951e"
+revision: str = "4fe7d032bab3"
 down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -24,7 +24,7 @@ def upgrade() -> None:
         "users",
         sa.Column("username", sa.String(), nullable=False),
         sa.Column("password", sa.String(), nullable=False),
-        sa.Column("id", sa.BigInteger(), nullable=False),
+        sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("created", sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("username"),
@@ -34,7 +34,7 @@ def upgrade() -> None:
         sa.Column("title", sa.String(), nullable=False),
         sa.Column("body", sa.String(), nullable=False),
         sa.Column("user_id", sa.BigInteger(), nullable=True),
-        sa.Column("id", sa.BigInteger(), nullable=False),
+        sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("created", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"]),
         sa.PrimaryKeyConstraint("id"),
@@ -45,7 +45,7 @@ def upgrade() -> None:
         sa.Column("body", sa.String(), nullable=False),
         sa.Column("url", sa.String(), nullable=False),
         sa.Column("user_id", sa.BigInteger(), nullable=True),
-        sa.Column("id", sa.BigInteger(), nullable=False),
+        sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
         sa.Column("created", sa.DateTime(), nullable=False),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"]),
         sa.PrimaryKeyConstraint("id"),
