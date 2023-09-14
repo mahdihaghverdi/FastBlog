@@ -42,6 +42,26 @@ class PostModel(Base):
         return d
 
 
+class TagModel(Base):
+    __tablename__ = "tags"
+
+    name: Mapped[str] = mapped_column(unique=True)
+
+    async def dict(self):
+        d = await super().dict()
+        d["name"] = self.name
+        return d
+
+
+class PostTagModel(Base):
+    __tablename__ = "post_tags_relationship_model"
+
+    post_id: Mapped[int]
+    tag_id: Mapped[int]
+    created = None
+    dict = None
+
+
 class UserModel(Base):
     __tablename__ = "users"
 
