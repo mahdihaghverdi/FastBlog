@@ -1,7 +1,3 @@
-from datetime import datetime
-
-from slugify import Slugify
-
 from src.common.exceptions import PostNotFoundError
 from src.repository.repos.user_repo import UserRepo
 from src.service import Service
@@ -28,16 +24,6 @@ class PostService(Service):
         )
 
     async def create_post(self, user_id, post: dict) -> Post:
-        slugify = Slugify(to_lower=True)
-
-        pre_title_in_url = post.pop("title_in_url")
-        if pre_title_in_url is None:
-            title_slug = slugify(f"{post['title']} {hex(hash(datetime.utcnow()))}")
-        else:
-            title_slug = slugify(f"{pre_title_in_url} {hex(hash(datetime.utcnow()))}")
-
-        username = (await UserRepo(self.repo.session).get(user_id)).username
-        post["url"] = f"/@{username}/{title_slug}"
         return await self.repo.add(user_id, post)
 
     async def get_post(self, user_id, post_id) -> Post:

@@ -30,7 +30,13 @@ async def create_post(
     async with UnitOfWork(asessionmaker) as uow:
         repo = PostRepo(uow.session)
         service = PostService(repo)
-        post = await service.create_post(user.id, post.model_dump())
+
+        slug = post.slug(user.username)
+        post_dict = post.model_dump()
+        del post_dict["title_in_url"]
+        post_dict["url"] = slug
+        post = await service.create_post(user.id, post_dict)
+
         await uow.commit()
         return give_domain(str(request.base_url), await post.dict())
 
