@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 from sqlalchemy import ForeignKey, BigInteger, Integer, Table, Column
@@ -38,10 +39,12 @@ class PostModel(Base):
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     user: Mapped["UserModel"] = relationship(back_populates="posts")
 
-    tags: Mapped[set["TagModel"]] = relationship(
-        secondary=association_table,
-        back_populates="posts",
-    )
+    tags: Mapped[set["TagModel"]] = relationship(secondary=association_table)
+
+    def __repr__(self):
+        return (
+            f"<PostModel: title={self.title!r}, body={self.body!r}, tags={self.tags}>"
+        )
 
     async def dict(self):
         d = await super().dict()
@@ -50,9 +53,11 @@ class PostModel(Base):
                 "title": self.title,
                 "body": self.body,
                 "url": self.url,
-                "tags": self.tags,
             },
         )
+        tags_tasks = [asyncio.create_task(tag.dict()) for tag in self.tags]
+        tags = [tag["name"] for tag in await asyncio.gather(*tags_tasks)]
+        d.update({"tags": sorted(tags)})
         return d
 
 
@@ -62,9 +67,12 @@ class TagModel(Base):
     name: Mapped[str] = mapped_column(unique=True)
 
     async def dict(self):
-        d = await super().dict()
+        d = {}
         d["name"] = self.name
         return d
+
+    def __repr__(self):
+        return f"<TagModel: id={self.id}, name={self.name!r}>"
 
 
 class UserModel(Base):

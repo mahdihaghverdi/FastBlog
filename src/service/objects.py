@@ -4,6 +4,13 @@ class BusinessObject:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+    def __repr__(self):
+        attrs = ", ".join(
+            f"{key}={value!r}" if key != "model" else f"{value.__class__.__name__!r}"
+            for key, value in self.__dict__.items()
+        )
+        return f"<{self.__class__.__name__}: {attrs}>"
+
     async def dict(self):
         return await self.model.dict()
 
@@ -17,4 +24,8 @@ class User(BusinessObject):
 
 
 class Draft(BusinessObject):
+    pass
+
+
+class Tag(BusinessObject):
     pass

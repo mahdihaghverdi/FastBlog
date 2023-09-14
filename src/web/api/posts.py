@@ -36,7 +36,6 @@ async def create_post(
         del post_dict["title_in_url"]
         post_dict["url"] = slug
         post = await service.create_post(user.id, post_dict)
-
         await uow.commit()
         return give_domain(str(request.base_url), await post.dict())
 
@@ -112,6 +111,7 @@ async def update_post(
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
     """Replace an existing post"""
+    # TODO: test title_in_url in this fucking route
     async with UnitOfWork(asessionmaker) as uow:
         repo = PostRepo(uow.session)
         service = PostService(repo)

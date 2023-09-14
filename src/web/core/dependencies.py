@@ -51,5 +51,5 @@ async def get_current_user(
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = await get_user(asession, user_id)
+    user = await get_user(asession, int(user_id))
     return user

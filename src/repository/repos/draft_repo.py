@@ -4,13 +4,13 @@ from datetime import datetime
 from slugify import Slugify
 from sqlalchemy import select, desc
 
-from src.repository.repos import BaseRepo, RelatedObjectsRepoMixin
+from src.repository.repos import BaseRepo, OneToManyRelRepo
 from src.repository.models import DraftModel, UserModel, PostModel
 from src.service.objects import Draft, Post
 from src.web.core.schemas import Sort
 
 
-class DraftRepo(RelatedObjectsRepoMixin, BaseRepo):
+class DraftRepo(OneToManyRelRepo, BaseRepo):
     def __init__(self, session):
         model = DraftModel
         object_ = Draft
@@ -46,7 +46,7 @@ class DraftRepo(RelatedObjectsRepoMixin, BaseRepo):
         return [Draft(**(await record.dict())) for record in records]
 
     async def publish(self, user: UserModel, draft_id, title_in_url):
-        draft = await super(RelatedObjectsRepoMixin, self).get(draft_id, raw=True)
+        draft = await super(OneToManyRelRepo, self).get(draft_id, raw=True)
         if draft is None:
             return None
         slugify = Slugify(to_lower=True)

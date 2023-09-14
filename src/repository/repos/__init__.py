@@ -43,7 +43,7 @@ class BaseRepo(RepoProtocol):
             return self.object(**(await record.dict()), model=record)
 
 
-class RelatedObjectsRepoMixin(RepoProtocol):
+class OneToManyRelRepo(RepoProtocol):
     async def _get_related(self, user_id, self_id) -> type[Base] | None:
         stmt = (
             select(self.model)
