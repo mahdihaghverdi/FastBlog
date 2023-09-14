@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from src.common.exceptions import DraftNotFoundError
 from src.repository.repos.user_repo import UserRepo
 from src.service import Service
@@ -34,7 +32,7 @@ class DraftService(Service):
             raise DraftNotFoundError(f"draft with id: '{draft_id}' is not found")
         return draft
 
-    async def update_draft(self, user_id, draft_id: UUID, draft_detail: dict):
+    async def update_draft(self, user_id, draft_id, draft_detail: dict):
         draft = await self.repo.update(user_id, draft_id, draft_detail)
         if draft is None:
             raise DraftNotFoundError(f"draft with id: '{draft_id}' is not found")
