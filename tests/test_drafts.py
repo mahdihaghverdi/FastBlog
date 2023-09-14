@@ -193,5 +193,5 @@ def test_delete_draft_not_found(client, headers):
 
 
 def test_publish_draft_not_found(client, headers):
-    response = client.post(f"/drafts/{random.randint(0, 1)}/publish", headers=headers)
+    response = client.post(f"/drafts/{random.randint(0, 2)}/publish", headers=headers)
     assert response.status_code == 404, response.text
