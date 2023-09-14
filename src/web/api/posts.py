@@ -1,5 +1,4 @@
 from typing import Annotated
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import async_sessionmaker
@@ -85,7 +84,7 @@ async def get_posts(
 @router.get("/{post_id}", response_model=PostSchema, status_code=status.HTTP_200_OK)
 async def get_post(
     request: Request,
-    post_id: UUID,
+    post_id: int,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
@@ -101,7 +100,7 @@ async def get_post(
 @router.put("/{post_id}", response_model=PostSchema, status_code=status.HTTP_200_OK)
 async def update_post(
     request: Request,
-    post_id: UUID,
+    post_id: int,
     post_detail: CreatePostSchema,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
@@ -117,7 +116,7 @@ async def update_post(
 
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(
-    post_id: UUID,
+    post_id: int,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):

@@ -1,6 +1,5 @@
 from datetime import datetime
 from enum import Enum
-from uuid import UUID
 
 from pydantic import BaseModel, constr, AnyHttpUrl
 
@@ -32,14 +31,14 @@ class CreateDraftSchema(BaseModel):
 
 
 class DraftSchema(BaseModel):
-    id: UUID
+    id: int
     created: datetime
     title: constr(strip_whitespace=True, min_length=1)
     body: constr(strip_whitespace=True, min_length=1)
 
 
 class PostSchema(BaseModel):
-    id: UUID
+    id: int
     created: datetime
     title: constr(strip_whitespace=True, min_length=1)
     body: constr(strip_whitespace=True, min_length=1)
@@ -69,7 +68,7 @@ class UserOutSchema(BaseModel):
 
 
 class UserInternalSchema(UserOutSchema):
-    id: UUID
+    id: int
 
 
 class UserInDBSchema(UserInternalSchema):

@@ -1,5 +1,4 @@
 from typing import Annotated
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Form
 from sqlalchemy.ext.asyncio import async_sessionmaker
@@ -88,7 +87,7 @@ async def get_drafts(
 
 @router.get("/{draft_id}", response_model=DraftSchema, status_code=status.HTTP_200_OK)
 async def get_draft(
-    draft_id: UUID,
+    draft_id: int,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
@@ -101,7 +100,7 @@ async def get_draft(
 
 @router.put("/{draft_id}", response_model=DraftSchema, status_code=status.HTTP_200_OK)
 async def update_draft(
-    draft_id: UUID,
+    draft_id: int,
     draft_detail: CreateDraftSchema,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
@@ -117,7 +116,7 @@ async def update_draft(
 
 @router.delete("/{draft_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_draft(
-    draft_id: UUID,
+    draft_id: int,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
@@ -132,7 +131,7 @@ async def delete_draft(
 @router.post("/{draft_id}/publish", status_code=status.HTTP_200_OK)
 async def publish_draft(
     request: Request,
-    draft_id: UUID,
+    draft_id: int,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
     title_in_url: Annotated[str | None, Form()] = None,

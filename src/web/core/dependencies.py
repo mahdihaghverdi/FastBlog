@@ -1,5 +1,4 @@
 from typing import Annotated
-from uuid import UUID
 
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
@@ -7,10 +6,10 @@ from jose import jwt, JWTError  # noqa
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
 
-from src.repository.unit_of_work import UnitOfWork
 from src.repository.repos.user_repo import UserRepo
-from src.service.user_service import UserService
+from src.repository.unit_of_work import UnitOfWork
 from src.service.objects import User
+from src.service.user_service import UserService
 from src.web.core.config import settings
 from src.web.core.database import sqlalchemy_engine
 
@@ -52,5 +51,5 @@ async def get_current_user(
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = await get_user(asession, UUID(user_id))
+    user = await get_user(asession, user_id)
     return user
