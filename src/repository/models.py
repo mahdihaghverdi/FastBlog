@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, BigInteger, Integer
+from sqlalchemy import ForeignKey, BigInteger, Integer, Table, Column
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -20,6 +20,14 @@ class Base(AsyncAttrs, DeclarativeBase):
         }
 
 
+association_table = Table(
+    "association_table",
+    Base.metadata,
+    Column("post_id", ForeignKey("posts.id"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id"), primary_key=True),
+)
+
+
 class PostModel(Base):
     __tablename__ = "posts"
 
@@ -30,6 +38,11 @@ class PostModel(Base):
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     user: Mapped["UserModel"] = relationship(back_populates="posts")
 
+    tags: Mapped[set["TagModel"]] = relationship(
+        secondary=association_table,
+        back_populates="posts",
+    )
+
     async def dict(self):
         d = await super().dict()
         d.update(
@@ -37,6 +50,7 @@ class PostModel(Base):
                 "title": self.title,
                 "body": self.body,
                 "url": self.url,
+                "tags": self.tags,
             },
         )
         return d
@@ -51,15 +65,6 @@ class TagModel(Base):
         d = await super().dict()
         d["name"] = self.name
         return d
-
-
-class PostTagModel(Base):
-    __tablename__ = "post_tags_relationship_model"
-
-    post_id: Mapped[int]
-    tag_id: Mapped[int]
-    created = None
-    dict = None
 
 
 class UserModel(Base):
