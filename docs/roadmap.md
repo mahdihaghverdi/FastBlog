@@ -54,6 +54,9 @@ With this feature posts can be:
 
 **Note:** with this feature, a post recommendation can be implemented in the future versions.
 
+### `v3.1.0`
+Logging will be implemented for the project
+
 ----
 ### `v4.0.0`
 Post recommendation system will be implemented.
