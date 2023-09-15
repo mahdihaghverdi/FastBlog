@@ -82,6 +82,14 @@ class UserModel(Base):
         lazy="selectin",
     )
 
+    def sync_dict(self):
+        return {
+            "id": self.id,
+            "created": self.created,
+            "username": self.username,
+            "password": self.password,
+        }
+
     async def dict(self):
         d = await super().dict()
         d.update(

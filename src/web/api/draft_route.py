@@ -42,9 +42,7 @@ async def create_draft(
         service = DraftService(repo)
         draft = await service.create_draft(user.id, draft.model_dump())
         await uow.commit()
-        payload = draft.sync_dict()
-
-    return payload
+        return draft.sync_dict()
 
 
 @router.get(
