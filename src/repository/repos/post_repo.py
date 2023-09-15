@@ -81,4 +81,4 @@ class PostRepo(OneToManyRelRepo, BaseRepo):
         stmt = select(PostModel).filter_by(**filters)
         post = (await self.session.execute(stmt)).scalar_one_or_none()
         if post is not None:
-            return Post(**(await post.dict()), model=post)
+            return Post(**post.sync_dict(), model=post)
