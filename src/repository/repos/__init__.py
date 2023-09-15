@@ -50,9 +50,9 @@ class OneToManyRelRepo(RepoProtocol):
             .where(self.model.user_id == user_id)
             .where(self.model.id == self_id)
         )
-        record = (await self.session.execute(stmt)).first()
+        record = (await self.session.execute(stmt)).scalar_one_or_none()
         if record is not None:
-            return record[0]
+            return record
 
     async def add(self, user_id, data: dict):
         record = self.model(**data, user_id=user_id)
@@ -68,6 +68,7 @@ class OneToManyRelRepo(RepoProtocol):
         record = await self._get_related(user_id, self_id)
         if record is None:
             return
+        raise Exception(data)
         for key, value in data.items():
             setattr(record, key, value)
         return self.object(**(await record.dict()), model=record)

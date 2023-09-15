@@ -27,6 +27,22 @@ class PostRepo(OneToManyRelRepo, BaseRepo):
 
         return self.object(**(await record.dict()), model=record)
 
+    async def update(self, user_id, post_id, data: dict):
+        record = await self._get_related(user_id, post_id)
+        if record is None:
+            return
+
+        tags = data.pop("tags")
+        tags = await TagRepo(self.session).get_or_create(tags)
+        record.tags.clear()
+        for tag in tags:
+            record.tags.add(tag)
+
+        for key, value in data.items():
+            setattr(record, key, value)
+        self.session.add(record)
+        return Post(**(await record.dict()), model=record)
+
     async def list(
         self,
         user_id,

@@ -1,4 +1,3 @@
-import asyncio
 from datetime import datetime
 
 from sqlalchemy import ForeignKey, BigInteger, Integer, Table, Column
@@ -14,6 +13,7 @@ class Base(AsyncAttrs, DeclarativeBase):
     )
     created: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
+    # TODO: try removing awaitable_attrs
     async def dict(self):
         return {
             "id": await self.awaitable_attrs.id,
@@ -39,7 +39,10 @@ class PostModel(Base):
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     user: Mapped["UserModel"] = relationship(back_populates="posts")
 
-    tags: Mapped[set["TagModel"]] = relationship(secondary=association_table)
+    tags: Mapped[set["TagModel"]] = relationship(
+        secondary=association_table,
+        lazy="selectin",
+    )
 
     def __repr__(self):
         return (
@@ -55,8 +58,7 @@ class PostModel(Base):
                 "url": self.url,
             },
         )
-        tags_tasks = [asyncio.create_task(tag.dict()) for tag in self.tags]
-        tags = [tag["name"] for tag in await asyncio.gather(*tags_tasks)]
+        tags = [tag.name for tag in await self.awaitable_attrs.tags]
         d.update({"tags": sorted(tags)})
         return d
 
@@ -67,8 +69,7 @@ class TagModel(Base):
     name: Mapped[str] = mapped_column(unique=True)
 
     async def dict(self):
-        d = {}
-        d["name"] = self.name
+        d = {"name": self.name}
         return d
 
     def __repr__(self):

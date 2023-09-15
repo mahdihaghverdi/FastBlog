@@ -30,12 +30,7 @@ async def create_post(
     async with UnitOfWork(asessionmaker) as uow:
         repo = PostRepo(uow.session)
         service = PostService(repo)
-
-        slug = post.slug(user.username)
-        post_dict = post.model_dump()
-        del post_dict["title_in_url"]
-        post_dict["url"] = slug
-        post = await service.create_post(user.id, post_dict)
+        post = await service.create_post(user, post)
         await uow.commit()
         return give_domain(str(request.base_url), await post.dict())
 
@@ -49,6 +44,7 @@ async def get_posts(
     request: Request,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    # TODO: get rid of the fucking query params
     page: Annotated[
         int,
         Query(description="page number of the pagination", ge=1),
@@ -106,16 +102,15 @@ async def get_post(
 async def update_post(
     request: Request,
     post_id: int,
-    post_detail: CreatePostSchema,
+    post: CreatePostSchema,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
     """Replace an existing post"""
-    # TODO: test title_in_url in this fucking route
     async with UnitOfWork(asessionmaker) as uow:
         repo = PostRepo(uow.session)
         service = PostService(repo)
-        post = await service.update_post(user.id, post_id, post_detail.model_dump())
+        post = await service.update_post(user, post_id, post)
         await uow.commit()
         return give_domain(str(request.base_url), await post.dict())
 

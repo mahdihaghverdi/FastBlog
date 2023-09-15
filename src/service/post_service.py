@@ -5,6 +5,14 @@ from src.service.objects import Post
 from src.web.core.schemas import Sort
 
 
+async def slugify(post, user):
+    slug = post.slug(user.username)
+    post_dict = post.model_dump()
+    del post_dict["title_in_url"]
+    post_dict["url"] = slug
+    return post_dict
+
+
 class PostService(Service):
     async def list_posts(
         self,
@@ -23,8 +31,9 @@ class PostService(Service):
             desc_=desc_,
         )
 
-    async def create_post(self, user_id, post: dict) -> Post:
-        return await self.repo.add(user_id, post)
+    async def create_post(self, user, post) -> Post:
+        post_dict = await slugify(post, user)
+        return await self.repo.add(user.id, post_dict)
 
     async def get_post(self, user_id, post_id) -> Post:
         post = await self.repo.get(user_id, post_id)
@@ -32,8 +41,9 @@ class PostService(Service):
             raise PostNotFoundError(f"post with id: '{post_id}' is not found")
         return post
 
-    async def update_post(self, user_id, post_id, post_detail: dict):
-        post = await self.repo.update(user_id, post_id, post_detail)
+    async def update_post(self, user, post_id, post):
+        post_dict = await slugify(post, user)
+        post = await self.repo.update(user.id, post_id, post_dict)
         if post is None:
             raise PostNotFoundError(f"post with id: '{post_id}' is not found")
         return post
