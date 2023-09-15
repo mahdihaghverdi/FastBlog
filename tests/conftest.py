@@ -1,6 +1,8 @@
 import asyncio
 import pathlib
+import string
 import sys
+import random
 
 import pytest
 from starlette.testclient import TestClient
@@ -9,6 +11,19 @@ sys.path.append(str(pathlib.Path(__file__).parent.parent))
 from src.repository.models import Base  # noqa: E402
 from src.web.app import app  # noqa: E402
 from src.web.core.database import sqlalchemy_engine as engine  # noqa: E402
+
+
+def random_string():
+    return "".join(random.choices(string.ascii_lowercase, k=1))
+
+
+test_posts = [
+    [
+        {"title": random_string(), "body": random_string(), "tags": ["a"]}
+        for _ in range(5)
+    ]
+    for _ in range(5)
+]
 
 
 async def create_all():
@@ -50,12 +65,12 @@ new_title = "the Ugly umbrella"
 
 @pytest.fixture(scope="function")
 def payload():
-    return {"title": title, "body": body, "title_in_url": None}
+    return {"title": title, "body": body, "tags": ["1"]}
 
 
 @pytest.fixture(scope="function")
 def payload2():
-    return {"title": title, "body": body, "title_in_url": new_title}
+    return {"title": title, "body": body, "title_in_url": new_title, "tags": [1]}
 
 
 @pytest.fixture(scope="function")

@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
 from starlette.requests import Request
@@ -8,8 +8,13 @@ from starlette.requests import Request
 from src.repository.repos.post_repo import PostRepo
 from src.repository.unit_of_work import UnitOfWork
 from src.service.post_service import PostService
-from src.web.core.dependencies import get_async_sessionmaker, get_current_user
-from src.web.core.schemas import CreatePostSchema, PostSchema, Sort, UserInternalSchema
+from src.web.core.dependencies import (
+    get_async_sessionmaker,
+    get_current_user,
+    returning_query_parameters,
+    QueryParameters,
+)
+from src.web.core.schemas import CreatePostSchema, PostSchema, UserInternalSchema
 from . import give_domain
 
 router = APIRouter(prefix="/posts", tags=["posts"])
@@ -32,7 +37,7 @@ async def create_post(
         service = PostService(repo)
         post = await service.create_post(user, post)
         await uow.commit()
-        return give_domain(str(request.base_url), await post.dict())
+        return give_domain(str(request.base_url), post.sync_dict())
 
 
 @router.get(
@@ -44,28 +49,7 @@ async def get_posts(
     request: Request,
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
-    # TODO: get rid of the fucking query params
-    page: Annotated[
-        int,
-        Query(description="page number of the pagination", ge=1),
-    ] = 1,
-    per_page: Annotated[
-        int,
-        Query(
-            alias="per-page",
-            description="number of posts per page",
-            ge=1,
-            le=30,
-        ),
-    ] = 5,
-    sort: Annotated[
-        Sort,
-        Query(description="sorts the returned posts"),
-    ] = Sort.DATE,
-    desc: Annotated[
-        bool,
-        Query(description="order of the sorted posts"),
-    ] = True,
+    query_parameters: Annotated[QueryParameters, Depends(returning_query_parameters)],
 ):
     """Retrieve all the posts"""
     async with UnitOfWork(asessionmaker) as uow:
@@ -73,10 +57,10 @@ async def get_posts(
         service = PostService(repo)
         posts = await service.list_posts(
             user.id,
-            page=page,
-            per_page=per_page,
-            sort=sort,
-            desc_=desc,
+            page=query_parameters.page,
+            per_page=query_parameters.per_page,
+            sort=query_parameters.sort,
+            desc_=query_parameters.desc,
         )
         posts = give_domain(str(request.base_url), posts)
         return posts
@@ -112,7 +96,7 @@ async def update_post(
         service = PostService(repo)
         post = await service.update_post(user, post_id, post)
         await uow.commit()
-        return give_domain(str(request.base_url), await post.dict())
+        return give_domain(str(request.base_url), post.sync_dict())
 
 
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)

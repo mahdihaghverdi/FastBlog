@@ -15,6 +15,12 @@ class PostRepo(OneToManyRelRepo, BaseRepo):
         object_ = Post
         super().__init__(session, model, object_)
 
+    # TODO: when all gets are done with sync_dict, impl it in BaseRepo
+    async def get(self, user_id, /, self_id):
+        record = await self.session.get(self.model, self_id)
+        if record is not None:
+            return Post(**record.sync_dict(), model=record)
+
     async def add(self, user_id, data: dict):
         # get or create tags
         tags = data.pop("tags")
@@ -24,8 +30,7 @@ class PostRepo(OneToManyRelRepo, BaseRepo):
         for tag in tags:
             record.tags.add(tag)
         self.session.add(record)
-
-        return self.object(**(await record.dict()), model=record)
+        return Post(**record.sync_dict(), model=record)
 
     async def update(self, user_id, post_id, data: dict):
         record = await self._get_related(user_id, post_id)
@@ -41,7 +46,7 @@ class PostRepo(OneToManyRelRepo, BaseRepo):
         for key, value in data.items():
             setattr(record, key, value)
         self.session.add(record)
-        return Post(**(await record.dict()), model=record)
+        return Post(**record.sync_dict(), model=record)
 
     async def list(
         self,
@@ -70,7 +75,7 @@ class PostRepo(OneToManyRelRepo, BaseRepo):
         records = list(
             itertools.chain.from_iterable((await self.session.execute(stmt)).all()),
         )
-        return [Post(**(await record.dict()), model=record) for record in records]
+        return [Post(**record.sync_dict()) for record in records]
 
     async def filter_get(self, **filters):
         stmt = select(PostModel).filter_by(**filters)

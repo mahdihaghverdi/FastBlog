@@ -13,7 +13,6 @@ class Base(AsyncAttrs, DeclarativeBase):
     )
     created: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
-    # TODO: try removing awaitable_attrs
     async def dict(self):
         return {
             "id": await self.awaitable_attrs.id,
@@ -44,23 +43,15 @@ class PostModel(Base):
         lazy="selectin",
     )
 
-    def __repr__(self):
-        return (
-            f"<PostModel: title={self.title!r}, body={self.body!r}, tags={self.tags}>"
-        )
-
-    async def dict(self):
-        d = await super().dict()
-        d.update(
-            {
-                "title": self.title,
-                "body": self.body,
-                "url": self.url,
-            },
-        )
-        tags = [tag.name for tag in await self.awaitable_attrs.tags]
-        d.update({"tags": sorted(tags)})
-        return d
+    def sync_dict(self):
+        return {
+            "id": self.id,
+            "created": self.created,
+            "title": self.title,
+            "body": self.body,
+            "url": self.url,
+            "tags": sorted(tag.name for tag in self.tags),
+        }
 
 
 class TagModel(Base):
@@ -85,11 +76,13 @@ class UserModel(Base):
     posts: Mapped[list["PostModel"]] = relationship(
         back_populates="user",
         cascade="delete, delete-orphan",
+        lazy="selectin",
     )
 
     draft_posts: Mapped[list["DraftModel"]] = relationship(
         back_populates="user",
         cascade="delete, delete-orphan",
+        lazy="selectin",
     )
 
     async def dict(self):

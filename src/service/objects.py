@@ -14,6 +14,9 @@ class BusinessObject:
     async def dict(self):
         return await self.model.dict()
 
+    def sync_dict(self):
+        return self.model.sync_dict()
+
 
 class Post(BusinessObject):
     pass

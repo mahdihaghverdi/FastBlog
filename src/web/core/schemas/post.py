@@ -1,7 +1,12 @@
+import hashlib
 from datetime import datetime
 
 from pydantic import BaseModel, constr, AnyHttpUrl, conset
 from slugify import Slugify
+
+
+def generate_hash():
+    return hashlib.shake_256(str(datetime.utcnow()).encode("utf-8")).hexdigest(4)
 
 
 class CreatePostSchema(BaseModel):
@@ -18,9 +23,9 @@ class CreatePostSchema(BaseModel):
         slugify = Slugify(to_lower=True)
 
         if self.title_in_url is None:
-            slug = slugify(f"{self.title} {hex(hash(datetime.utcnow()))}")
+            slug = slugify(f"{self.title} {generate_hash()}")
         else:
-            slug = slugify(f"{self.title_in_url} {hex(hash(datetime.utcnow()))}")
+            slug = slugify(f"{self.title_in_url} {generate_hash()}")
         return f"/@{username}/{slug}"
 
 
@@ -32,4 +37,4 @@ class PostSchema(BaseModel):
     url: AnyHttpUrl
     # the pattern for posts' url is like this: https://fastblog.io/@username/slugged-title-somehash
     # this is generated automatically for posts that'll be published
-    tags: list
+    tags: list[str]
