@@ -1,4 +1,3 @@
----
 openapi: 3.1.0
 info:
   title: Fast Blog
@@ -191,8 +190,7 @@ paths:
         in: path
         required: true
         schema:
-          type: string
-          format: uuid
+          type: integer
           title: Post Id
       responses:
         '200':
@@ -220,8 +218,7 @@ paths:
         in: path
         required: true
         schema:
-          type: string
-          format: uuid
+          type: integer
           title: Post Id
       requestBody:
         required: true
@@ -255,8 +252,7 @@ paths:
         in: path
         required: true
         schema:
-          type: string
-          format: uuid
+          type: integer
           title: Post Id
       responses:
         '204':
@@ -374,8 +370,7 @@ paths:
         in: path
         required: true
         schema:
-          type: string
-          format: uuid
+          type: integer
           title: Draft Id
       responses:
         '200':
@@ -403,8 +398,7 @@ paths:
         in: path
         required: true
         schema:
-          type: string
-          format: uuid
+          type: integer
           title: Draft Id
       requestBody:
         required: true
@@ -438,8 +432,7 @@ paths:
         in: path
         required: true
         schema:
-          type: string
-          format: uuid
+          type: integer
           title: Draft Id
       responses:
         '204':
@@ -464,22 +457,21 @@ paths:
         in: path
         required: true
         schema:
-          type: string
-          format: uuid
+          type: integer
           title: Draft Id
       requestBody:
+        required: true
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
-              allOf:
-              - "$ref": "#/components/schemas/Body_publish_draft_drafts__draft_id__publish_post"
-              title: Body
+              "$ref": "#/components/schemas/PublishSchema"
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                "$ref": "#/components/schemas/PostSchema"
         '422':
           description: Validation Error
           content:
@@ -552,15 +544,6 @@ components:
       - username
       - password
       title: Body_login_for_access_token_auth_access_token_post
-    Body_publish_draft_drafts__draft_id__publish_post:
-      properties:
-        title_in_url:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Title In Url
-      type: object
-      title: Body_publish_draft_drafts__draft_id__publish_post
     Body_signup_user_users_signup_post:
       properties:
         username:
@@ -599,6 +582,15 @@ components:
           type: string
           minLength: 1
           title: Body
+        tags:
+          items:
+            type: string
+            minLength: 1
+          type: array
+          maxItems: 5
+          minItems: 1
+          uniqueItems: true
+          title: Tags
         title_in_url:
           anyOf:
           - type: string
@@ -609,12 +601,12 @@ components:
       required:
       - title
       - body
+      - tags
       title: CreatePostSchema
     DraftSchema:
       properties:
         id:
-          type: string
-          format: uuid
+          type: integer
           title: Id
         created:
           type: string
@@ -647,8 +639,7 @@ components:
     PostSchema:
       properties:
         id:
-          type: string
-          format: uuid
+          type: integer
           title: Id
         created:
           type: string
@@ -667,6 +658,11 @@ components:
           minLength: 1
           format: uri
           title: Url
+        tags:
+          items:
+            type: string
+          type: array
+          title: Tags
       type: object
       required:
       - id
@@ -674,7 +670,29 @@ components:
       - title
       - body
       - url
+      - tags
       title: PostSchema
+    PublishSchema:
+      properties:
+        title_in_url:
+          anyOf:
+          - type: string
+            minLength: 1
+          - type: 'null'
+          title: Title In Url
+        tags:
+          items:
+            type: string
+            minLength: 1
+          type: array
+          maxItems: 5
+          minItems: 1
+          uniqueItems: true
+          title: Tags
+      type: object
+      required:
+      - tags
+      title: PublishSchema
     Sort:
       type: string
       enum:
