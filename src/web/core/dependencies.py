@@ -1,6 +1,7 @@
+from collections import namedtuple
 from typing import Annotated
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Query
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError  # noqa
 from sqlalchemy.ext.asyncio import async_sessionmaker
@@ -12,6 +13,7 @@ from src.service.objects import User
 from src.service.user_service import UserService
 from src.web.core.config import settings
 from src.web.core.database import sqlalchemy_engine
+from src.web.core.schemas import Sort
 
 
 async def get_async_sessionmaker() -> async_sessionmaker:
@@ -19,6 +21,34 @@ async def get_async_sessionmaker() -> async_sessionmaker:
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/access-token")
+
+QueryParameters = namedtuple("QueryParameters", "page per_page sort desc")
+
+
+async def returning_query_parameters(
+    page: Annotated[
+        int,
+        Query(description="page number of the pagination", ge=1),
+    ] = 1,
+    per_page: Annotated[
+        int,
+        Query(
+            alias="per-page",
+            description="number of posts per page",
+            ge=1,
+            le=30,
+        ),
+    ] = 5,
+    sort: Annotated[
+        Sort,
+        Query(description="sorts the returned posts"),
+    ] = Sort.DATE,
+    desc: Annotated[
+        bool,
+        Query(description="order of the sorted posts"),
+    ] = True,
+):
+    return QueryParameters(page, per_page, sort, desc)
 
 
 async def get_user(

@@ -79,6 +79,6 @@ class PostRepo(OneToManyRelRepo, BaseRepo):
 
     async def filter_get(self, **filters):
         stmt = select(PostModel).filter_by(**filters)
-        post = (await self.session.execute(stmt)).first()[0]
+        post = (await self.session.execute(stmt)).scalar_one_or_none()
         if post is not None:
             return Post(**(await post.dict()), model=post)

@@ -68,7 +68,6 @@ class OneToManyRelRepo(RepoProtocol):
         record = await self._get_related(user_id, self_id)
         if record is None:
             return
-        raise Exception(data)
         for key, value in data.items():
             setattr(record, key, value)
         return self.object(**(await record.dict()), model=record)

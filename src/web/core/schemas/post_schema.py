@@ -1,12 +1,9 @@
-import hashlib
 from datetime import datetime
 
 from pydantic import BaseModel, constr, AnyHttpUrl, conset
 from slugify import Slugify
 
-
-def generate_hash():
-    return hashlib.shake_256(str(datetime.utcnow()).encode("utf-8")).hexdigest(4)
+from src.common.utils import generate_hash
 
 
 class CreatePostSchema(BaseModel):

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, constr
 
-from src.web.core.schemas.post import PostSchema
+from src.web.core.schemas.post_schema import PostSchema
 
 
 class UserSignUpSchema(BaseModel):

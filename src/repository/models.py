@@ -63,9 +63,6 @@ class TagModel(Base):
         d = {"name": self.name}
         return d
 
-    def __repr__(self):
-        return f"<TagModel: id={self.id}, name={self.name!r}>"
-
 
 class UserModel(Base):
     __tablename__ = "users"
@@ -107,12 +104,10 @@ class DraftModel(Base):
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     user: Mapped["UserModel"] = relationship(back_populates="draft_posts")
 
-    async def dict(self):
-        d = await super().dict()
-        d.update(
-            {
-                "title": self.title,
-                "body": self.body,
-            },
-        )
-        return d
+    def sync_dict(self):
+        return {
+            "id": self.id,
+            "created": self.created,
+            "title": self.title,
+            "body": self.body,
+        }

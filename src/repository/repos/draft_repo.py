@@ -1,11 +1,10 @@
 import itertools
-from datetime import datetime
 
-from slugify import Slugify
 from sqlalchemy import select, desc
 
 from src.repository.repos import BaseRepo, OneToManyRelRepo
 from src.repository.models import DraftModel, UserModel, PostModel
+from src.repository.repos.tag_repo import TagRepo
 from src.service.objects import Draft, Post
 from src.web.core.schemas import Sort
 
@@ -15,6 +14,24 @@ class DraftRepo(OneToManyRelRepo, BaseRepo):
         model = DraftModel
         object_ = Draft
         super().__init__(session, model, object_)
+
+    async def get(self, user_id, /, self_id):
+        record = await self._get_related(user_id, self_id)
+        if record is not None:
+            return self.object(**record.sync_dict(), model=record)
+
+    async def update(self, user_id, /, self_id, data: dict):
+        record = await self._get_related(user_id, self_id)
+        if record is None:
+            return
+        for key, value in data.items():
+            setattr(record, key, value)
+        return self.object(**record.sync_dict(), model=record)
+
+    async def add(self, user_id, data: dict):
+        record = self.model(**data, user_id=user_id)
+        self.session.add(record)
+        return self.object(**record.sync_dict(), model=record)
 
     async def list(
         self,
@@ -43,24 +60,25 @@ class DraftRepo(OneToManyRelRepo, BaseRepo):
         records = list(
             itertools.chain.from_iterable((await self.session.execute(stmt)).all()),
         )
-        return [Draft(**(await record.dict())) for record in records]
+        return [Draft(**record.sync_dict(), model=record) for record in records]
 
-    async def publish(self, user: UserModel, draft_id, title_in_url):
+    async def publish(self, user: UserModel, draft_id, tags_and_title_in_url):
         draft = await super(OneToManyRelRepo, self).get(draft_id, raw=True)
         if draft is None:
             return None
-        slugify = Slugify(to_lower=True)
-        if title_in_url is not None:
-            title_slug = slugify(f"{title_in_url} {hex(hash(datetime.utcnow()))}")
-        else:
-            title_slug = slugify(f"{draft.title} {hex(hash(datetime.utcnow()))}")
+
+        slug = tags_and_title_in_url.slug(draft.title, user.username)
+        tags = await TagRepo(self.session).get_or_create(tags_and_title_in_url.tags)
 
         record = PostModel(
             title=draft.title,
             body=draft.body,
-            url=f"/@{user.username}/{title_slug}",
+            url=f"{slug}",
         )
+        for tag in tags:
+            record.tags.add(tag)
+
         self.session.add(record)
         user.posts.append(record)
         user.draft_posts.remove(draft)
-        return Post(**(await record.dict()), model=record)
+        return Post(**record.sync_dict(), model=record)

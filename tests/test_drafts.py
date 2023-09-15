@@ -1,112 +1,199 @@
 import random
-import string
+
+from tests.conftest import random_string
 
 
-def random_string():
-    return "".join(random.choices(string.ascii_lowercase, k=1))
+class BaseTest:
+    @classmethod
+    def setup_class(cls):
+        cls.title = "Python 3.11"
+        cls.body = "Wow, such a release!"
+        cls.tags = ["python", "programming"]
+        cls.url = "http://testserver/@string/python-3-11"
+
+    @property
+    def payload(self):
+        return {"title": self.title, "body": self.body}
+
+    @staticmethod
+    def extract(post_data):
+        return post_data["title"], post_data["body"]
 
 
-def test_create_draft(client, headers, payload):
-    # not authenticated
-    response = client.post("/drafts", json=payload)
-    assert response.status_code == 401
+class TestPostDraft(BaseTest):
+    @classmethod
+    def setup_class(cls):
+        super().setup_class()
+        cls.title_in_url = "an ugly umbrella"
+        cls.new_url = "http://testserver/@string/an-ugly-umbrella"
 
-    response = client.post("/drafts", json=payload, headers=headers)
-    assert response.status_code == 201, response.text
-    post_data = response.json()
-    assert post_data["title"] == payload["title"]
-    assert post_data["body"] == payload["body"]
+    @property
+    def basic_publish_payload(self):
+        return {"tags": self.tags}
 
-    # ensure that it is saved in database
-    response = client.get("/drafts", headers=headers)
-    data = response.json()[0]
-    assert data["title"] == payload["title"]
-    assert data["body"] == payload["body"]
+    @property
+    def custom_publish_payload(self):
+        return {"tags": self.tags, "title_in_url": self.title_in_url}
 
+    @staticmethod
+    def publish_extract(post_data):
+        title, body, _url, tags = (
+            post_data["title"],
+            post_data["body"],
+            post_data["url"],
+            post_data["tags"],
+        )
+        url = _url[: len(_url) - 9]
+        return title, body, url, tags
 
-def test_get_drafts(client, headers, payload, headers2):
-    # not authenticated
-    response = client.get("/drafts")
-    assert response.status_code == 401, response.text
+    def test_create_draft(self, client, headers):
+        response = client.post("/drafts", json=self.payload, headers=headers)
+        assert response.status_code == 201, response.text
+        title, body = self.extract(response.json())
+        assert title == self.title
+        assert body == self.body
 
-    response = client.get("/drafts", headers=headers)
-    assert response.status_code == 200, response.text
-    assert response.json() == []
+        response = client.get("/drafts", headers=headers)
+        title, body = self.extract(response.json()[0])
+        assert title == self.title
+        assert body == self.body
 
-    client.post("/drafts", json={"title": "a", "body": "b"}, headers=headers2)
-    assert len(client.get("/drafts", headers=headers2).json()) == 1
-    assert len(client.get("/drafts", headers=headers).json()) == 0
+    def test_publish_draft(self, client, headers):
+        draft_id = client.post("/drafts", json=self.payload, headers=headers).json()[
+            "id"
+        ]
+        response = client.post(
+            f"/drafts/{draft_id}/publish",
+            json=self.basic_publish_payload,
+            headers=headers,
+        )
+        assert response.status_code == 200, response.text
 
-    test_drafts = [
-        [{"title": random_string(), "body": random_string()} for _ in range(5)]
-        for _ in range(5)
-    ]
+        drafts = client.get("/drafts", headers=headers).json()
+        assert not drafts
 
-    posts = [
-        client.post("/drafts", json=post, headers=headers).json()
-        for post_list in test_drafts
-        for post in post_list
-    ]
+        post_id = response.json()["id"]
+        title, body, url, tags = self.publish_extract(
+            client.get(f"/posts/{post_id}", headers=headers).json(),
+        )
+        assert title == self.title
+        assert body == self.body
+        assert url == self.url
+        assert set(tags) == set(self.tags)
 
-    # default query params: page = 1, per-page = 5, sort = date, desc = true
-    # pages
-    response = client.get("/drafts", headers=headers)
-    assert len(response.json()) == 5
+    def test_publish_draft_custom_slug(self, client, headers):
+        draft_id = client.post("/drafts", json=self.payload, headers=headers).json()[
+            "id"
+        ]
+        response = client.post(
+            f"/drafts/{draft_id}/publish",
+            json=self.custom_publish_payload,
+            headers=headers,
+        )
+        assert response.status_code == 200, response.text
 
-    response = client.get("/drafts", params={"page": 2}, headers=headers)
-    assert len(response.json()) == 5
+        drafts = client.get("/drafts", headers=headers).json()
+        assert not drafts
 
-    response = client.get("/drafts", params={"page": 3}, headers=headers)
-    assert len(response.json()) == 5
-
-    response = client.get("/drafts", params={"page": 4}, headers=headers)
-    assert len(response.json()) == 5
-
-    response = client.get("/drafts", params={"page": 5}, headers=headers)
-    assert len(response.json()) == 5
-
-    # per-page
-    response = client.get("/drafts", params={"per-page": 10}, headers=headers)
-    assert len(response.json()) == 10
-
-    response = client.get("/drafts", params={"per-page": 20}, headers=headers)
-    assert len(response.json()) == 20
-
-    response = client.get("/drafts", params={"per-page": len(posts)}, headers=headers)
-    assert len(response.json()) == len(posts)
-
-    # sort
-    response = client.get("/drafts", params={"per-page": len(posts)}, headers=headers)
-    assert response.json() == posts[::-1]
-
-    response = client.get(
-        "/drafts",
-        params={"per-page": len(posts), "sort": "title"},
-        headers=headers,
-    )
-    assert response.json() == sorted(posts, key=lambda x: x["title"], reverse=True)
-
-    # desc
-    response = client.get(
-        "/drafts",
-        params={"per-page": len(posts), "desc": "false"},
-        headers=headers,
-    )
-    assert response.json() == posts
+        post_id = response.json()["id"]
+        title, body, url, tags = self.publish_extract(
+            client.get(f"/posts/{post_id}", headers=headers).json(),
+        )
+        assert title == self.title
+        assert body == self.body
+        assert url == self.new_url
+        assert set(tags) == set(self.tags)
 
 
-def test_get_draft(client, headers, payload):
-    response = client.post("/drafts", json=payload)
-    assert response.status_code == 401, response.text
+class TestGetDraft(BaseTest):
+    def test_get_drafts(self, client, headers, headers2):
+        response = client.get("/drafts", headers=headers)
+        assert response.status_code == 200, response.text
+        assert response.json() == []
 
-    draft_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
+        client.post("/drafts", json=self.payload, headers=headers2)
+        assert len(client.get("/drafts", headers=headers2).json()) == 1
+        assert len(client.get("/drafts", headers=headers).json()) == 0
 
-    response = client.get(f"/drafts/{draft_id}", headers=headers)
-    assert response.status_code == 200, response.text
+        test_drafts = [
+            [{"title": random_string(), "body": random_string()} for _ in range(5)]
+            for _ in range(5)
+        ]
 
-    data = response.json()
-    assert data["title"] == payload["title"]
-    assert data["body"] == payload["body"]
+        posts = [
+            client.post("/drafts", json=post, headers=headers).json()
+            for post_list in test_drafts
+            for post in post_list
+        ]
+
+        # default query params: page = 1, per-page = 5, sort = date, desc = true
+        # pages
+        response = client.get("/drafts", headers=headers)
+        assert len(response.json()) == 5
+
+        response = client.get("/drafts", params={"page": 2}, headers=headers)
+        assert len(response.json()) == 5
+
+        response = client.get("/drafts", params={"page": 3}, headers=headers)
+        assert len(response.json()) == 5
+
+        response = client.get("/drafts", params={"page": 4}, headers=headers)
+        assert len(response.json()) == 5
+
+        response = client.get("/drafts", params={"page": 5}, headers=headers)
+        assert len(response.json()) == 5
+
+        # per-page
+        response = client.get("/drafts", params={"per-page": 10}, headers=headers)
+        assert len(response.json()) == 10
+
+        response = client.get("/drafts", params={"per-page": 20}, headers=headers)
+        assert len(response.json()) == 20
+
+        response = client.get(
+            "/drafts",
+            params={"per-page": len(posts)},
+            headers=headers,
+        )
+        assert len(response.json()) == len(posts)
+
+        # sort
+        response = client.get(
+            "/drafts",
+            params={"per-page": len(posts)},
+            headers=headers,
+        )
+        assert response.json() == posts[::-1]
+
+        response = client.get(
+            "/drafts",
+            params={"per-page": len(posts), "sort": "title"},
+            headers=headers,
+        )
+        assert response.json() == sorted(posts, key=lambda x: x["title"], reverse=True)
+
+        # desc
+        response = client.get(
+            "/drafts",
+            params={"per-page": len(posts), "desc": "false"},
+            headers=headers,
+        )
+        assert response.json() == posts
+
+    def test_get_draft(self, client, headers):
+        response = client.post("/drafts", json=self.payload)
+        assert response.status_code == 401, response.text
+
+        draft_id = client.post("/drafts", json=self.payload, headers=headers).json()[
+            "id"
+        ]
+
+        response = client.get(f"/drafts/{draft_id}", headers=headers)
+        assert response.status_code == 200, response.text
+
+        title, body = self.extract(response.json())
+        assert title == self.title
+        assert body == self.body
 
 
 def test_update_draft(client, headers, payload):
@@ -123,9 +210,9 @@ def test_update_draft(client, headers, payload):
     )
     assert response.status_code == 200, response.text
 
-    data = response.json()
-    assert data["title"] == new_title
-    assert data["body"] == new_body
+    title, body = BaseTest.extract(response.json())
+    assert title == new_title
+    assert body == new_body
 
 
 def test_delete_draft(client, headers, payload):
@@ -136,41 +223,8 @@ def test_delete_draft(client, headers, payload):
 
     response = client.delete(f"/drafts/{draft_id}", headers=headers)
     assert response.status_code == 204, response.text
+    assert not client.get("/posts", headers=headers).json()
     assert client.get(f"/posts{draft_id}").status_code == 404
-
-
-def test_publish_draft(client, headers, payload):
-    draft_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
-    response = client.post(f"/drafts/{draft_id}/publish", headers=headers)
-    assert response.status_code == 200, response.text
-
-    drafts = client.get("/drafts", headers=headers).json()
-    assert not drafts
-
-    post_id = response.json()["id"]
-    new_post_data = client.get(f"/posts/{post_id}", headers=headers).json()
-    assert new_post_data["title"] == payload["title"]
-    assert new_post_data["body"] == payload["body"]
-    assert new_post_data["url"] == response.json()["url"]
-
-
-def test_publish_draft_custom_slug(client, headers, payload):
-    draft_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
-    response = client.post(
-        f"/drafts/{draft_id}/publish",
-        headers=headers,
-        data={"title_in_url": "an ugly umbrella"},
-    )
-    assert response.status_code == 200, response.text
-
-    drafts = client.get("/drafts", headers=headers).json()
-    assert not drafts
-
-    post_id = response.json()["id"]
-    new_post_data = client.get(f"/posts/{post_id}", headers=headers).json()
-    assert new_post_data["title"] == payload["title"]
-    assert new_post_data["body"] == payload["body"]
-    assert new_post_data["url"] == response.json()["url"]
 
 
 def test_get_draft_not_found(client, headers):
@@ -178,10 +232,10 @@ def test_get_draft_not_found(client, headers):
     assert response.status_code == 404, response.text
 
 
-def test_update_draft_not_found(client, headers):
+def test_update_draft_not_found(client, headers, payload):
     response = client.put(
         f"/drafts/{random.randint(0, 1)}",
-        json={"title": "a", "body": "b"},
+        json=payload,
         headers=headers,
     )
     assert response.status_code == 404, response.text
@@ -193,5 +247,9 @@ def test_delete_draft_not_found(client, headers):
 
 
 def test_publish_draft_not_found(client, headers):
-    response = client.post(f"/drafts/{random.randint(0, 2)}/publish", headers=headers)
+    response = client.post(
+        f"/drafts/{random.randint(0, 2)}/publish",
+        headers=headers,
+        json={"tags": ["1"]},
+    )
     assert response.status_code == 404, response.text
