@@ -43,6 +43,15 @@ class PostModel(Base):
         lazy="selectin",
     )
 
+    def __repr__(self):
+        return (
+            f"<PostModel: "
+            f"title={self.title!r}, "
+            f"body={self.body!r}, "
+            f"url={self.url!r}, "
+            f"tags={self.tags!r}>"
+        )
+
     def sync_dict(self):
         return {
             "id": self.id,
@@ -50,7 +59,11 @@ class PostModel(Base):
             "title": self.title,
             "body": self.body,
             "url": self.url,
-            "tags": sorted(tag.name for tag in self.tags),
+            # "tags": [{'name': tag.name for tag in self.tags}],
+            "tags": sorted(
+                [tag.sync_dict() for tag in self.tags],
+                key=lambda x: x["name"],
+            ),
         }
 
 
@@ -59,9 +72,11 @@ class TagModel(Base):
 
     name: Mapped[str] = mapped_column(unique=True)
 
-    async def dict(self):
-        d = {"name": self.name}
-        return d
+    def __repr__(self):
+        return f"<TagModel: name={self.name!r}>"
+
+    def sync_dict(self):
+        return {"name": self.name}
 
 
 class UserModel(Base):
@@ -97,7 +112,7 @@ class UserModel(Base):
                 "username": self.username,
                 "password": self.password,
                 "posts": await self.awaitable_attrs.posts,
-                "draft_posts": await self.awaitable_attrs.draft_posts,
+                "drafts": await self.awaitable_attrs.draft_posts,
             },
         )
         return d
@@ -111,6 +126,9 @@ class DraftModel(Base):
 
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     user: Mapped["UserModel"] = relationship(back_populates="draft_posts")
+
+    def __repr__(self):
+        return f"<DraftPost: {self.title!r}>"
 
     def sync_dict(self):
         return {

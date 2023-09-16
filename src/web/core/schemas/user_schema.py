@@ -2,6 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, constr
 
+from src.web.core.schemas import DraftSchema
 from src.web.core.schemas.post_schema import PostSchema
 
 
@@ -18,6 +19,7 @@ class UserOutSchema(BaseModel):
     username: str
     created: datetime
     posts: list[PostSchema]
+    drafts: list[DraftSchema]
 
 
 class UserInternalSchema(UserOutSchema):

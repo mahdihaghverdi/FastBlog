@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, constr, AnyHttpUrl, conset
+from pydantic import BaseModel, constr, AnyHttpUrl, conset, model_serializer
 from slugify import Slugify
 
 from src.common.utils import generate_hash
@@ -26,6 +26,14 @@ class CreatePostSchema(BaseModel):
         return f"/@{username}/{slug}"
 
 
+class TagSchema(BaseModel):
+    name: str
+
+    @model_serializer
+    def ser_model(self) -> str:
+        return self.name
+
+
 class PostSchema(BaseModel):
     id: int
     created: datetime
@@ -34,4 +42,4 @@ class PostSchema(BaseModel):
     url: AnyHttpUrl
     # the pattern for posts' url is like this: https://fastblog.io/@username/slugged-title-somehash
     # this is generated automatically for posts that'll be published
-    tags: list[str]
+    tags: list[TagSchema]
