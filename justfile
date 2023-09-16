@@ -20,6 +20,9 @@ database:
     -v fastblog-data:/var/lib/postgresql/data \
      postgres
 
+enter-database:
+  docker exec -it psql-dev psql -U postgres
+
 test $database_url=test-database:
   pytest --durations=5 --no-header --cov=src --cov-report=html --cov-report=term-missing tests
 
