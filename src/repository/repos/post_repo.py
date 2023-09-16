@@ -1,12 +1,12 @@
 from sqlalchemy import select
 
 from src.repository.models import PostModel
-from src.repository.repos import BaseRepo, OneToManyRelRepo, PaginationMixin
+from src.repository.repos import BaseRepo, OneToManyRelRepoMixin, PaginationMixin
 from src.repository.repos.tag_repo import TagRepo
 from src.service.objects import Post
 
 
-class PostRepo(OneToManyRelRepo, PaginationMixin, BaseRepo):
+class PostRepo(PaginationMixin, OneToManyRelRepoMixin, BaseRepo):
     def __init__(self, session):
         model = PostModel
         object_ = Post
@@ -24,7 +24,7 @@ class PostRepo(OneToManyRelRepo, PaginationMixin, BaseRepo):
         return Post(**record.sync_dict(), model=record)
 
     async def update(self, user_id, post_id, data: dict):
-        record = await self._get_related(user_id, post_id)
+        record = await self._get(user_id, post_id)
         if record is None:
             return
 

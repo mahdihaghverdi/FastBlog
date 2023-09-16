@@ -26,7 +26,7 @@ class RepoProtocol(Protocol):
         ...
 
 
-class BaseRepo(RepoProtocol):
+class BaseRepo:
     def __init__(
         self,
         session: AsyncSession,
@@ -45,8 +45,8 @@ class BaseRepo(RepoProtocol):
             return self.object(**(await record.dict()), model=record)
 
 
-class OneToManyRelRepo:
-    async def _get_related(self, user_id, self_id):
+class OneToManyRelRepoMixin:
+    async def _get(self, user_id, self_id):
         stmt = (
             select(self.model)
             .where(self.model.user_id == user_id)
@@ -62,12 +62,12 @@ class OneToManyRelRepo:
         return self.object(**record.sync_dict(), model=record)
 
     async def get(self, user_id, self_id):
-        record = await self._get_related(user_id, self_id)
+        record = await self._get(user_id, self_id)
         if record is not None:
             return self.object(**record.sync_dict(), model=record)
 
     async def update(self, user_id, /, self_id, data: dict):
-        record = await self._get_related(user_id, self_id)
+        record = await self._get(user_id, self_id)
         if record is None:
             return
         for key, value in data.items():
@@ -75,7 +75,7 @@ class OneToManyRelRepo:
         return self.object(**record.sync_dict(), model=record)
 
     async def delete(self, user_id, /, self_id):
-        record = await self._get_related(user_id, self_id)
+        record = await self._get(user_id, self_id)
         if record is None:
             return False
         await self.session.delete(record)
