@@ -1,4 +1,4 @@
-from src.repository.models import DraftModel, UserModel, PostModel
+from src.repository.models import DraftModel, PostModel
 from src.repository.repos import BaseRepo, OneToManyRelRepoMixin, PaginationMixin
 from src.repository.repos.tag_repo import TagRepo
 from src.service.objects import Draft, Post
@@ -10,7 +10,7 @@ class DraftRepo(PaginationMixin, OneToManyRelRepoMixin, BaseRepo):
         object_ = Draft
         super().__init__(session, model, object_)
 
-    async def publish(self, user: UserModel, draft_id, tags_and_title_in_url):
+    async def publish(self, user, draft_id, tags_and_title_in_url):
         draft = await super(OneToManyRelRepoMixin, self).get(draft_id, raw=True)
         if draft is None:
             return None
@@ -24,5 +24,5 @@ class DraftRepo(PaginationMixin, OneToManyRelRepoMixin, BaseRepo):
 
         self.session.add(record)
         user.posts.append(record)
-        user.draft_posts.remove(draft)
+        user.drafts.remove(draft)
         return Post(**record.sync_dict(), model=record)
