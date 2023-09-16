@@ -18,9 +18,9 @@ class TagRepo(BaseRepo):
                 await self.session.execute(
                     select(self.model).where(self.model.name == name),
                 )
-            ).first()
+            ).scalar_one_or_none()
             if tag is not None:
-                tags.append(tag[0])
+                tags.append(tag)
             else:
                 t = self.model(name=name)
                 self.session.add(t)
