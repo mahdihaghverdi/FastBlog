@@ -54,20 +54,17 @@ With this feature posts can be:
 
 **Note:** with this feature, a post recommendation can be implemented in the future versions.
 
-### `v3.1.0`
-Logging will be implemented for the project
-
 ----
 ### `v4.0.0`
-Post recommendation system will be implemented.
-
-Now the most recent posts with similarities in tags will be shown to the user.
-
-----
-### `v5.0.0`
 Comments will arrive in this version of `FastBlog`.
 
 Now users can comment on each other's posts.
+
+----
+### `v5.0.0`
+Post recommendation system will be implemented.
+
+Now the most recent posts with similarities in tags will be shown to the user.
 
 ----
 
