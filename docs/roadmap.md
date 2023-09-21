@@ -58,8 +58,16 @@ With this feature posts can be:
 ### `v4.0.0`
 Comments will arrive in this version of `FastBlog`.
 
-Now users can comment on each other's posts.
+Now users can comment on each other's posts; also, they can respond to comments as well.
 
+A comment system like instagram
+- Always the first five base comments of the posts will be returned automatically,
+for further comments, they should request.
+
+- Each comment can have infinite number of replies, but in returning them, only five of them
+will be returned, for more they should request more.
+
+- Only on the global link of the posts, comments will be shown
 ----
 ### `v5.0.0`
 Post recommendation system will be implemented.
