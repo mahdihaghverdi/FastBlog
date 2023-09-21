@@ -4,6 +4,7 @@ from pydantic import BaseModel, constr, AnyHttpUrl, conset, model_serializer
 from slugify import Slugify
 
 from src.common.utils import generate_hash
+from src.web.core.schemas.comment_schema import CommentSchema
 
 
 class CreatePostSchema(BaseModel):
@@ -43,3 +44,8 @@ class PostSchema(BaseModel):
     # the pattern for posts' url is like this: https://fastblog.io/@username/slugged-title-somehash
     # this is generated automatically for posts that'll be published
     tags: list[TagSchema]
+
+
+class GlobalPostSchema(BaseModel):
+    post: PostSchema
+    comments: list[CommentSchema]

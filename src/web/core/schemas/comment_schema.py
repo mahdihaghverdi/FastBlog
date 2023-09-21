@@ -9,3 +9,10 @@ class CommentSchema(BaseModel):
     post_id: int
     parent_id: int | None
     comment: str
+
+
+class CommentOnGlobalPost(BaseModel):
+    id: int
+    created: datetime
+    parent_id: int
+    comment: str
