@@ -72,4 +72,9 @@ Now the most recent posts with similarities in tags will be shown to the user.
 Scheduled publishing will be implemented for users.
 
 
+----
+### `v7.0.0`
+Notifications will be implemented for posting comments on the posts.
+
+
 _This file will be updated_
