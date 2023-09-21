@@ -1,5 +1,4 @@
 from src.common.exceptions import PostNotFoundError
-from src.repository.repos.user_repo import UserRepo
 from src.service import Service
 from src.service.objects import Post
 from src.web.core.schemas import Sort
@@ -54,7 +53,7 @@ class PostService(Service):
             raise PostNotFoundError(f"post with id: '{post_id}' is not found")
 
     async def get_post_by_post_url(self, username, post_slug):
-        user_id = (await UserRepo(self.repo.session).get_by_username(username)).id
+        user_id = (await self.user_repo.get_by_username(username)).id
         post = await self.repo.filter_get(
             user_id=user_id,
             url=f"/@{username}/{post_slug}",
@@ -62,3 +61,7 @@ class PostService(Service):
         if post is None:
             raise PostNotFoundError(f"post: @{username}/{post_slug} is not found!")
         return post
+
+    async def add_comment(self, post_id, comment):
+        # self.repo = None, self.comment_repo is available
+        return await self.comment_repo.add(post_id, parent_id=None, comment=comment)

@@ -32,3 +32,7 @@ class Draft(BusinessObject):
 
 class Tag(BusinessObject):
     pass
+
+
+class Comment(BusinessObject):
+    pass

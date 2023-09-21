@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Union
 
 from sqlalchemy import ForeignKey, BigInteger, Integer, Table, Column, String
 from sqlalchemy.ext.asyncio import AsyncAttrs
@@ -145,13 +144,13 @@ class CommentModel(Base):
     post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"))
     parent_id: Mapped[int | None] = mapped_column(ForeignKey("comments.id"))
     comment: Mapped[str] = mapped_column(String(255))
-    children: Mapped[dict[str, "CommentModel"]] = relationship(
-        "Node",
-        back_populates="parent",
-        cascade="delete, delete-orphan",
-    )
-    parent: Mapped[Union["CommentModel", None]] = relationship(
-        "Node",
-        back_populates="children",
-        remote_side="id",
-    )
+    children = relationship("CommentModel", cascade="delete, delete-orphan")
+
+    def sync_dict(self):
+        return {
+            "id": self.id,
+            "created": self.created,
+            "post_id": self.post_id,
+            "parent_id": self.parent_id,
+            "comment": self.comment,
+        }

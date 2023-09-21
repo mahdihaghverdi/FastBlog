@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
 from starlette.requests import Request
@@ -16,6 +16,8 @@ from src.web.core.dependencies import (
 )
 from src.web.core.schemas import CreatePostSchema, PostSchema, UserInternalSchema
 from . import give_domain
+from ..core.schemas.comment_schema import CommentSchema
+from ...repository.repos.comment_repo import CommentRepo
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -111,3 +113,23 @@ async def delete_post(
         service = PostService(repo)
         await service.delete_post(user.id, post_id)
         await uow.commit()
+
+
+# raw comment
+@router.post(
+    "/{post_id}/comment",
+    status_code=status.HTTP_201_CREATED,
+    response_model=CommentSchema,
+)
+async def add_comment(
+    post_id: int,
+    comment: Annotated[str, Body(min_length=1, max_length=255)],
+    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user)],  # noqa
+):
+    async with UnitOfWork(asessionmaker) as uow:
+        repo = CommentRepo(uow.session)
+        service = PostService(repo=None, comment_repo=repo)
+        comment = await service.add_comment(post_id, comment)
+        await uow.commit()
+        return comment.sync_dict()
