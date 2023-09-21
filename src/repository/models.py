@@ -1,6 +1,7 @@
 from datetime import datetime
+from typing import Union
 
-from sqlalchemy import ForeignKey, BigInteger, Integer, Table, Column
+from sqlalchemy import ForeignKey, BigInteger, Integer, Table, Column, String
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -137,3 +138,20 @@ class DraftModel(Base):
             "title": self.title,
             "body": self.body,
         }
+
+
+class CommentModel(Base):
+    __tablename__ = "comments"
+    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"))
+    parent_id: Mapped[int | None] = mapped_column(ForeignKey("comments.id"))
+    comment: Mapped[str] = mapped_column(String(255))
+    children: Mapped[dict[str, "CommentModel"]] = relationship(
+        "Node",
+        back_populates="parent",
+        cascade="delete, delete-orphan",
+    )
+    parent: Mapped[Union["CommentModel", None]] = relationship(
+        "Node",
+        back_populates="children",
+        remote_side="id",
+    )

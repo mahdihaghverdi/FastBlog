@@ -177,4 +177,6 @@ pyrightconfig.json
 node_modules
 
 expr.py
+
+*.txt
 # End of https://www.toptal.com/developers/gitignore/api/python
