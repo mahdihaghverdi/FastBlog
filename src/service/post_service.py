@@ -53,9 +53,12 @@ class PostService(Service):
             raise PostNotFoundError(f"post with id: '{post_id}' is not found")
 
     async def get_post_by_post_url(self, username, post_slug):
-        user_id = (await self.user_repo.get_by_username(username)).id
+        user = await self.user_repo.get_by_username(username)
+        if user is None:
+            raise PostNotFoundError(f"post: @{username}/{post_slug} is not found!")
+
         post = await self.repo.filter_get(
-            user_id=user_id,
+            user_id=user.id,
             url=f"/@{username}/{post_slug}",
         )
         if post is None:

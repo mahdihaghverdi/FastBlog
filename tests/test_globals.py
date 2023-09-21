@@ -7,3 +7,8 @@ def test_get_global_post(client, payload, headers):
 
     assert post["title"] == payload["title"]
     assert post["body"] == payload["body"]
+
+
+def test_get_global_post_not_found(client, payload, headers):
+    response = client.get("http://testserver/@mahdi2/lksjdflijsdfl")
+    assert response.status_code == 404, response.text
