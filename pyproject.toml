@@ -19,6 +19,7 @@ python-jose = {extras = ["cryptography"], version = "~3.3.0"}
 passlib = {extras = ["bcrypt"], version = "~1.7.4"}
 awesome-slugify = "~1.6.5"
 urlpath = "~1.2.0"
+sqlalchemy-utils = "~0.41.1"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "~3.3.3"
