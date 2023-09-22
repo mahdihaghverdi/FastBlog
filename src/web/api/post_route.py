@@ -115,7 +115,6 @@ async def delete_post(
         await uow.commit()
 
 
-# raw comment
 @router.post(
     "/{post_id}/comment",
     status_code=status.HTTP_201_CREATED,

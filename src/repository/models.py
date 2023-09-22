@@ -97,6 +97,11 @@ class UserModel(Base):
         lazy="selectin",
     )
 
+    comments: Mapped[list["CommentModel"]] = relationship(
+        back_populates="user",
+        cascade="delete, delete-orphan",
+    )
+
     def sync_dict(self):
         return {
             "id": self.id,
@@ -124,7 +129,7 @@ class DraftModel(Base):
     title: Mapped[str]
     body: Mapped[str]
 
-    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     user: Mapped["UserModel"] = relationship(back_populates="draft_posts")
 
     def __repr__(self):
@@ -145,6 +150,9 @@ class CommentModel(Base):
     parent_id: Mapped[int | None] = mapped_column(ForeignKey("comments.id"))
     comment: Mapped[str] = mapped_column(String(255))
     children = relationship("CommentModel", cascade="delete, delete-orphan")
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user: Mapped["UserModel"] = relationship(back_populates="comments")
 
     def sync_dict(self):
         return {
