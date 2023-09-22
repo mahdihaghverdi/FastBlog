@@ -75,18 +75,21 @@ Saving the update time of things will be implemented
 
 ----
 ### `v5.0.0`
+User profiles will be implemented!
+
+----
+### `v6.0.0`
 Post recommendation system will be implemented.
 
 Now the most recent posts with similarities in tags will be shown to the user.
 
 ----
 
-### `v6.0.0`
+### `v7.0.0`
 Scheduled publishing will be implemented for users.
 
-
 ----
-### `v7.0.0`
+### `v8.0.0`
 Notifications will be implemented for posting comments on the posts.
 
 
