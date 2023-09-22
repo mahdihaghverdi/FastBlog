@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import ForeignKey, BigInteger, Integer, Table, Column, String
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy_utils import LtreeType
 
 
 class Base(AsyncAttrs, DeclarativeBase):
@@ -34,15 +35,13 @@ class PostModel(Base):
     title: Mapped[str]
     body: Mapped[str]
     url: Mapped[str]
-
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
-    user: Mapped["UserModel"] = relationship(back_populates="posts")
 
+    user: Mapped["UserModel"] = relationship(back_populates="posts")
     tags: Mapped[set["TagModel"]] = relationship(
         secondary=association_table,
         lazy="selectin",
     )
-
     comments: Mapped[list["CommentModel"]] = relationship(
         back_populates="post",
         cascade="delete, delete-orphan",
@@ -95,13 +94,11 @@ class UserModel(Base):
         cascade="delete, delete-orphan",
         lazy="selectin",
     )
-
     draft_posts: Mapped[list["DraftModel"]] = relationship(
         back_populates="user",
         cascade="delete, delete-orphan",
         lazy="selectin",
     )
-
     comments: Mapped[list["CommentModel"]] = relationship(
         back_populates="user",
         cascade="delete, delete-orphan",
@@ -133,8 +130,8 @@ class DraftModel(Base):
 
     title: Mapped[str]
     body: Mapped[str]
-
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
     user: Mapped["UserModel"] = relationship(back_populates="draft_posts")
 
     def __repr__(self):
@@ -152,14 +149,14 @@ class DraftModel(Base):
 class CommentModel(Base):
     __tablename__ = "comments"
     post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"))
-    post: Mapped["PostModel"] = relationship(back_populates="comments")
-
     parent_id: Mapped[int | None] = mapped_column(ForeignKey("comments.id"))
     comment: Mapped[str] = mapped_column(String(255))
-    children = relationship("CommentModel", cascade="delete, delete-orphan")
-
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    path: Mapped[str | None] = mapped_column(LtreeType)
+
     user: Mapped["UserModel"] = relationship(back_populates="comments")
+    post: Mapped["PostModel"] = relationship(back_populates="comments")
+    children = relationship("CommentModel", cascade="delete, delete-orphan")
 
     def sync_dict(self):
         return {
