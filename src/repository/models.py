@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, BigInteger, Integer, Table, Column, String
+from sqlalchemy import ForeignKey, BigInteger, Integer, Table, Column, String, Index
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy_utils import LtreeType
@@ -152,11 +152,10 @@ class CommentModel(Base):
     parent_id: Mapped[int | None] = mapped_column(ForeignKey("comments.id"))
     comment: Mapped[str] = mapped_column(String(255))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    path: Mapped[str | None] = mapped_column(LtreeType)
+    path: Mapped[str] = mapped_column(LtreeType)
 
     user: Mapped["UserModel"] = relationship(back_populates="comments", lazy="selectin")
     post: Mapped["PostModel"] = relationship(back_populates="comments")
-    children = relationship("CommentModel", cascade="delete, delete-orphan")
 
     def sync_dict(self):
         return {
@@ -169,3 +168,6 @@ class CommentModel(Base):
             "user_id": self.user_id,
             "username": self.user.username,
         }
+
+
+index = Index("path_gist_idx", CommentModel.path, postgresql_using="gist")
