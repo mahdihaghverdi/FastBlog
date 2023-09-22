@@ -43,6 +43,11 @@ class PostModel(Base):
         lazy="selectin",
     )
 
+    comments: Mapped[list["CommentModel"]] = relationship(
+        back_populates="post",
+        cascade="delete, delete-orphan",
+    )
+
     def __repr__(self):
         return (
             f"<PostModel: "
@@ -147,6 +152,8 @@ class DraftModel(Base):
 class CommentModel(Base):
     __tablename__ = "comments"
     post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"))
+    post: Mapped["PostModel"] = relationship(back_populates="comments")
+
     parent_id: Mapped[int | None] = mapped_column(ForeignKey("comments.id"))
     comment: Mapped[str] = mapped_column(String(255))
     children = relationship("CommentModel", cascade="delete, delete-orphan")
