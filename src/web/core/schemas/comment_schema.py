@@ -6,9 +6,12 @@ from pydantic import BaseModel
 class CommentSchema(BaseModel):
     id: int
     created: datetime
-    post_id: int
-    parent_id: int | None
     comment: str
+    parent_id: int | None
+    path: str | None
+    post_id: int
+    user_id: int
+    username: str
 
 
 class CommentOnGlobalPost(BaseModel):

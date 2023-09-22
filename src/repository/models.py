@@ -154,7 +154,7 @@ class CommentModel(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     path: Mapped[str | None] = mapped_column(LtreeType)
 
-    user: Mapped["UserModel"] = relationship(back_populates="comments")
+    user: Mapped["UserModel"] = relationship(back_populates="comments", lazy="selectin")
     post: Mapped["PostModel"] = relationship(back_populates="comments")
     children = relationship("CommentModel", cascade="delete, delete-orphan")
 
@@ -165,4 +165,7 @@ class CommentModel(Base):
             "post_id": self.post_id,
             "parent_id": self.parent_id,
             "comment": self.comment,
+            "path": str(self.path),
+            "user_id": self.user_id,
+            "username": self.user.username,
         }

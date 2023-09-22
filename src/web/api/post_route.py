@@ -124,11 +124,11 @@ async def add_comment(
     post_id: int,
     comment: Annotated[str, Body(min_length=1, max_length=255)],
     asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],  # noqa
+    user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
     async with UnitOfWork(asessionmaker) as uow:
         repo = CommentRepo(uow.session)
         service = PostService(repo=None, comment_repo=repo)
-        comment = await service.add_comment(post_id, comment)
+        comment = await service.add_comment(user.id, post_id, comment)
         await uow.commit()
         return comment.sync_dict()
