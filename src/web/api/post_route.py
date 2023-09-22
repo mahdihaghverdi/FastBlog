@@ -5,19 +5,24 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from starlette import status
 from starlette.requests import Request
 
+from src.repository.repos.comment_repo import CommentRepo
 from src.repository.repos.post_repo import PostRepo
 from src.repository.unit_of_work import UnitOfWork
+from src.service.comment_service import CommentService
 from src.service.post_service import PostService
+from src.web.api import give_domain
 from src.web.core.dependencies import (
     get_async_sessionmaker,
     get_current_user,
     returning_query_parameters,
     QueryParameters,
 )
-from src.web.core.schemas import CreatePostSchema, PostSchema, UserInternalSchema
-from . import give_domain
-from ..core.schemas.comment_schema import CommentSchema
-from ...repository.repos.comment_repo import CommentRepo
+from src.web.core.schemas import (
+    CreatePostSchema,
+    PostSchema,
+    UserInternalSchema,
+    CommentSchema,
+)
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
@@ -130,5 +135,25 @@ async def add_comment(
         repo = CommentRepo(uow.session)
         service = PostService(repo=None, comment_repo=repo)
         comment = await service.add_comment(user.id, post_id, comment)
+        await uow.commit()
+        return comment.sync_dict()
+
+
+@router.post(
+    "/{post_id}/comment/{comment_id}",
+    status_code=status.HTTP_201_CREATED,
+    response_model=CommentSchema,
+)
+async def add_reply(
+    post_id: int,
+    comment_id: int,
+    reply: Annotated[str, Body(min_length=1, max_length=255)],
+    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+):
+    async with UnitOfWork(asessionmaker) as uow:
+        repo = CommentRepo(uow.session)
+        service = CommentService(repo)
+        comment = await service.reply(user.id, post_id, comment_id, reply)
         await uow.commit()
         return comment.sync_dict()

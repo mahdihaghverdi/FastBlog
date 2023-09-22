@@ -1,4 +1,4 @@
-from sqlalchemy import insert, update
+from sqlalchemy import insert, update, select
 from sqlalchemy_utils import Ltree
 
 from src.repository.models import CommentModel
@@ -25,10 +25,20 @@ class CommentRepo(BaseRepo):
         )
 
         record = (await self.session.execute(insert_stmt)).scalar_one()
-        add_path_stmt = (
-            update(self.model)
-            .where(self.model.id == record.id)
-            .values(path=Ltree(str(record.id)))
-        )
+        if parent_id is None:
+            add_path_stmt = (
+                update(self.model)
+                .where(self.model.id == record.id)
+                .values(path=Ltree(str(record.id)))
+            )
+        else:
+            # new_path: parent_path + self.id
+            parent_path_stmt = select(self.model.path).where(self.model.id == parent_id)
+            parent_path = (await self.session.execute(parent_path_stmt)).scalar_one()
+            add_path_stmt = (
+                update(self.model)
+                .where(self.model.id == record.id)
+                .values(path=Ltree(parent_path) + Ltree(str(record.id)))
+            )
         await self.session.execute(add_path_stmt)
         return self.object(**record.sync_dict(), model=record)

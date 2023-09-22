@@ -165,7 +165,7 @@ class CommentModel(Base):
             "post_id": self.post_id,
             "parent_id": self.parent_id,
             "comment": self.comment,
-            "path": str(self.path),
+            "path": self.path.path,
             "user_id": self.user_id,
             "username": self.user.username,
         }
