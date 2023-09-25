@@ -57,16 +57,15 @@ class PostService(Service):
         if user is None:
             raise PostNotFoundError(f"post: @{username}/{post_slug} is not found!")
 
-        posts_and_comments = await self.repo.get_post_of_someone_with_comments(
+        post = await self.repo.get_post_with_url(
             user_id=user.id,
             url=f"/@{username}/{post_slug}",
         )
 
-        if posts_and_comments is None:
+        if post is None:
             raise PostNotFoundError(f"post: @{username}/{post_slug} is not found!")
 
-        post, comments = posts_and_comments
-        return post, comments
+        return post
 
     async def add_comment(self, user_id, post_id, comment):
         # self.repo = None, self.comment_repo is available

@@ -1,12 +1,10 @@
-from sqlalchemy import select, desc, func, String, cast
+from sqlalchemy import select, func
 from sqlalchemy.orm import joinedload
-from sqlalchemy.sql import expression
-from sqlalchemy_utils.types.ltree import LQUERY
 
 from src.repository.models import PostModel, UserModel, CommentModel
 from src.repository.repos import BaseRepo, OneToManyRelRepoMixin, PaginationMixin
 from src.repository.repos.tag_repo import TagRepo
-from src.service.objects import Post, Comment
+from src.service.objects import Post
 
 
 class PostRepo(PaginationMixin, OneToManyRelRepoMixin, BaseRepo):
@@ -44,70 +42,48 @@ class PostRepo(PaginationMixin, OneToManyRelRepoMixin, BaseRepo):
         self.session.add(record)
         return Post(**record.sync_dict(), model=record)
 
-    async def get_post_of_someone_with_comments(self, user_id, url):
+    async def get_post_with_url(self, user_id, url):
         post_stmt = (
             select(PostModel)
-            .options(joinedload(PostModel.tags))
-            .join(UserModel.posts.and_(PostModel.user_id == user_id))
+            .join(UserModel, PostModel.user_id == user_id)
             .where(PostModel.url == url)
-        )
-        post = (await self.session.execute(post_stmt)).unique().scalar_one_or_none()
-        if post is None:
-            return None
-
-        # select
-        #   *,
-        #   (
-        #     select
-        #       count(*)
-        #     from
-        #       comments
-        #     where
-        #       path ~ CONCAT(a.path :: varchar, '.*{1}'):: lquery
-        #   )
-        # from
-        #   (
-        #     select
-        #       comments.*
-        #     from
-        #       comments
-        #       join posts on posts.id = comments.post_id
-        #     where
-        #       parent_id is null
-        #   ) a;
-
-        comments_subquery = (
-            select(
-                CommentModel.id,
-                CommentModel.created,
-                CommentModel.post_id,
-                CommentModel.parent_id,
-                CommentModel.comment,
-                CommentModel.user_id,
-                cast(CommentModel.path, String),
-                UserModel.username,
-            )
-            .join(PostModel, CommentModel.post_id == post.id)
-            .where(CommentModel.parent_id == None)  # noqa: E711
-            .join(UserModel)
-            .order_by(desc(CommentModel.created))
-            .limit(5)
         ).subquery()
-        count_stmt = (
-            select(func.count())
-            .filter(
-                CommentModel.path.lquery(
-                    expression.cast(
-                        expression.cast(comments_subquery.columns.path, String)
-                        + ".*{1}",
-                        LQUERY,
-                    ),
-                ),
+
+        # select count(*)
+        # from comments
+        # join posts on posts.id = post_id
+        # where post_id = ?
+        comment_count = (
+            (
+                select(func.count("*"))
+                .select_from(CommentModel)
+                .join(PostModel, PostModel.id == CommentModel.post_id)
+                .where(CommentModel.post_id == post_stmt.columns.id)
             )
             .scalar_subquery()
+            .label("comment_count")
         )
-        stmt = select(comments_subquery, count_stmt.label("reply_count"))
 
-        result = (await self.session.execute(stmt)).unique().mappings().all()
-        comments = list(Comment(**data) for data in result)
-        return post, comments
+        tags = (
+            select(PostModel)
+            .options(joinedload(PostModel.tags))
+            .where(PostModel.id == post_stmt.columns.id)
+        )
+        post_and_comment_count = select(post_stmt, comment_count)
+
+        post = (
+            (await self.session.execute(post_and_comment_count))
+            .unique()
+            .mappings()
+            .fetchall()
+        )
+        if post:
+            tags = (
+                (await self.session.execute(tags))
+                .unique()
+                .scalar_one()
+                .sync_dict()["tags"]
+            )
+            to_ret = dict(post[0])
+            to_ret["tags"] = tags
+            return dict(to_ret)

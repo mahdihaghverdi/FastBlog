@@ -49,6 +49,7 @@ class PostSchema(BaseModel):
     # the pattern for posts' url is like this: https://fastblog.io/@username/slugged-title-somehash
     # this is generated automatically for posts that'll be published
     tags: list[TagSchema]
+    comment_count: int
 
 
 class GlobalPostSchema(BaseModel):

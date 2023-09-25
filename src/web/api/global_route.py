@@ -10,12 +10,12 @@ from src.repository.unit_of_work import UnitOfWork
 from src.service.post_service import PostService
 from src.web.api import give_domain
 from src.web.core.dependencies import get_async_sessionmaker
-from src.web.core.schemas import GlobalPostSchema
+from src.web.core.schemas import PostSchema
 
 router = APIRouter(tags=["global posts"])
 
 
-@router.get("/@{username}/{post_slug}", response_model=GlobalPostSchema)
+@router.get("/@{username}/{post_slug}", response_model=PostSchema)
 async def get_global_post(
     username: str,
     post_slug: str,
@@ -26,9 +26,6 @@ async def get_global_post(
         post_repo = PostRepo(uow.session)
         user_repo = UserRepo(uow.session)
         service = PostService(post_repo, user_repo=user_repo)
-        post, comments = await service.get_post_by_post_url(username, post_slug)
+        post = await service.get_post_by_post_url(username, post_slug)
         post = give_domain(str(request.base_url), post)
-        return {
-            "post": post,
-            "comments": comments,
-        }
+        return post
