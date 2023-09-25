@@ -17,8 +17,13 @@ class CreatePostSchema(BaseModel):
     )
     title_in_url: constr(strip_whitespace=True, min_length=1) | None = None
 
-    def slug(self, username):
+    def slug(self, username, update=False):
         slugify = Slugify(to_lower=True)
+
+        if update:
+            if self.title_in_url is not None:
+                return slugify(f"{self.title_in_url} {generate_hash()}")
+            return None
 
         if self.title_in_url is None:
             slug = slugify(f"{self.title} {generate_hash()}")

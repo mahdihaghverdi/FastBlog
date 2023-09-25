@@ -38,6 +38,8 @@ class PostRepo(PaginationMixin, OneToManyRelRepoMixin, BaseRepo):
             record.tags.add(tag)
 
         for key, value in data.items():
+            if key == "url" and value is None:
+                continue
             setattr(record, key, value)
         self.session.add(record)
         return Post(**record.sync_dict(), model=record)
