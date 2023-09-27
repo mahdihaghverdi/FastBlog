@@ -63,7 +63,6 @@ class PostModel(Base):
             "title": self.title,
             "body": self.body,
             "url": self.url,
-            # "tags": [{'name': tag.name for tag in self.tags}],
             "tags": sorted(
                 [tag.sync_dict() for tag in self.tags],
                 key=lambda x: x["name"],
@@ -152,6 +151,7 @@ class CommentModel(Base):
     parent_id: Mapped[int | None] = mapped_column(ForeignKey("comments.id"))
     comment: Mapped[str] = mapped_column(String(255))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    username: Mapped[str] = mapped_column(ForeignKey("users.username"))
     path: Mapped[str | None] = mapped_column(LtreeType)
 
     user: Mapped["UserModel"] = relationship(back_populates="comments", lazy="selectin")
