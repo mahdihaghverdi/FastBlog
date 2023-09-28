@@ -45,6 +45,7 @@ class PostSchema(BaseModel):
     created: datetime
     title: constr(strip_whitespace=True, min_length=1)
     body: constr(strip_whitespace=True, min_length=1)
+    username: str
     url: AnyHttpUrl
     # the pattern for posts' url is like this: https://fastblog.io/@username/slugged-title-somehash
     # this is generated automatically for posts that'll be published

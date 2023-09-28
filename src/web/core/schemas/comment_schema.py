@@ -9,7 +9,5 @@ class CommentSchema(BaseModel):
     comment: str
     parent_id: int | None
     path: str | None
-    post_id: int
-    user_id: int
     username: str
     reply_count: int

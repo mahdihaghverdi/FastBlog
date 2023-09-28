@@ -35,7 +35,7 @@ class PostModel(Base):
     title: Mapped[str]
     body: Mapped[str]
     url: Mapped[str]
-    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    username: Mapped[int | None] = mapped_column(ForeignKey("users.username"))
 
     user: Mapped["UserModel"] = relationship(back_populates="posts")
     tags: Mapped[set["TagModel"]] = relationship(
@@ -63,6 +63,7 @@ class PostModel(Base):
             "title": self.title,
             "body": self.body,
             "url": self.url,
+            "username": self.username,
             "tags": sorted(
                 [tag.sync_dict() for tag in self.tags],
                 key=lambda x: x["name"],
@@ -99,7 +100,6 @@ class UserModel(Base):
         lazy="selectin",
     )
     comments: Mapped[list["CommentModel"]] = relationship(
-        back_populates="user",
         cascade="delete, delete-orphan",
     )
 
@@ -129,7 +129,7 @@ class DraftModel(Base):
 
     title: Mapped[str]
     body: Mapped[str]
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    username: Mapped[int] = mapped_column(ForeignKey("users.username"))
 
     user: Mapped["UserModel"] = relationship(back_populates="draft_posts")
 
@@ -150,11 +150,9 @@ class CommentModel(Base):
     post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"))
     parent_id: Mapped[int | None] = mapped_column(ForeignKey("comments.id"))
     comment: Mapped[str] = mapped_column(String(255))
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     username: Mapped[str] = mapped_column(ForeignKey("users.username"))
     path: Mapped[str | None] = mapped_column(LtreeType)
 
-    user: Mapped["UserModel"] = relationship(back_populates="comments", lazy="selectin")
     post: Mapped["PostModel"] = relationship(back_populates="comments")
 
     def sync_dict(self):
@@ -165,8 +163,7 @@ class CommentModel(Base):
             "parent_id": self.parent_id,
             "comment": self.comment,
             "path": self.path.path,
-            "user_id": self.user_id,
-            "username": self.user.username,
+            "username": self.username,
         }
 
 
