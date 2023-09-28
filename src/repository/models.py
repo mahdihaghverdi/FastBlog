@@ -35,7 +35,7 @@ class PostModel(Base):
     title: Mapped[str]
     body: Mapped[str]
     url: Mapped[str]
-    username: Mapped[int | None] = mapped_column(ForeignKey("users.username"))
+    username: Mapped[str] = mapped_column(ForeignKey("users.username"))
 
     user: Mapped["UserModel"] = relationship(back_populates="posts")
     tags: Mapped[set["TagModel"]] = relationship(
@@ -109,19 +109,9 @@ class UserModel(Base):
             "created": self.created,
             "username": self.username,
             "password": self.password,
+            "posts": self.posts,
+            "drafts": self.draft_posts,
         }
-
-    async def dict(self):
-        d = await super().dict()
-        d.update(
-            {
-                "username": self.username,
-                "password": self.password,
-                "posts": await self.awaitable_attrs.posts,
-                "drafts": await self.awaitable_attrs.draft_posts,
-            },
-        )
-        return d
 
 
 class DraftModel(Base):
@@ -129,7 +119,7 @@ class DraftModel(Base):
 
     title: Mapped[str]
     body: Mapped[str]
-    username: Mapped[int] = mapped_column(ForeignKey("users.username"))
+    username: Mapped[str] = mapped_column(ForeignKey("users.username"))
 
     user: Mapped["UserModel"] = relationship(back_populates="draft_posts")
 
