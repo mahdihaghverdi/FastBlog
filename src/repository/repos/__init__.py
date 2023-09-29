@@ -42,40 +42,40 @@ class BaseRepo:
         if record is not None:
             if raw:
                 return record
-            return self.object(**(await record.dict()), model=record)
+            return self.object(**record.sync_dict(), model=record)
 
 
 class OneToManyRelRepoMixin:
-    async def _get(self, user_id, self_id):
+    async def _get(self, username, self_id):
         stmt = (
             select(self.model)
-            .where(self.model.user_id == user_id)
+            .where(self.model.username == username)
             .where(self.model.id == self_id)
         )
         record = (await self.session.execute(stmt)).scalar_one_or_none()
         if record is not None:
             return record
 
-    async def add(self, user_id, data: dict):
-        record = self.model(**data, user_id=user_id)
+    async def add(self, username, data: dict):
+        record = self.model(**data, username=username)
         self.session.add(record)
         return self.object(**record.sync_dict(), model=record)
 
-    async def get(self, user_id, self_id):
-        record = await self._get(user_id, self_id)
+    async def get(self, username, self_id):
+        record = await self._get(username, self_id)
         if record is not None:
-            return self.object(**record.sync_dict(), model=record)
+            return record.sync_dict()
 
-    async def update(self, user_id, /, self_id, data: dict):
-        record = await self._get(user_id, self_id)
+    async def update(self, username, /, self_id, data: dict):
+        record = await self._get(username, self_id)
         if record is None:
             return
         for key, value in data.items():
             setattr(record, key, value)
         return self.object(**record.sync_dict(), model=record)
 
-    async def delete(self, user_id, /, self_id):
-        record = await self._get(user_id, self_id)
+    async def delete(self, username, /, self_id):
+        record = await self._get(username, self_id)
         if record is None:
             return False
         await self.session.delete(record)
@@ -84,7 +84,7 @@ class OneToManyRelRepoMixin:
 class PaginationMixin:
     async def list(
         self,
-        user_id,
+        username,
         *,
         page: int,
         per_page: int,
@@ -99,7 +99,7 @@ class PaginationMixin:
         order_by_column = self.model.title if sort is Sort.TITLE else self.model.created
         stmt = (
             select(self.model)
-            .where(self.model.user_id == user_id)
+            .where(self.model.username == username)
             .offset((page - 1) * per_page)
             .limit(per_page)
             .order_by(
