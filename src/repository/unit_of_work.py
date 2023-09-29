@@ -1,9 +1,8 @@
 class UnitOfWork:
-    def __init__(self, session_factory):
-        self.session_factory = session_factory
+    def __init__(self, session):
+        self.session = session
 
     async def __aenter__(self):
-        self.session = self.session_factory()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):

@@ -1,17 +1,15 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from starlette.requests import Request
 
-from src.common.exceptions import DuplicateUsernameError
-from src.repository.unit_of_work import UnitOfWork
 from src.repository.repos.user_repo import UserRepo
+from src.repository.unit_of_work import UnitOfWork
 from src.service.user_service import UserService
 from src.web.api import give_domain
-from src.web.core.dependencies import get_async_sessionmaker, get_current_user
+from src.web.core.dependencies import get_db, get_current_user
 from src.web.core.schemas import UserOutSchema, UserSignUpSchema, UserInternalSchema
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -25,20 +23,16 @@ router = APIRouter(prefix="/users", tags=["users"])
 async def signup_user(
     username: Annotated[str, Form()],
     password: Annotated[str, Form()],
-    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    session: Annotated[AsyncSession, Depends(get_db)],
 ):
-    async with UnitOfWork(asessionmaker) as uow:
+    async with UnitOfWork(session) as uow:
         repo = UserRepo(uow.session)
         service = UserService(repo)
         user = await service.create_user(
             UserSignUpSchema(username=username, password=password).model_dump(),
         )
-        try:
-            await uow.commit()
-        except IntegrityError:
-            raise DuplicateUsernameError(f"username: {user.username!r} already exists!")
-        else:
-            return await user.dict()
+        await uow.commit()
+        return user.sync_dict()
 
 
 @router.get("/me", response_model=UserOutSchema)

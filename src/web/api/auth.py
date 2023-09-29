@@ -2,12 +2,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestFormStrict
-from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.repository.unit_of_work import UnitOfWork
 from src.repository.repos.user_repo import UserRepo
+from src.repository.unit_of_work import UnitOfWork
 from src.service.user_service import UserService
-from src.web.core.dependencies import get_async_sessionmaker
+from src.web.core.dependencies import get_db
 from src.web.core.schemas import TokenSchema, UserLoginSchema
 from src.web.core.security import create_access_token
 
@@ -16,10 +16,10 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/access-token", response_model=TokenSchema)
 async def login_for_access_token(
-    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    session: Annotated[AsyncSession, Depends(get_db)],
     form_data: Annotated[OAuth2PasswordRequestFormStrict, Depends()],
 ):
-    async with UnitOfWork(asessionmaker) as uow:
+    async with UnitOfWork(session) as uow:
         repo = UserRepo(uow.session)
         service = UserService(repo)
         user = await service.authenticate(

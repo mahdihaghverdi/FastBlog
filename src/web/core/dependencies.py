@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, Query
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError  # noqa
-from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from starlette import status
 
 from src.repository.repos.user_repo import UserRepo
@@ -18,6 +18,16 @@ from src.web.core.schemas import Sort
 
 async def get_async_sessionmaker() -> async_sessionmaker:
     return async_sessionmaker(sqlalchemy_engine, expire_on_commit=False)
+
+
+async def get_db(
+    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+) -> AsyncSession:
+    db = asessionmaker()
+    try:
+        yield db
+    finally:
+        await db.close()
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/access-token")
@@ -52,17 +62,17 @@ async def returning_query_parameters(
 
 
 async def get_user(
-    asession: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    session: Annotated[AsyncSession, Depends(get_db)],
     user_id,
 ) -> User:
-    async with UnitOfWork(asession) as uow:
+    async with UnitOfWork(session) as uow:
         repo = UserRepo(uow.session)
         service = UserService(repo)
         return await service.get_user(user_id)
 
 
 async def get_current_user(
-    asession: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    session: Annotated[AsyncSession, Depends(get_db)],
     token: Annotated[str, Depends(oauth2_scheme)],
 ) -> User:
     credentials_exception = HTTPException(
@@ -81,5 +91,5 @@ async def get_current_user(
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = await get_user(asession, int(user_id))
+    user = await get_user(session, int(user_id))
     return user

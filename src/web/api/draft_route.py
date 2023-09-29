@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from starlette.requests import Request
 
@@ -10,10 +10,10 @@ from src.repository.unit_of_work import UnitOfWork
 from src.service.draft_service import DraftService
 from src.web.api import give_domain
 from src.web.core.dependencies import (
-    get_async_sessionmaker,
     get_current_user,
     QueryParameters,
     returning_query_parameters,
+    get_db,
 )
 from src.web.core.schemas import (
     CreateDraftSchema,
@@ -33,11 +33,11 @@ router = APIRouter(prefix="/drafts", tags=["drafts"])
 )
 async def create_draft(
     draft: CreateDraftSchema,
-    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    session: Annotated[AsyncSession, Depends(get_db)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
     """Create a draft draft"""
-    async with UnitOfWork(asessionmaker) as uow:
+    async with UnitOfWork(session) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
         draft = await service.create_draft(user.id, draft.model_dump())
@@ -51,12 +51,12 @@ async def create_draft(
     status_code=status.HTTP_200_OK,
 )
 async def get_drafts(
-    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    session: Annotated[AsyncSession, Depends(get_db)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
     query_parameters: Annotated[QueryParameters, Depends(returning_query_parameters)],
 ):
     """Retrieve all the draft"""
-    async with UnitOfWork(asessionmaker) as uow:
+    async with UnitOfWork(session) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
         drafts = await service.list_drafts(
@@ -72,11 +72,11 @@ async def get_drafts(
 @router.get("/{draft_id}", response_model=DraftSchema, status_code=status.HTTP_200_OK)
 async def get_draft(
     draft_id: int,
-    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    session: Annotated[AsyncSession, Depends(get_db)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
     """Return details of a specific draft"""
-    async with UnitOfWork(asessionmaker) as uow:
+    async with UnitOfWork(session) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
         return await service.get_draft(user.id, draft_id)
@@ -86,11 +86,11 @@ async def get_draft(
 async def update_draft(
     draft_id: int,
     draft_detail: CreateDraftSchema,
-    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    session: Annotated[AsyncSession, Depends(get_db)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
     """Replace an existing draft"""
-    async with UnitOfWork(asessionmaker) as uow:
+    async with UnitOfWork(session) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
         draft = await service.update_draft(user.id, draft_id, draft_detail.model_dump())
@@ -101,11 +101,11 @@ async def update_draft(
 @router.delete("/{draft_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_draft(
     draft_id: int,
-    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    session: Annotated[AsyncSession, Depends(get_db)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
     """Delete a specific draft"""
-    async with UnitOfWork(asessionmaker) as uow:
+    async with UnitOfWork(session) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
         await service.delete_draft(user.id, draft_id)
@@ -121,11 +121,11 @@ async def publish_draft(
     request: Request,
     draft_id: int,
     tags_and_title_in_url: PublishSchema,
-    asessionmaker: Annotated[async_sessionmaker, Depends(get_async_sessionmaker)],
+    session: Annotated[AsyncSession, Depends(get_db)],
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
     """Publish a draft post"""
-    async with UnitOfWork(asessionmaker) as uow:
+    async with UnitOfWork(session) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
         post = await service.publish_draft(user, draft_id, tags_and_title_in_url)
