@@ -17,19 +17,31 @@ class CreatePostSchema(BaseModel):
     )
     title_in_url: constr(strip_whitespace=True, min_length=1) | None = None
 
-    def slug(self, username, update=False):
+    def slug(self, username):
         slugify = Slugify(to_lower=True)
-
-        if update:
-            if self.title_in_url is not None:
-                return slugify(f"{self.title_in_url} {generate_hash()}")
-            return None
 
         if self.title_in_url is None:
             slug = slugify(f"{self.title} {generate_hash()}")
         else:
             slug = slugify(f"{self.title_in_url} {generate_hash()}")
         return f"/@{username}/{slug}"
+
+
+class UpdatePostSchema(BaseModel):
+    title: constr(strip_whitespace=True, min_length=1) | None = None
+    body: constr(strip_whitespace=True, min_length=1) | None = None
+    tags: conset(
+        constr(strip_whitespace=True, to_lower=True, min_length=1),
+        min_length=1,
+        max_length=5,
+    ) | None = None
+    title_in_url: constr(strip_whitespace=True, min_length=1) | None = None
+
+    def slug(self):
+        slugify = Slugify(to_lower=True)
+
+        if self.title_in_url is not None:
+            return slugify(f"{self.title_in_url} {generate_hash()}")
 
 
 class TagSchema(BaseModel):
@@ -40,7 +52,7 @@ class TagSchema(BaseModel):
         return self.name
 
 
-class PostSchema(BaseModel):
+class BarePostSchema(BaseModel):
     id: int
     created: datetime
     title: constr(strip_whitespace=True, min_length=1)
@@ -49,7 +61,10 @@ class PostSchema(BaseModel):
     url: AnyHttpUrl
     # the pattern for posts' url is like this: https://fastblog.io/@username/slugged-title-somehash
     # this is generated automatically for posts that'll be published
-    tags: list[TagSchema]
+    tags: list[str]
+
+
+class PostSchema(BarePostSchema):
     comment_count: int
 
 

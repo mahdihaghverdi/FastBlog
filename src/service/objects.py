@@ -11,9 +11,6 @@ class BusinessObject:
         )
         return f"<{self.__class__.__name__}: {attrs}>"
 
-    async def dict(self):
-        return await self.model.dict()
-
     def sync_dict(self):
         return self.model.sync_dict()
 

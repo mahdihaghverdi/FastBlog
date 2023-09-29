@@ -64,10 +64,11 @@ class PostModel(Base):
             "body": self.body,
             "url": self.url,
             "username": self.username,
-            "tags": sorted(
-                [tag.sync_dict() for tag in self.tags],
-                key=lambda x: x["name"],
-            ),
+            "tags": sorted(tag.name for tag in self.tags),
+            # "tags": sorted(
+            #     [tag.sync_dict() for tag in self.tags],
+            #     key=lambda x: x["name"],
+            # ),
         }
 
 

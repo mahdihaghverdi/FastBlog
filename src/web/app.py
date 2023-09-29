@@ -7,7 +7,14 @@ from src.common.exceptions import (
     DuplicateUsernameError,
     UnAuthorizedError,
 )
-from src.web.api import post_route, user_route, auth, draft_route, global_route
+from src.web.api import (
+    post_route,
+    user_route,
+    auth,
+    draft_route,
+    global_route,
+    comments_route,
+)
 
 app = FastAPI(debug=True)
 
@@ -16,6 +23,7 @@ app.include_router(auth.router)
 app.include_router(post_route.router)
 app.include_router(draft_route.router)
 app.include_router(global_route.router)
+app.include_router(comments_route.router)
 
 
 @app.exception_handler(ResourceNotFoundError)
