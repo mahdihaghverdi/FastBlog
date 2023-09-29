@@ -4,11 +4,8 @@ from src.service.objects import Post
 from src.web.core.schemas import Sort
 
 
-async def slugify(post, user, update=False):
-    if update:
-        slug = post.slug()
-    else:
-        slug = post.slug(user.username)
+async def slugify(post, user):
+    slug = post.slug(user.username)
     post_dict = post.model_dump()
     del post_dict["title_in_url"]
     post_dict["url"] = slug
@@ -44,7 +41,7 @@ class PostService(Service):
         return post
 
     async def update_post(self, user, post_id, post):
-        post_dict = await slugify(post, user, update=True)
+        post_dict = await slugify(post, user)
         post = await self.repo.update(user.username, post_id, post_dict)
         if post is None:
             raise PostNotFoundError(f"post with id: '{post_id}' is not found")
@@ -61,7 +58,7 @@ class PostService(Service):
             raise PostNotFoundError(f"post: @{username}/{post_slug} is not found!")
 
         post = await self.repo.get_post_with_url(
-            user_id=user.username,
+            username=user.username,
             url=f"/@{username}/{post_slug}",
         )
 

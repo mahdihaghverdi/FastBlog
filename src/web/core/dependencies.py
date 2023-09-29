@@ -9,7 +9,6 @@ from starlette import status
 
 from src.repository.repos.user_repo import UserRepo
 from src.repository.unit_of_work import UnitOfWork
-from src.service.objects import User
 from src.service.user_service import UserService
 from src.web.core.config import settings
 from src.web.core.database import sqlalchemy_engine
@@ -64,7 +63,7 @@ async def returning_query_parameters(
 async def get_user(
     session: Annotated[AsyncSession, Depends(get_db)],
     user_id,
-) -> User:
+):
     async with UnitOfWork(session) as uow:
         repo = UserRepo(uow.session)
         service = UserService(repo)
@@ -74,7 +73,7 @@ async def get_user(
 async def get_current_user(
     session: Annotated[AsyncSession, Depends(get_db)],
     token: Annotated[str, Depends(oauth2_scheme)],
-) -> User:
+):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

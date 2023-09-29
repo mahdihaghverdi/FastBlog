@@ -37,11 +37,12 @@ class UpdatePostSchema(BaseModel):
     ) | None = None
     title_in_url: constr(strip_whitespace=True, min_length=1) | None = None
 
-    def slug(self):
+    def slug(self, username):
         slugify = Slugify(to_lower=True)
 
         if self.title_in_url is not None:
-            return slugify(f"{self.title_in_url} {generate_hash()}")
+            slug = slugify(f"{self.title_in_url} {generate_hash()}")
+            return f"/@{username}/{slug}"
 
 
 class TagSchema(BaseModel):

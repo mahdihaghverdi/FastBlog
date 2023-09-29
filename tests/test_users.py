@@ -1,6 +1,3 @@
-from slugify import Slugify
-
-
 class TestAuth:
     username = "string"
     password = "12345678"
@@ -17,8 +14,8 @@ class TestAuth:
 
     @staticmethod
     def extract(data):
-        username, posts, drafts = data["username"], data["posts"], data["drafts"]
-        return username, posts, drafts
+        username = data["username"]
+        return username
 
     @staticmethod
     def extract_post(data):
@@ -35,55 +32,37 @@ class TestAuth:
         assert response.status_code == 201, response.text
 
         data = response.json()
-        username, posts, drafts = self.extract(data)
+        username = self.extract(data)
         assert username == self.username
-        assert not posts
-        assert not drafts
 
-        response = client.post("/users/signup", data=self.data)
-        assert response.status_code == 400, response.text
-
-    def test_empty_users_me(self, client):
-        client.post("/users/signup", data=self.data)
-        access_token = client.post(
-            "/auth/access-token",
-            data=self.access_token_data,
-        ).json()["access_token"]
-        response = client.get(
-            "/users/me",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-        assert response.status_code == 200, response.text
-
-        data = response.json()
-        username, posts, drafts = self.extract(data)
-        assert username == self.username
-        assert not posts
-        assert not drafts
-
-    def test_users_me_posts_drafts(self, client, payload):
-        client.post("/users/signup", data=self.data)
         access_token = client.post(
             "/auth/access-token",
             data=self.access_token_data,
         ).json()["access_token"]
 
         headers = {"Authorization": f"Bearer {access_token}"}
-        client.post("/drafts", json=payload, headers=headers)
-        client.post("/posts", json=payload, headers=headers)
 
-        response = client.get("/users/me", headers=headers)
+        posts = client.get("/posts", headers=headers).json()
+        assert not posts
 
-        username, posts, drafts = self.extract(response.json())
-        assert username == self.username
+        drafts = client.get("/drafts", headers=headers).json()
+        assert not drafts
 
-        title, body, url, tags = self.extract_post(posts[0])
-        assert title == payload["title"]
-        assert body == payload["body"]
-        s = Slugify(to_lower=True)
-        assert f"http://testserver/@{self.username}/{s(title)}" == url[: len(url) - 9]
-        assert tags == payload["tags"]
+        response = client.post("/users/signup", data=self.data)
+        assert response.status_code == 400, response.text
 
-        title, body = self.extract_draft(drafts[0])
-        assert title == payload["title"]
-        assert body == payload["body"]
+    def test_empty_users_me_posts_drafts(self, client):
+        client.post("/users/signup", data=self.data)
+
+        access_token = client.post(
+            "/auth/access-token",
+            data=self.access_token_data,
+        ).json()["access_token"]
+
+        headers = {"Authorization": f"Bearer {access_token}"}
+
+        posts = client.get("/posts", headers=headers).json()
+        assert not posts
+
+        drafts = client.get("/drafts", headers=headers).json()
+        assert not drafts

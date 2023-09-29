@@ -130,4 +130,6 @@ async def publish_draft(
         service = DraftService(repo)
         post = await service.publish_draft(user, draft_id, tags_and_title_in_url)
         await uow.commit()
-        return give_domain(str(request.base_url), post.sync_dict())
+        post_data = post.sync_dict()
+        post_data["comment_count"] = 0
+        return give_domain(str(request.base_url), post_data)

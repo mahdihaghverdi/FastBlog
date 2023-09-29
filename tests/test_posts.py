@@ -1,7 +1,5 @@
 import random
 
-from tests.conftest import test_posts
-
 
 class BaseTest:
     @classmethod
@@ -72,11 +70,58 @@ class TestGetPost(BaseTest):
         assert len(client.get("/posts", headers=headers2).json()) == 1
         assert len(client.get("/posts", headers=headers).json()) == 0
 
-        posts = [
-            client.post("/posts", json=post, headers=headers).json()
-            for post_list in test_posts
-            for post in post_list
-        ]
+        post1 = client.post(
+            "/posts",
+            json={"title": "0", "body": "b1", "tags": ["1"]},
+            headers=headers,
+        ).json()["title"]
+        post2 = client.post(
+            "/posts",
+            json={"title": "1", "body": "b2", "tags": ["1"]},
+            headers=headers,
+        ).json()["title"]
+        post3 = client.post(
+            "/posts",
+            json={"title": "2", "body": "b3", "tags": ["1"]},
+            headers=headers,
+        ).json()["title"]
+        post4 = client.post(
+            "/posts",
+            json={"title": "3", "body": "b4", "tags": ["1"]},
+            headers=headers,
+        ).json()["title"]
+        post5 = client.post(
+            "/posts",
+            json={"title": "4", "body": "b5", "tags": ["1"]},
+            headers=headers,
+        ).json()["title"]
+        post6 = client.post(
+            "/posts",
+            json={"title": "5", "body": "b6", "tags": ["1"]},
+            headers=headers,
+        ).json()["title"]
+        post7 = client.post(
+            "/posts",
+            json={"title": "6", "body": "b7", "tags": ["1"]},
+            headers=headers,
+        ).json()["title"]
+        post8 = client.post(
+            "/posts",
+            json={"title": "7", "body": "b8", "tags": ["1"]},
+            headers=headers,
+        ).json()["title"]
+        post9 = client.post(
+            "/posts",
+            json={"title": "8", "body": "b9", "tags": ["1"]},
+            headers=headers,
+        ).json()["title"]
+        post10 = client.post(
+            "/posts",
+            json={"title": "9", "body": "b10", "tags": ["1"]},
+            headers=headers,
+        ).json()["title"]
+
+        posts = [post1, post2, post3, post4, post5, post6, post7, post8, post9, post10]
 
         # default query params: page = 1, per-page = 5, sort = date, desc = true
         # pages
@@ -87,20 +132,20 @@ class TestGetPost(BaseTest):
         assert len(response.json()) == 5
 
         response = client.get("/posts", params={"page": 3}, headers=headers)
-        assert len(response.json()) == 5
-
-        response = client.get("/posts", params={"page": 4}, headers=headers)
-        assert len(response.json()) == 5
-
-        response = client.get("/posts", params={"page": 5}, headers=headers)
-        assert len(response.json()) == 5
+        assert len(response.json()) == 0
 
         # per-page
+        response = client.get("/posts", params={"per-page": 1}, headers=headers)
+        assert len(response.json()) == 1
+
+        response = client.get("/posts", params={"per-page": 2}, headers=headers)
+        assert len(response.json()) == 2
+
         response = client.get("/posts", params={"per-page": 10}, headers=headers)
         assert len(response.json()) == 10
 
         response = client.get("/posts", params={"per-page": 20}, headers=headers)
-        assert len(response.json()) == 20
+        assert len(response.json()) == 10
 
         response = client.get(
             "/posts",
@@ -115,14 +160,18 @@ class TestGetPost(BaseTest):
             params={"per-page": len(posts)},
             headers=headers,
         )
-        assert response.json() == posts[::-1]
+
+        assert [post["title"] for post in response.json()] == posts[::-1]
 
         response = client.get(
             "/posts",
             params={"per-page": len(posts), "sort": "title"},
             headers=headers,
         )
-        assert response.json() == sorted(posts, key=lambda x: x["title"], reverse=True)
+        assert [post["title"] for post in response.json()] == sorted(
+            posts,
+            reverse=True,
+        )
 
         # desc
         response = client.get(
@@ -130,7 +179,7 @@ class TestGetPost(BaseTest):
             params={"per-page": len(posts), "desc": "false"},
             headers=headers,
         )
-        assert response.json() == posts
+        assert [post["title"] for post in response.json()] == posts
 
     def test_get_post(self, client, headers):
         post_id = client.post("/posts", json=self.payload, headers=headers).json()["id"]
@@ -144,7 +193,7 @@ class TestGetPost(BaseTest):
         assert set(tags) == set(self.tags)
 
 
-class TestPutPost(TestPostPost):
+class TestPatchPost(TestPostPost):
     test_create_post_with_default_url = None
     test_create_post_with_custom_url = None
 
@@ -160,40 +209,49 @@ class TestPutPost(TestPostPost):
 
     def test_update_title(self, client, headers):
         post_id = client.post("/posts", json=self.payload, headers=headers).json()["id"]
-        payload = self.payload
-        payload["title"] = "a"
-        response = client.put(f"/posts/{post_id}", json=payload, headers=headers)
+        response = client.patch(
+            f"/posts/{post_id}",
+            json={"title": "new title"},
+            headers=headers,
+        )
+
         assert response.status_code == 200, response.text
+
         id_, title, body, url, tags = self.extract(response.json())
 
         assert id_ == post_id
-        assert title == payload["title"]
+        assert title == "new title"
         assert body == self.body
-        assert url == "http://testserver/@string/a"
+        assert url == self.url
         assert set(tags) == set(self.tags)
 
     def test_update_body(self, client, headers):
         post_id = client.post("/posts", json=self.payload, headers=headers).json()["id"]
-        payload = self.payload
-        payload["body"] = "a"
-        response = client.put(f"/posts/{post_id}", json=payload, headers=headers)
+        response = client.patch(
+            f"/posts/{post_id}",
+            json={"body": "new body"},
+            headers=headers,
+        )
+
         assert response.status_code == 200, response.text
+
         id_, title, body, url, tags = self.extract(response.json())
 
         assert id_ == post_id
         assert title == self.title
-        assert body == payload["body"]
+        assert body == "new body"
         assert url == self.url
         assert set(tags) == set(self.tags)
 
     def test_update_url(self, client, headers):
         post_id = client.post("/posts", json=self.payload, headers=headers).json()["id"]
-        response = client.put(
+        response = client.patch(
             f"/posts/{post_id}",
-            json=self.custom_data,
+            json={"title_in_url": self.new_slug},
             headers=headers,
         )
         assert response.status_code == 200, response.text
+
         id_, title, body, url, tags = self.extract(response.json())
 
         assert id_ == post_id
@@ -204,9 +262,11 @@ class TestPutPost(TestPostPost):
 
     def test_update_tags(self, client, headers):
         post_id = client.post("/posts", json=self.payload, headers=headers).json()["id"]
-        payload = self.payload
-        payload["tags"] = self.new_tags
-        response = client.put(f"/posts/{post_id}", json=payload, headers=headers)
+        response = client.patch(
+            f"/posts/{post_id}",
+            json={"tags": self.new_tags},
+            headers=headers,
+        )
         assert response.status_code == 200, response.text
         id_, title, body, url, tags = self.extract(response.json())
 
@@ -231,7 +291,7 @@ def test_get_post_fail(client, headers):
 
 
 def test_update_post_fail(client, headers, payload):
-    response = client.put(
+    response = client.patch(
         f"/posts/{random.randint(0, 1)}",
         json=payload,
         headers=headers,

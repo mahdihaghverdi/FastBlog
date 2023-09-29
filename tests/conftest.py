@@ -1,16 +1,19 @@
 import asyncio
 import pathlib
+import random
 import string
 import sys
-import random
 
 import pytest
+from sqlalchemy import NullPool
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from starlette.testclient import TestClient
 
 sys.path.append(str(pathlib.Path(__file__).parent.parent))
 from src.repository.models import Base  # noqa: E402
 from src.web.app import app  # noqa: E402
-from src.web.core.database import sqlalchemy_engine as engine  # noqa: E402
+from src.web.core.config import settings  # noqa: E402
+from src.web.core.dependencies import get_async_sessionmaker  # noqa: E402
 
 
 def random_string():
@@ -26,14 +29,19 @@ test_posts = [
 ]
 
 
-async def create_all():
+async def get_async_sessionmaker_mock():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+    return async_sessionmaker(
+        engine,
+        expire_on_commit=False,
+        autocommit=False,
+        autoflush=False,
+    )
 
-async def drop_all():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+
+app.dependency_overrides[get_async_sessionmaker] = get_async_sessionmaker_mock
 
 
 @pytest.fixture(scope="function")
@@ -73,9 +81,16 @@ def payload2():
     return {"title": title, "body": body, "title_in_url": new_title, "tags": [1]}
 
 
+engine = create_async_engine(str(settings.database_url), poolclass=NullPool)
+
+
+async def drop_all():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
+
 @pytest.fixture(scope="function")
 def client() -> TestClient:
-    asyncio.run(create_all())
     try:
         yield TestClient(app=app)
     finally:

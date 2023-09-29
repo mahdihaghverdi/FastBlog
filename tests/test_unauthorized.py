@@ -37,7 +37,7 @@ def test_not_authorized_posts(client, headers, payload):
     response = client.get(f"/posts/{post_id}")
     assert response.status_code == 401, response.text
 
-    response = client.put(f"/posts/{post_id}", json=payload)
+    response = client.patch(f"/posts/{post_id}", json=payload)
     assert response.status_code == 401, response.text
 
     response = client.delete(f"/posts/{post_id}")

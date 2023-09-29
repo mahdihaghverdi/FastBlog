@@ -154,9 +154,6 @@ class PostRepo(PaginationMixin, OneToManyRelRepoMixin, BaseRepo):
             .where(PostModel.username == username)
             .offset((page - 1) * per_page)
             .limit(per_page)
-            .order_by(
-                desc(order_by_column) if desc_ else order_by_column,
-            )
         ).subquery("posts")
 
         posts_with_tags = (
@@ -170,7 +167,9 @@ class PostRepo(PaginationMixin, OneToManyRelRepoMixin, BaseRepo):
                 )
             )
             .group_by(posts)
-            .order_by(posts.columns.created)
+            .order_by(
+                desc(order_by_column) if desc_ else order_by_column,
+            )
         ).subquery("posts_with_tags")
 
         comment_count = (
