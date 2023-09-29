@@ -1,7 +1,5 @@
 import asyncio
 import pathlib
-import random
-import string
 import sys
 
 import pytest
@@ -14,19 +12,6 @@ from src.repository.models import Base  # noqa: E402
 from src.web.app import app  # noqa: E402
 from src.web.core.config import settings  # noqa: E402
 from src.web.core.dependencies import get_async_sessionmaker  # noqa: E402
-
-
-def random_string():
-    return "".join(random.choices(string.ascii_lowercase, k=1))
-
-
-test_posts = [
-    [
-        {"title": random_string(), "body": random_string(), "tags": ["a"]}
-        for _ in range(5)
-    ]
-    for _ in range(5)
-]
 
 
 async def get_async_sessionmaker_mock():
@@ -71,12 +56,12 @@ body = "Wow, such a release!"
 new_title = "the Ugly umbrella"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def payload():
     return {"title": title, "body": body, "tags": ["1"]}
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def payload2():
     return {"title": title, "body": body, "title_in_url": new_title, "tags": [1]}
 
