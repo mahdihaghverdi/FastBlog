@@ -40,7 +40,7 @@ async def create_draft(
     async with UnitOfWork(session) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
-        draft = await service.create_draft(user.id, draft.model_dump())
+        draft = await service.create_draft(user, draft.model_dump())
         await uow.commit()
         return draft.sync_dict()
 
@@ -60,7 +60,7 @@ async def get_drafts(
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
         drafts = await service.list_drafts(
-            user.id,
+            user,
             page=query_parameters.page,
             per_page=query_parameters.per_page,
             sort=query_parameters.sort,
@@ -79,7 +79,7 @@ async def get_draft(
     async with UnitOfWork(session) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
-        return await service.get_draft(user.id, draft_id)
+        return await service.get_draft(user, draft_id)
 
 
 @router.put("/{draft_id}", response_model=DraftSchema, status_code=status.HTTP_200_OK)
@@ -93,7 +93,7 @@ async def update_draft(
     async with UnitOfWork(session) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
-        draft = await service.update_draft(user.id, draft_id, draft_detail.model_dump())
+        draft = await service.update_draft(user, draft_id, draft_detail.model_dump())
         await uow.commit()
         return draft.sync_dict()
 
@@ -108,7 +108,7 @@ async def delete_draft(
     async with UnitOfWork(session) as uow:
         repo = DraftRepo(uow.session)
         service = DraftService(repo)
-        await service.delete_draft(user.id, draft_id)
+        await service.delete_draft(user, draft_id)
         await uow.commit()
 
 
