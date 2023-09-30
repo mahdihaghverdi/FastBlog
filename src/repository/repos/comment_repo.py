@@ -68,14 +68,14 @@ class CommentRepo(BaseRepo):
     async def list(self, post_id, comment_id, reply_level):
         # Base query
         """
-                select *,
-                  (
-                    select count(*)-1
-                    from comments
-                    where path <@ c.path::varchar::ltree
-                  ) as reply_count
-                from comments as c
-                where post_id = 30 and c.path ~ '*{1}'::lquery;    <--- level of replies ----> {1,n}
+        select *,
+          (
+            select count(*)-1
+            from comments
+            where path <@ c.path::varchar::ltree
+          ) as reply_count
+        from comments as c
+        where post_id = 30 and c.path ~ '*{1}'::lquery;    <--- level of replies ----> {1,n}
 
          post_id | parent_id | comment | id |          created           | user_id | path | reply_count
         ---------+-----------+---------+----+----------------------------+---------+------+-------------
@@ -84,15 +84,16 @@ class CommentRepo(BaseRepo):
         (2 rows)
 
         ------------------------------------------------------------------------------------------------------------------------
-                select *,
-                  (
-                    select count(*)-1
-                    from comments
-                    where path <@ c.path::varchar::ltree
-                  ) as reply_count
-                from comments as c
-                where post_id = 30
-                      and path ~ '*{1,2}'::lquery limit 10;
+
+        select *,
+          (
+            select count(*)-1
+            from comments
+            where path <@ c.path::varchar::ltree
+          ) as reply_count
+        from comments as c
+        where post_id = 30
+              and path ~ '*{1,2}'::lquery limit 10;
 
          post_id | parent_id |         comment         | id |          created           | user_id | path  | reply_count
         ---------+-----------+-------------------------+----+----------------------------+---------+-------+-------------

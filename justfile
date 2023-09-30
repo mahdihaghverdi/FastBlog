@@ -41,16 +41,16 @@ ltree:
 
 
 test $database_url=test-database-url:
-  pytest --durations=5 --no-header --cov=src --cov-report=html --cov-report=term-missing tests -vv
+  pytest --durations=10 --no-header --cov=src --cov-report=html --cov-report=term-missing tests -vv
 
 test-no-cov $database_url=test-database-url:
-  pytest --durations=5 --no-header tests
+  pytest --durations=10 --no-header tests
 
 test-spec where $database_url=test-database-url:
-  pytest --durations=5 --no-header --cov=src --cov-report=html --cov-report=term-missing tests/{{where}}
+  pytest --durations=10 --no-header --cov=src --cov-report=html --cov-report=term-missing tests/{{where}}
 
 test-spec-no-cov where $database_url=test-database-url:
-  pytest --durations=5 --no-header tests/{{where}}
+  pytest --durations=10 --no-header tests/{{where}}
 
 migrate message $database_url=prod-database-url:
   alembic revision --autogenerate -m "{{message}}"
