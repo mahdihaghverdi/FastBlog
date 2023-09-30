@@ -1,44 +1,42 @@
-def test_not_authorized_drafts(client, headers, payload):
-    response = client.post("/drafts", json=payload)
-    assert response.status_code == 401, response.text
+class TestNotAuthorized:
+    def test_not_authorized_me(self, class_client):
+        response = class_client.get("/users/me")
+        assert response.status_code == 401, response.text
 
-    draft_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
+    def test_not_authorized_posts(self, class_client, payload):
+        response = class_client.get("/posts")
+        assert response.status_code == 401, response.text
 
-    response = client.get("/drafts")
-    assert response.status_code == 401, response.text
+        response = class_client.post("/posts", json=payload)
+        assert response.status_code == 401, response.text
 
-    response = client.get(f"/drafts/{draft_id}")
-    assert response.status_code == 401, response.text
+        response = class_client.get("/posts/0")
+        assert response.status_code == 401, response.text
 
-    response = client.put(f"/drafts/{draft_id}", json=payload)
-    assert response.status_code == 401, response.text
+        response = class_client.patch("/posts/0", json=payload)
+        assert response.status_code == 401, response.text
 
-    response = client.delete(f"/drafts/{draft_id}")
-    assert response.status_code == 401, response.text
+        response = class_client.delete("/posts/0")
+        assert response.status_code == 401, response.text
 
-    response = client.post(f"/drafts/{draft_id}/publish")
-    assert response.status_code == 401, response.text
+        response = class_client.post("/posts/0/comment", json="string")
+        assert response.status_code == 401, response.text
 
+        response = class_client.post("/posts/0/comment/0", json="string")
+        assert response.status_code == 401, response.text
 
-def test_not_authorized_me(client, headers):
-    response = client.get("/users/me")
-    assert response.status_code == 401, response.text
+    def test_not_authorized_drafts(self, class_client, payload):
+        response = class_client.get("/drafts")
+        assert response.status_code == 401, response.text
 
+        response = class_client.get("/drafts/0")
+        assert response.status_code == 401, response.text
 
-def test_not_authorized_posts(client, headers, payload):
-    response = client.post("/posts", json=payload)
-    assert response.status_code == 401, response.text
+        response = class_client.put("/drafts/0", json=payload)
+        assert response.status_code == 401, response.text
 
-    post_id = client.post("/posts", json=payload, headers=headers).json()["id"]
+        response = class_client.delete("/drafts/0")
+        assert response.status_code == 401, response.text
 
-    response = client.get("/posts")
-    assert response.status_code == 401, response.text
-
-    response = client.get(f"/posts/{post_id}")
-    assert response.status_code == 401, response.text
-
-    response = client.patch(f"/posts/{post_id}", json=payload)
-    assert response.status_code == 401, response.text
-
-    response = client.delete(f"/posts/{post_id}")
-    assert response.status_code == 401, response.text
+        response = class_client.post("/drafts/0/publish")
+        assert response.status_code == 401, response.text
