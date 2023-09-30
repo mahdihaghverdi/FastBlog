@@ -189,11 +189,23 @@ class CommentRepo(BaseRepo):
             # other comments
             if reply_level is ReplyLevel.BASE:
                 stmt = (
-                    select(CommentModel).filter(
+                    select(
+                        CommentModel.id,
+                        CommentModel.created,
+                        CommentModel.comment,
+                        CommentModel.parent_id,
+                        expression.cast(CommentModel.path, String),
+                        CommentModel.post_id,
+                        CommentModel.username,
+                    ).filter(
                         CommentModel.path.lquery(
                             expression.cast(
                                 expression.cast(
-                                    "*." + str(comment_id) + ".*{1}",
+                                    "*."
+                                    + str(comment_id)
+                                    + ".*{1,"
+                                    + str(int(reply_level.value) + 1)
+                                    + "}",
                                     String,
                                 ),
                                 LQUERY,
@@ -203,13 +215,21 @@ class CommentRepo(BaseRepo):
                 ).subquery()
             else:
                 stmt = (
-                    select(CommentModel).filter(
+                    select(
+                        CommentModel.id,
+                        CommentModel.created,
+                        CommentModel.comment,
+                        CommentModel.parent_id,
+                        expression.cast(CommentModel.path, String),
+                        CommentModel.post_id,
+                        CommentModel.username,
+                    ).filter(
                         CommentModel.path.lquery(
                             expression.cast(
                                 expression.cast(
                                     "*."
                                     + str(comment_id)
-                                    + ".*{0,"
+                                    + ".*{1,"
                                     + str(int(reply_level.value) + 1)
                                     + "}",
                                     String,
