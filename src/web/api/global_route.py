@@ -10,12 +10,12 @@ from src.repository.unit_of_work import UnitOfWork
 from src.service.post_service import PostService
 from src.web.api import give_domain
 from src.web.core.dependencies import get_db
-from src.web.core.schemas import PostSchema
+from src.web.core.schemas import GlobalPostSchema
 
 router = APIRouter(tags=["global posts"])
 
 
-@router.get("/@{username}/{post_slug}", response_model=PostSchema)
+@router.get("/@{username}/{post_slug}", response_model=GlobalPostSchema)
 async def get_global_post(
     username: str,
     post_slug: str,

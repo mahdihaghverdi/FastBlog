@@ -23,7 +23,6 @@ from src.web.core.schemas import (
     UserInternalSchema,
     CommentSchema,
     UpdatePostSchema,
-    BarePostSchema,
 )
 
 router = APIRouter(prefix="/posts", tags=["posts"])
@@ -93,7 +92,7 @@ async def get_post(
 
 @router.patch(
     "/{post_id}",
-    response_model=BarePostSchema,
+    response_model=PostSchema,
     status_code=status.HTTP_200_OK,
 )
 async def update_post(

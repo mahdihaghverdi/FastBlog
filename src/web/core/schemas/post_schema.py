@@ -4,7 +4,6 @@ from pydantic import BaseModel, constr, AnyHttpUrl, conset, model_serializer
 from slugify import Slugify
 
 from src.common.utils import generate_hash
-from src.web.core.schemas.comment_schema import CommentSchema
 
 
 class CreatePostSchema(BaseModel):
@@ -53,7 +52,7 @@ class TagSchema(BaseModel):
         return self.name
 
 
-class BarePostSchema(BaseModel):
+class PostSchema(BaseModel):
     id: int
     created: datetime
     title: constr(strip_whitespace=True, min_length=1)
@@ -65,10 +64,5 @@ class BarePostSchema(BaseModel):
     tags: list[str]
 
 
-class PostSchema(BarePostSchema):
+class GlobalPostSchema(PostSchema):
     comment_count: int
-
-
-class GlobalPostSchema(BaseModel):
-    post: PostSchema
-    comments: list[CommentSchema]
