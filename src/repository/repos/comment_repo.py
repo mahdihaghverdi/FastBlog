@@ -159,6 +159,7 @@ class CommentRepo(BaseRepo):
                             expression.cast(expression.cast("*{1}", String), LQUERY),
                         ),
                     )
+                    .order_by("path")
                 ).subquery()
             else:
                 stmt = (
@@ -183,6 +184,7 @@ class CommentRepo(BaseRepo):
                             ),
                         ),
                     )
+                    .order_by("path")
                 ).subquery()
             comments = select(stmt, self._reply_count_of(stmt))
         else:
@@ -197,7 +199,8 @@ class CommentRepo(BaseRepo):
                         expression.cast(CommentModel.path, String),
                         CommentModel.post_id,
                         CommentModel.username,
-                    ).filter(
+                    )
+                    .filter(
                         CommentModel.path.lquery(
                             expression.cast(
                                 expression.cast(
@@ -212,6 +215,7 @@ class CommentRepo(BaseRepo):
                             ),
                         ),
                     )
+                    .order_by("path")
                 ).subquery()
             else:
                 stmt = (
@@ -223,7 +227,8 @@ class CommentRepo(BaseRepo):
                         expression.cast(CommentModel.path, String),
                         CommentModel.post_id,
                         CommentModel.username,
-                    ).filter(
+                    )
+                    .filter(
                         CommentModel.path.lquery(
                             expression.cast(
                                 expression.cast(
@@ -238,6 +243,7 @@ class CommentRepo(BaseRepo):
                             ),
                         ),
                     )
+                    .order_by("path")
                 ).subquery()
             comments = select(stmt, self._reply_count_of(stmt))
         comments_mappings = (
