@@ -20,9 +20,27 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11"]
 
+    services:
+      postgres:
+        image: postgres
+
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
-      - name: Setup PostgreSQL with PostgreSQL extensions and unprivileged user
-        uses: Daniel-Marynicz/postgresql-action@1.0.0
+      - name: add ltree to postgres
+        run: |
+          PGPASSWORD=postgres psql -U postgres -h 127.0.0.1 -p ${{ job.services.postgres.ports[5432] }} -d postgres -tc "create extension if not exists ltree;"
 
       - name: Checkout the repo
         uses: actions/checkout@v3
