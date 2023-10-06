@@ -88,17 +88,38 @@ class PostRepo(PaginationMixin, OneToManyRelRepoMixin, BaseRepo):
             ).group_by(post)
         ).subquery("post_with_tags")
 
-        comment_count = (
+        all_comments_count = (
             (
                 select(func.count("*"))
                 .select_from(CommentModel)
                 .where(CommentModel.post_id == post_with_tags.columns.id)
             )
             .scalar_subquery()
-            .label("comment_count")
+            .label("all_comments_count")
         )
 
-        stmt = select(post_with_tags, comment_count)
+        base_comments_count = (
+            (
+                select(func.count("*"))
+                .select_from(CommentModel)
+                .where(CommentModel.post_id == post_with_tags.columns.id)
+                .where(CommentModel.parent_id == None)  # noqa: E711
+            )
+            .scalar_subquery()
+            .label("base_comments_count")
+        )
+
+        reply_comments_count = (
+            select(all_comments_count - base_comments_count)
+            .scalar_subquery()
+            .label("reply_comments_count")
+        )
+        stmt = select(
+            post_with_tags,
+            all_comments_count,
+            base_comments_count,
+            reply_comments_count,
+        )
         post = (await self.session.execute(stmt)).mappings().one_or_none()
         if post is not None:
             return dict(post)

@@ -35,16 +35,15 @@ class TestPostDraft(BaseTest):
 
     @staticmethod
     def publish_extract(post_data):
-        title, body, _url, tags, username, comment_count = (
+        title, body, _url, tags, username = (
             post_data["title"],
             post_data["body"],
             post_data["url"],
             post_data["tags"],
             post_data["username"],
-            post_data["comment_count"],
         )
         url = _url[: len(_url) - 9]
-        return title, body, url, tags, username, comment_count
+        return title, body, url, tags, username
 
     def test_create_draft(self, client, headers):
         response = client.post("/drafts", json=self.payload, headers=headers)
@@ -69,19 +68,18 @@ class TestPostDraft(BaseTest):
         )
         assert response.status_code == 200, response.text
 
-        # drafts = client.get("/drafts", headers=headers).json()
-        # assert not drafts
-        #
-        # post_id = response.json()["id"]
-        # title, body, url, tags, username, comment_count = self.publish_extract(
-        #     client.get(f"/posts/{post_id}", headers=headers).json(),
-        # )
-        # assert title == self.title
-        # assert body == self.body
-        # assert url == self.url
-        # assert set(tags) == set(self.tags)
-        # assert username == 'string'
-        # assert comment_count == 0
+        drafts = client.get("/drafts", headers=headers).json()
+        assert not drafts
+
+        post_id = response.json()["id"]
+        title, body, url, tags, username = self.publish_extract(
+            client.get(f"/posts/{post_id}", headers=headers).json(),
+        )
+        assert title == self.title
+        assert body == self.body
+        assert url == self.url
+        assert set(tags) == set(self.tags)
+        assert username == "string"
 
     def test_publish_draft_custom_slug(self, client, headers):
         draft_id = client.post("/drafts", json=self.payload, headers=headers).json()[
@@ -98,7 +96,7 @@ class TestPostDraft(BaseTest):
         assert not drafts
 
         post_id = response.json()["id"]
-        title, body, url, tags, username, comment_count = self.publish_extract(
+        title, body, url, tags, username = self.publish_extract(
             client.get(f"/posts/{post_id}", headers=headers).json(),
         )
         assert title == self.title
@@ -106,7 +104,6 @@ class TestPostDraft(BaseTest):
         assert url == self.new_url
         assert set(tags) == set(self.tags)
         assert username == "string"
-        assert comment_count == 0
 
 
 class TestGetDraft(BaseTest):
