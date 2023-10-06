@@ -205,12 +205,12 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/HTTPValidationError"
-    put:
+    patch:
       tags:
       - posts
       summary: Update Post
-      description: Replace an existing post
-      operationId: update_post_posts__post_id__put
+      description: Updating a post
+      operationId: update_post_posts__post_id__patch
       security:
       - OAuth2PasswordBearer: []
       parameters:
@@ -225,7 +225,7 @@ paths:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/CreatePostSchema"
+              "$ref": "#/components/schemas/UpdatePostSchema"
       responses:
         '200':
           description: Successful Response
@@ -257,6 +257,86 @@ paths:
       responses:
         '204':
           description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/posts/{post_id}/comment":
+    post:
+      tags:
+      - posts
+      summary: Add Comment
+      operationId: add_comment_posts__post_id__comment_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: post_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Post Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              minLength: 1
+              maxLength: 255
+              title: Comment
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CommentSchema"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/posts/{post_id}/comment/{comment_id}":
+    post:
+      tags:
+      - posts
+      summary: Add Reply
+      operationId: add_reply_posts__post_id__comment__comment_id__post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: post_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Post Id
+      - name: comment_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Comment Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              minLength: 1
+              maxLength: 255
+              title: Reply
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CommentSchema"
         '422':
           description: Validation Error
           content:
@@ -503,7 +583,92 @@ paths:
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/PostSchema"
+                "$ref": "#/components/schemas/GlobalPostSchema"
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/comments/{post_id}/basecomments":
+    get:
+      tags:
+      - comments
+      summary: Get Base Comments
+      operationId: get_base_comments_comments__post_id__basecomments_get
+      parameters:
+      - name: post_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Post Id
+      - name: reply-level
+        in: query
+        required: false
+        schema:
+          allOf:
+          - "$ref": "#/components/schemas/ReplyLevel"
+          description: how many nested replies should be returned
+          default: '0'
+          title: Reply-Level
+        description: how many nested replies should be returned
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/CommentSchema"
+                title: Response Get Base Comments Comments  Post Id  Basecomments
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/comments/{post_id}/{comment_id}":
+    get:
+      tags:
+      - comments
+      summary: Get Comments
+      operationId: get_comments_comments__post_id___comment_id__get
+      parameters:
+      - name: post_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Post Id
+      - name: comment_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Comment Id
+      - name: reply-level
+        in: query
+        required: false
+        schema:
+          allOf:
+          - "$ref": "#/components/schemas/ReplyLevel"
+          description: how many nested replies should be returned
+          default: '0'
+          title: Reply-Level
+        description: how many nested replies should be returned
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/CommentSchema"
+                title: Response Get Comments Comments  Post Id   Comment Id  Get
         '422':
           description: Validation Error
           content:
@@ -557,6 +722,44 @@ components:
       - username
       - password
       title: Body_signup_user_users_signup_post
+    CommentSchema:
+      properties:
+        id:
+          type: integer
+          title: Id
+        created:
+          type: string
+          format: date-time
+          title: Created
+        comment:
+          type: string
+          title: Comment
+        parent_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Parent Id
+        path:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Path
+        username:
+          type: string
+          title: Username
+        reply_count:
+          type: integer
+          title: Reply Count
+      type: object
+      required:
+      - id
+      - created
+      - comment
+      - parent_id
+      - path
+      - username
+      - reply_count
+      title: CommentSchema
     CreateDraftSchema:
       properties:
         title:
@@ -627,6 +830,58 @@ components:
       - title
       - body
       title: DraftSchema
+    GlobalPostSchema:
+      properties:
+        id:
+          type: integer
+          title: Id
+        created:
+          type: string
+          format: date-time
+          title: Created
+        title:
+          type: string
+          minLength: 1
+          title: Title
+        body:
+          type: string
+          minLength: 1
+          title: Body
+        username:
+          type: string
+          title: Username
+        url:
+          type: string
+          minLength: 1
+          format: uri
+          title: Url
+        tags:
+          items:
+            type: string
+          type: array
+          title: Tags
+        all_comments_count:
+          type: integer
+          title: All Comments Count
+        base_comments_count:
+          type: integer
+          title: Base Comments Count
+        reply_comments_count:
+          type: integer
+          title: Reply Comments Count
+      type: object
+      required:
+      - id
+      - created
+      - title
+      - body
+      - username
+      - url
+      - tags
+      - all_comments_count
+      - base_comments_count
+      - reply_comments_count
+      title: GlobalPostSchema
     HTTPValidationError:
       properties:
         detail:
@@ -653,6 +908,9 @@ components:
           type: string
           minLength: 1
           title: Body
+        username:
+          type: string
+          title: Username
         url:
           type: string
           minLength: 1
@@ -669,6 +927,7 @@ components:
       - created
       - title
       - body
+      - username
       - url
       - tags
       title: PostSchema
@@ -693,6 +952,14 @@ components:
       required:
       - tags
       title: PublishSchema
+    ReplyLevel:
+      type: string
+      enum:
+      - '0'
+      - '1'
+      - '2'
+      - '3'
+      title: ReplyLevel
     Sort:
       type: string
       enum:
@@ -712,6 +979,39 @@ components:
       - access_token
       - token_type
       title: TokenSchema
+    UpdatePostSchema:
+      properties:
+        title:
+          anyOf:
+          - type: string
+            minLength: 1
+          - type: 'null'
+          title: Title
+        body:
+          anyOf:
+          - type: string
+            minLength: 1
+          - type: 'null'
+          title: Body
+        tags:
+          anyOf:
+          - items:
+              type: string
+              minLength: 1
+            type: array
+            maxItems: 5
+            minItems: 1
+            uniqueItems: true
+          - type: 'null'
+          title: Tags
+        title_in_url:
+          anyOf:
+          - type: string
+            minLength: 1
+          - type: 'null'
+          title: Title In Url
+      type: object
+      title: UpdatePostSchema
     UserOutSchema:
       properties:
         username:
@@ -721,16 +1021,10 @@ components:
           type: string
           format: date-time
           title: Created
-        posts:
-          items:
-            "$ref": "#/components/schemas/PostSchema"
-          type: array
-          title: Posts
       type: object
       required:
       - username
       - created
-      - posts
       title: UserOutSchema
     ValidationError:
       properties:

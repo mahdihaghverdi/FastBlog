@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastblog"
-version = "3.0.0"
+version = "4.0.0"
 description = "A RESTful blog system built with Python and FastAPI ⚡"
 authors = ["MahdiHaghverdi <mahdihaghverdliewpl@gmail.com>"]
 license = 'GPLv3'
@@ -18,7 +18,6 @@ asyncpg = "~0.28.0"
 python-jose = {extras = ["cryptography"], version = "~3.3.0"}
 passlib = {extras = ["bcrypt"], version = "~1.7.4"}
 awesome-slugify = "~1.6.5"
-urlpath = "~1.2.0"
 sqlalchemy-utils = "~0.41.1"
 
 [tool.poetry.group.dev.dependencies]
