@@ -37,8 +37,8 @@ pytest-cov = "^4.1.0"
 exclude = [".venv"]
 extend-exclude = ["src/web/core/schemas/__init__.py"]
 
-[tool.coverage.run]
-branch = true
+#[tool.coverage.run]
+#branch = true
 
 [tool.coverage.report]
 exclude_also = [
