@@ -11,6 +11,7 @@ env:
   DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432
   SECRET_KEY: laskdjflaskdjfosdf98suidfjjksdf98sduf
 
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -20,15 +21,8 @@ jobs:
         python-version: ["3.10", "3.11"]
 
     steps:
-      - name: Setup Postgres database
-        uses: Daniel-Marynicz/postgresql-action@master
-        with:
-          postgres_image_tag: 12-alpine
-          postgres_user: postgres
-          postgres_db: postgres
-          postgres_password: postgres
-          exposed_postgres_port: 5432
-          postgres_extensions: ltree
+      - name: Setup PostgreSQL with PostgreSQL extensions and unprivileged user
+        uses: Daniel-Marynicz/postgresql-action@1.0.0
 
       - name: Checkout the repo
         uses: actions/checkout@v3
