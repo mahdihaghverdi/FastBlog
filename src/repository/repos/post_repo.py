@@ -7,13 +7,13 @@ from src.repository.models import (
     TagModel,
     association_table,
 )
-from src.repository.repos import BaseRepo, OneToManyRelRepoMixin, PaginationMixin
+from src.repository.repos import BaseRepo, OneToManyRelRepoMixin
 from src.repository.repos.tag_repo import TagRepo
 from src.service.objects import Post
 from src.web.core.schemas import Sort
 
 
-class PostRepo(PaginationMixin, OneToManyRelRepoMixin, BaseRepo):
+class PostRepo(OneToManyRelRepoMixin, BaseRepo):
     def __init__(self, session):
         model = PostModel
         object_ = Post

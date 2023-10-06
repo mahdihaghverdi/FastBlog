@@ -1,12 +1,10 @@
-import itertools
 from typing import Protocol
 
-from sqlalchemy import select, desc
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repository.models import Base
 from src.service.objects import BusinessObject
-from src.web.core.schemas import Sort
 
 
 class RepoProtocol(Protocol):
@@ -79,34 +77,3 @@ class OneToManyRelRepoMixin:
         if record is None:
             return False
         await self.session.delete(record)
-
-
-class PaginationMixin:
-    async def list(
-        self,
-        username,
-        *,
-        page: int,
-        per_page: int,
-        sort: Sort,
-        desc_: bool,
-    ) -> list:
-        """Return a list of Post objects
-
-        This function paginates the results according to page and per_page
-        This function sorts the results according to `Sort` and `SortOrder` values
-        """
-        order_by_column = self.model.title if sort is Sort.TITLE else self.model.created
-        stmt = (
-            select(self.model)
-            .where(self.model.username == username)
-            .offset((page - 1) * per_page)
-            .limit(per_page)
-            .order_by(
-                desc(order_by_column) if desc_ else order_by_column,
-            )
-        )
-        records = list(
-            itertools.chain.from_iterable((await self.session.execute(stmt)).all()),
-        )
-        return [self.object(**record.sync_dict(), model=record) for record in records]
