@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Protocol
 
 from sqlalchemy import select, insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repository.models import Base
@@ -36,12 +37,18 @@ class BaseRepo:
         self.object = object_
         self.session = session
 
-    async def get(self, self_id, /, raw: bool = False):
+    async def get(self, self_id):
         record = await self.session.get(self.model, self_id)
         if record is not None:
-            if raw:
-                return record
-            return self.object(**record.sync_dict(), model=record)
+            return record
+
+    async def add(self, data: dict):
+        stmt = insert(self.model).values(**data).returning(self.model)
+        try:
+            user = (await self.session.execute(stmt)).scalar_one_or_none()
+        except IntegrityError:
+            return None
+        return user.sync_dict()
 
 
 class OneToManyRelRepoMixin:

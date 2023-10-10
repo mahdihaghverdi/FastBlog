@@ -1,5 +1,4 @@
-from sqlalchemy import select, insert
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select
 
 from src.common.exceptions import DuplicateUsernameError
 from src.repository.repos import BaseRepo
@@ -15,29 +14,20 @@ class UserRepo(BaseRepo):
         super().__init__(session=session, model=model, object_=object_)
 
     async def get(self, self_id):
-        stmt = select(UserModel).where(UserModel.id == self_id)
-        user = (await self.session.execute(stmt)).scalar_one_or_none()
-        if user is not None:
-            return User(**user.sync_dict(), model=user)
+        return User(**(await super().get(self_id)).sync_dict())
 
-    async def get_by_username(self, username) -> User | None:
+    async def get_by_username(self, username):
         stmt = select(UserModel).where(UserModel.username == username)
         user = (await self.session.execute(stmt)).scalar_one_or_none()
         if user is not None:
-            return User(**user.sync_dict(), model=user)
+            return user.sync_dict()
 
-    async def add(self, data: dict) -> User:
+    async def add(self, data):
         password = hash_password(data["password"])
-        stmt = (
-            insert(UserModel)
-            .values(username=data["username"], password=password)
-            .returning(UserModel)
-        )
-
-        try:
-            user = (await self.session.execute(stmt)).scalar_one_or_none()
-        except IntegrityError:
+        data["password"] = password
+        user = await super().add(data)
+        if user is None:
             raise DuplicateUsernameError(
                 f"username: {data['username']!r} already exists!",
             )
-        return User(**user.sync_dict(), model=user)
+        return User(**user)

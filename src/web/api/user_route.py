@@ -30,7 +30,7 @@ async def signup_user(
             UserSignUpSchema(username=username, password=password).model_dump(),
         )
         await uow.commit()
-        return user.sync_dict()
+        return user
 
 
 @router.get("/me", response_model=UserOutSchema)
