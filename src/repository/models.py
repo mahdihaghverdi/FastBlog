@@ -97,7 +97,7 @@ class UserModel(Base):
         cascade="delete, delete-orphan",
         lazy="selectin",
     )
-    draft_posts: Mapped[list["DraftModel"]] = relationship(
+    drafts: Mapped[list["DraftModel"]] = relationship(
         back_populates="user",
         cascade="delete, delete-orphan",
         lazy="selectin",
@@ -113,7 +113,7 @@ class UserModel(Base):
             "username": self.username,
             "password": self.password,
             "posts": self.posts,
-            "drafts": self.draft_posts,
+            "drafts": self.drafts,
         }
 
 
@@ -125,7 +125,7 @@ class DraftModel(Base):
     username: Mapped[str] = mapped_column(ForeignKey("users.username"))
     updated: Mapped[datetime | None] = mapped_column()
 
-    user: Mapped["UserModel"] = relationship(back_populates="draft_posts")
+    user: Mapped["UserModel"] = relationship(back_populates="drafts")
 
     def __repr__(self):
         return f"<DraftPost: {self.title!r}>"

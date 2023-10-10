@@ -58,7 +58,7 @@ class PostService(Service):
             raise PostNotFoundError(f"post: @{username}/{post_slug} is not found!")
 
         post = await self.repo.get_post_with_url(
-            username=user.username,
+            username=user["username"],
             url=f"/@{username}/{post_slug}",
         )
 

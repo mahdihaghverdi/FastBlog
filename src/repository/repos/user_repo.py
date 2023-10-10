@@ -13,7 +13,9 @@ class UserRepo(BaseRepo):
         object_ = User
         super().__init__(session=session, model=model, object_=object_)
 
-    async def get(self, self_id):
+    async def get(self, self_id, raw=False):
+        if raw:
+            return await super().get(self_id)
         return User(**(await super().get(self_id)).sync_dict())
 
     async def get_by_username(self, username):

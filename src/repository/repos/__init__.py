@@ -87,7 +87,7 @@ class OneToManyRelRepoMixin:
         record = (await self.session.execute(stmt)).scalar_one_or_none()
         return record
 
-    async def update(self, username, /, self_id, data: dict):
+    async def update(self, username, self_id, data: dict):
         record = await self._get(username, self_id)
         if record is None:
             return

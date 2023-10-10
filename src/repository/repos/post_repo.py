@@ -54,6 +54,8 @@ class PostRepo(OneToManyRelRepoMixin, BaseRepo):
         tags = data.pop("tags")
 
         record: PostModel = await super().update(username, post_id, data)
+        if record is None:
+            return
 
         if tags is not None:
             tags = await TagRepo(self.session).get_or_create(tags)

@@ -45,7 +45,7 @@ class DraftRepo(OneToManyRelRepoMixin, BaseRepo):
         return [self.object(**record.sync_dict(), model=record) for record in records]
 
     async def publish(self, user, draft_id, tags_and_title_in_url):
-        draft = await super(OneToManyRelRepoMixin, self).get(draft_id, raw=True)
+        draft = await super(OneToManyRelRepoMixin, self).get(draft_id)
         if draft is None:
             return None
 

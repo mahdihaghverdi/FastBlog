@@ -44,7 +44,7 @@ class DraftService(Service):
             raise DraftNotFoundError(f"draft with id: '{draft_id}' is not found")
 
     async def publish_draft(self, user, draft_id, tags_and_title_in_url):
-        user = await UserRepo(self.repo.session).get(user.id)
+        user = await UserRepo(self.repo.session).get(user.id, raw=True)
         post = await self.repo.publish(user, draft_id, tags_and_title_in_url)
         if post is None:
             raise DraftNotFoundError(f"draft with id: '{draft_id}' is not found")
