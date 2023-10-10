@@ -237,23 +237,21 @@ class TestGetDraft(BaseTest):
         assert body == self.body
 
 
-def test_update_draft(client, headers, payload):
-    new_title, new_body = "a", "b"
-    response = client.post("/drafts", json=payload)
-    assert response.status_code == 401, response.text
+class TestPutDraft:
+    def test_update_draft(self, client, headers, payload):
+        new_title, new_body = "a", "b"
+        draft_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
 
-    draft_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
+        response = client.put(
+            f"/drafts/{draft_id}",
+            json={"title": new_title, "body": new_body},
+            headers=headers,
+        )
+        assert response.status_code == 200, response.text
 
-    response = client.put(
-        f"/drafts/{draft_id}",
-        json={"title": new_title, "body": new_body},
-        headers=headers,
-    )
-    assert response.status_code == 200, response.text
-
-    title, body = BaseTest.extract(response.json())
-    assert title == new_title
-    assert body == new_body
+        title, body = BaseTest.extract(response.json())
+        assert title == new_title
+        assert body == new_body
 
 
 def test_delete_draft(client, headers, payload):

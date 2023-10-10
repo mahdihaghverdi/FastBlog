@@ -108,7 +108,7 @@ async def update_post(
         service = PostService(repo)
         post = await service.update_post(user, post_id, post)
         await uow.commit()
-        return give_domain(str(request.base_url), post.sync_dict())
+        return give_domain(str(request.base_url), post)
 
 
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)

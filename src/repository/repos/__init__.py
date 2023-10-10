@@ -67,6 +67,11 @@ class OneToManyRelRepoMixin:
         if record is not None:
             return record
 
+    async def get(self, username, self_id):
+        record = await self._get(username, self_id)
+        if record is not None:
+            return record.sync_dict()
+
     async def add(self, username, data: dict):
         """Inserts the model with the provided data and returns it"""
         stmt = (
@@ -75,19 +80,16 @@ class OneToManyRelRepoMixin:
         record = (await self.session.execute(stmt)).scalar_one_or_none()
         return record
 
-    async def get(self, username, self_id):
-        record = await self._get(username, self_id)
-        if record is not None:
-            return record.sync_dict()
-
     async def update(self, username, /, self_id, data: dict):
         record = await self._get(username, self_id)
         if record is None:
             return
+
+        data = {k: v for k, v in data.items() if v is not None}
         for key, value in data.items():
             setattr(record, key, value)
         setattr(record, "updated", datetime.utcnow())
-        return self.object(**record.sync_dict(), model=record)
+        return record
 
     async def delete(self, username, /, self_id):
         record = await self._get(username, self_id)

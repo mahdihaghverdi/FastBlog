@@ -50,23 +50,18 @@ class PostRepo(OneToManyRelRepoMixin, BaseRepo):
 
         return record.sync_dict()
 
-    async def update(self, username, post_id, data: dict):
-        record = await self._get(username, post_id)
-        if record is None:
-            return
-
+    async def update(self, username, post_id, data):
         tags = data.pop("tags")
+
+        record: PostModel = await super().update(username, post_id, data)
+
         if tags is not None:
             tags = await TagRepo(self.session).get_or_create(tags)
             record.tags.clear()
             for tag in tags:
                 record.tags.add(tag)
 
-        data = {k: v for k, v in data.items() if v is not None}
-        for key, value in data.items():
-            setattr(record, key, value)
-        self.session.add(record)
-        return Post(**record.sync_dict(), model=record)
+        return record.sync_dict()
 
     async def get_post_with_url(self, username, url):
         post = (
