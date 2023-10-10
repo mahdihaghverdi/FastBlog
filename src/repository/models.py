@@ -36,6 +36,7 @@ class PostModel(Base):
     body: Mapped[str]
     url: Mapped[str]
     username: Mapped[str] = mapped_column(ForeignKey("users.username"))
+    updated: Mapped[datetime | None] = mapped_column()
 
     user: Mapped["UserModel"] = relationship(back_populates="posts")
     tags: Mapped[set["TagModel"]] = relationship(
@@ -89,6 +90,7 @@ class UserModel(Base):
 
     username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
+    updated: Mapped[datetime | None] = mapped_column()
 
     posts: Mapped[list["PostModel"]] = relationship(
         back_populates="user",
@@ -121,6 +123,7 @@ class DraftModel(Base):
     title: Mapped[str]
     body: Mapped[str]
     username: Mapped[str] = mapped_column(ForeignKey("users.username"))
+    updated: Mapped[datetime | None] = mapped_column()
 
     user: Mapped["UserModel"] = relationship(back_populates="draft_posts")
 
