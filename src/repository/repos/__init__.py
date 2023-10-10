@@ -1,6 +1,7 @@
+from datetime import datetime
 from typing import Protocol
 
-from sqlalchemy import select
+from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.repository.models import Base
@@ -44,6 +45,18 @@ class BaseRepo:
 
 
 class OneToManyRelRepoMixin:
+    """Provide the shared functionality for models
+
+    This mixin's methods do the core operation like:
+      - get the record from database
+      - add a record to database
+      - update the record
+      - delete a record
+
+    if you want to override, please do the needed work and
+    let this parent class do the core functionality
+    """
+
     async def _get(self, username, self_id):
         stmt = (
             select(self.model)
@@ -55,9 +68,12 @@ class OneToManyRelRepoMixin:
             return record
 
     async def add(self, username, data: dict):
-        record = self.model(**data, username=username)
-        self.session.add(record)
-        return self.object(**record.sync_dict(), model=record)
+        """Inserts the model with the provided data and returns it"""
+        stmt = (
+            insert(self.model).values(**data, username=username).returning(self.model)
+        )
+        record = (await self.session.execute(stmt)).scalar_one_or_none()
+        return record
 
     async def get(self, username, self_id):
         record = await self._get(username, self_id)
@@ -70,6 +86,7 @@ class OneToManyRelRepoMixin:
             return
         for key, value in data.items():
             setattr(record, key, value)
+        setattr(record, "updated", datetime.utcnow())
         return self.object(**record.sync_dict(), model=record)
 
     async def delete(self, username, /, self_id):

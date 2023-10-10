@@ -1,4 +1,4 @@
-from sqlalchemy import select, func, insert, desc
+from sqlalchemy import select, func, desc
 
 from src.repository.models import (
     PostModel,
@@ -40,12 +40,11 @@ class PostRepo(OneToManyRelRepoMixin, BaseRepo):
         if post is not None:
             return dict(post)
 
-    async def add(self, username, data: dict):
+    async def add(self, username, data):
         tags = data.pop("tags")
         tags = await TagRepo(self.session).get_or_create(tags)
 
-        stmt = insert(PostModel).values(**data, username=username).returning(PostModel)
-        record = (await self.session.execute(stmt)).scalar_one_or_none()
+        record: PostModel = await super().add(username, data)
         for tag in tags:
             record.tags.add(tag)
 
