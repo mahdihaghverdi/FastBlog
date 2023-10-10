@@ -65,6 +65,9 @@ Now users can comment on each other's posts; also, they can respond to comments 
 #### `v4.1.0`
 Saving the update time of things will be implemented
 
+#### `v4.2.0`
+Comments are now updatable
+
 ----
 ### `v5.0.0`
 User profiles will be implemented!

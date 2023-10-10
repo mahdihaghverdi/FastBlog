@@ -238,6 +238,10 @@ class TestGetDraft(BaseTest):
 
 
 class TestPutDraft:
+    @staticmethod
+    def extract(data):
+        return data["title"], data["body"], data["updated"]
+
     def test_update_draft(self, client, headers, payload):
         new_title, new_body = "a", "b"
         draft_id = client.post("/drafts", json=payload, headers=headers).json()["id"]
@@ -249,9 +253,10 @@ class TestPutDraft:
         )
         assert response.status_code == 200, response.text
 
-        title, body = BaseTest.extract(response.json())
+        title, body, updated = self.extract(response.json())
         assert title == new_title
         assert body == new_body
+        assert updated is not None
 
 
 def test_delete_draft(client, headers, payload):

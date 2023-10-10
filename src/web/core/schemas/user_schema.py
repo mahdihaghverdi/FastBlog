@@ -15,6 +15,7 @@ class UserLoginSchema(UserSignUpSchema):
 class UserOutSchema(BaseModel):
     username: str
     created: datetime
+    updated: datetime | None = None
 
 
 class UserInternalSchema(UserOutSchema):

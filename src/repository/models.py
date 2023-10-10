@@ -61,6 +61,7 @@ class PostModel(Base):
         return {
             "id": self.id,
             "created": self.created,
+            "updated": self.updated,
             "title": self.title,
             "body": self.body,
             "url": self.url,
@@ -110,6 +111,7 @@ class UserModel(Base):
         return {
             "id": self.id,
             "created": self.created,
+            "updated": self.updated,
             "username": self.username,
             "password": self.password,
             "posts": self.posts,
@@ -134,6 +136,7 @@ class DraftModel(Base):
         return {
             "id": self.id,
             "created": self.created,
+            "updated": self.updated,
             "title": self.title,
             "body": self.body,
         }

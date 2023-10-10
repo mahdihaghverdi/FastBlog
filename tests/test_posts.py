@@ -205,7 +205,7 @@ class TestPatchPost(TestPostPost):
     @staticmethod
     def extract(post_data):
         t, b, u, ta = BaseTest.extract(post_data)
-        return post_data["id"], t, b, u, ta
+        return post_data["id"], t, b, u, ta, post_data["updated"]
 
     def test_update_title(self, client, headers):
         post_id = client.post("/posts", json=self.payload, headers=headers).json()["id"]
@@ -217,13 +217,14 @@ class TestPatchPost(TestPostPost):
 
         assert response.status_code == 200, response.text
 
-        id_, title, body, url, tags = self.extract(response.json())
+        id_, title, body, url, tags, updated = self.extract(response.json())
 
         assert id_ == post_id
         assert title == "new title"
         assert body == self.body
         assert url == self.url
         assert set(tags) == set(self.tags)
+        assert updated is not None
 
     def test_update_body(self, client, headers):
         post_id = client.post("/posts", json=self.payload, headers=headers).json()["id"]
@@ -235,13 +236,14 @@ class TestPatchPost(TestPostPost):
 
         assert response.status_code == 200, response.text
 
-        id_, title, body, url, tags = self.extract(response.json())
+        id_, title, body, url, tags, updated = self.extract(response.json())
 
         assert id_ == post_id
         assert title == self.title
         assert body == "new body"
         assert url == self.url
         assert set(tags) == set(self.tags)
+        assert updated is not None
 
     def test_update_url(self, client, headers):
         post_id = client.post("/posts", json=self.payload, headers=headers).json()["id"]
@@ -252,13 +254,14 @@ class TestPatchPost(TestPostPost):
         )
         assert response.status_code == 200, response.text
 
-        id_, title, body, url, tags = self.extract(response.json())
+        id_, title, body, url, tags, updated = self.extract(response.json())
 
         assert id_ == post_id
         assert title == self.title
         assert body == self.body
         assert url == self.new_url
         assert set(tags) == set(self.tags)
+        assert updated is not None
 
     def test_update_tags(self, client, headers):
         post_id = client.post("/posts", json=self.payload, headers=headers).json()["id"]
@@ -268,13 +271,14 @@ class TestPatchPost(TestPostPost):
             headers=headers,
         )
         assert response.status_code == 200, response.text
-        id_, title, body, url, tags = self.extract(response.json())
+        id_, title, body, url, tags, updated = self.extract(response.json())
 
         assert id_ == post_id
         assert title == self.title
         assert body == self.body
         assert url == self.url
         assert set(tags) == set(self.new_tags)
+        assert updated is not None
 
 
 def test_delete_post(client, headers, payload):

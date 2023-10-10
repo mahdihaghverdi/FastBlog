@@ -55,6 +55,7 @@ class TagSchema(BaseModel):
 class PostSchema(BaseModel):
     id: int
     created: datetime
+    updated: datetime | None = None
     title: constr(strip_whitespace=True, min_length=1)
     body: constr(strip_whitespace=True, min_length=1)
     username: str
