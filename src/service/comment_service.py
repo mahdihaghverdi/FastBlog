@@ -4,6 +4,8 @@ from src.service import Service
 
 class CommentService(Service):
     async def reply(self, user, post_id, comment_id, reply):
+        if not await self.post_repo.exists(post_id):
+            raise PostNotFoundError(f"Post with id: '{post_id}' is not found")
         return await self.repo.add(
             user.username,
             post_id,
@@ -12,6 +14,8 @@ class CommentService(Service):
         )
 
     async def get_comments(self, post_id, comment_id, reply_level):
+        if not await self.post_repo.exists(post_id):
+            raise PostNotFoundError(f"Post with id: '{post_id}' is not found")
         return await self.repo.list(post_id, comment_id, reply_level)
 
     async def update_comment(self, user, post_id, comment_id, comment):
@@ -25,3 +29,10 @@ class CommentService(Service):
         if comment is None:
             raise CommentNotFoundError(f"Comment with id: '{comment}' not found")
         return comment
+
+    async def delete_comment(self, user, post_id, comment_id):
+        if not await self.post_repo.exists(post_id):
+            raise PostNotFoundError(f"Post with id: '{post_id}' is not found")
+        result = await self.repo.delete(user.username, comment_id)
+        if result is False:
+            raise CommentNotFoundError(f"Comment with id: '{comment_id}' is not found")

@@ -47,6 +47,7 @@ class PostService(Service):
             raise PostNotFoundError(f"post with id: '{post_id}' is not found")
         return post
 
+    # TODO: write tests for PostNotFoundError
     async def delete_post(self, user, post_id):
         deleted = await self.repo.delete(user.username, post_id)
         if deleted is False:
@@ -67,6 +68,7 @@ class PostService(Service):
 
         return post
 
+    # TODO: do post existence first
     async def add_comment(self, user, post_id, comment):
         # self.repo = None, self.comment_repo is available
         return await self.comment_repo.add(

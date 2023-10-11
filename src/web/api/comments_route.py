@@ -14,6 +14,7 @@ from src.web.core.schemas import CommentSchema, ReplyLevel, UserInternalSchema
 router = APIRouter(prefix="/comments", tags=["comments"])
 
 
+# TODO: write tests for PostNotFoundError
 @router.get(
     "/{post_id}/basecomments",
     response_model=list[CommentSchema],
@@ -32,7 +33,8 @@ async def get_base_comments(
 ):
     async with UnitOfWork(session) as uow:
         repo = CommentRepo(uow.session)
-        service = CommentService(repo)
+        post_repo = PostRepo(uow.session)
+        service = CommentService(repo, post_repo=post_repo)
         comments = await service.get_comments(
             post_id,
             0,
@@ -41,6 +43,7 @@ async def get_base_comments(
         return comments
 
 
+# TODO: write tests for PostNotFoundError
 @router.get(
     "/{post_id}/{comment_id}",
     response_model=list[CommentSchema],
@@ -60,7 +63,8 @@ async def get_replies(
 ):
     async with UnitOfWork(session) as uow:
         repo = CommentRepo(uow.session)
-        service = CommentService(repo)
+        post_repo = PostRepo(uow.session)
+        service = CommentService(repo, post_repo=post_repo)
         comments = await service.get_comments(
             post_id,
             comment_id,
@@ -88,3 +92,21 @@ async def update_comment(
         comment = await service.update_comment(user, post_id, comment_id, comment)
         await uow.commit()
         return comment
+
+
+@router.delete(
+    "/{post_id}/{comment_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_comment(
+    post_id: int,
+    comment_id: int,
+    session: Annotated[AsyncSession, Depends(get_db)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+):
+    async with UnitOfWork(session) as uow:
+        repo = CommentRepo(uow.session)
+        post_repo = PostRepo(uow.session)
+        service = CommentService(repo, post_repo=post_repo)
+        await service.delete_comment(user, post_id, comment_id)
+        await uow.commit()
