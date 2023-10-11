@@ -36,7 +36,7 @@ class PostModel(Base):
     body: Mapped[str]
     url: Mapped[str]
     username: Mapped[str] = mapped_column(ForeignKey("users.username"))
-    updated: Mapped[datetime | None] = mapped_column()
+    updated: Mapped[datetime | None]
 
     user: Mapped["UserModel"] = relationship(back_populates="posts")
     tags: Mapped[set["TagModel"]] = relationship(
@@ -91,7 +91,7 @@ class UserModel(Base):
 
     username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
-    updated: Mapped[datetime | None] = mapped_column()
+    updated: Mapped[datetime | None]
 
     posts: Mapped[list["PostModel"]] = relationship(
         back_populates="user",
@@ -125,7 +125,7 @@ class DraftModel(Base):
     title: Mapped[str]
     body: Mapped[str]
     username: Mapped[str] = mapped_column(ForeignKey("users.username"))
-    updated: Mapped[datetime | None] = mapped_column()
+    updated: Mapped[datetime | None]
 
     user: Mapped["UserModel"] = relationship(back_populates="drafts")
 
@@ -149,7 +149,7 @@ class CommentModel(Base):
     comment: Mapped[str] = mapped_column(String(255))
     username: Mapped[str] = mapped_column(ForeignKey("users.username"))
     path: Mapped[str | None] = mapped_column(LtreeType)
-
+    updated: Mapped[datetime | None]
     post: Mapped["PostModel"] = relationship(back_populates="comments")
 
     def sync_dict(self):
