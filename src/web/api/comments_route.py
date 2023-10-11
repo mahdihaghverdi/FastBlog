@@ -1,14 +1,15 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Path
+from fastapi import APIRouter, Depends, Query, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from src.repository.repos.comment_repo import CommentRepo
+from src.repository.repos.post_repo import PostRepo
 from src.repository.unit_of_work import UnitOfWork
 from src.service.comment_service import CommentService
-from src.web.core.dependencies import get_db
-from src.web.core.schemas import CommentSchema, ReplyLevel
+from src.web.core.dependencies import get_db, get_current_user
+from src.web.core.schemas import CommentSchema, ReplyLevel, UserInternalSchema
 
 router = APIRouter(prefix="/comments", tags=["comments"])
 
@@ -45,9 +46,9 @@ async def get_base_comments(
     response_model=list[CommentSchema],
     status_code=status.HTTP_200_OK,
 )
-async def get_comments(
+async def get_replies(
     post_id: int,
-    comment_id: Annotated[int, Path()],
+    comment_id: int,
     session: Annotated[AsyncSession, Depends(get_db)],
     reply_level: Annotated[
         ReplyLevel,
@@ -66,3 +67,24 @@ async def get_comments(
             reply_level=reply_level,
         )
         return comments
+
+
+@router.put(
+    "/{post_id}/{comment_id}",
+    response_model=CommentSchema,
+    status_code=status.HTTP_200_OK,
+)
+async def update_comment(
+    post_id: int,
+    comment_id: int,
+    comment: Annotated[str, Body(min_length=1, max_length=255)],
+    session: Annotated[AsyncSession, Depends(get_db)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+):
+    async with UnitOfWork(session) as uow:
+        repo = CommentRepo(uow.session)
+        post_repo = PostRepo(uow.session)
+        service = CommentService(repo, post_repo=post_repo)
+        comment = await service.update_comment(user, post_id, comment_id, comment)
+        await uow.commit()
+        return comment

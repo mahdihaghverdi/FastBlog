@@ -13,22 +13,20 @@ def test_add_comment(client, headers, payload):
     assert response.status_code == 201, response.text
 
     comment_data = response.json()
-    comment, parent_id, username, path, reply_count = (
+    comment, parent_id, username, path, reply_count, updated = (
         comment_data["comment"],
         comment_data["parent_id"],
         comment_data["username"],
         comment_data["path"],
         comment_data["reply_count"],
+        comment_data["updated"],
     )
     assert comment == "my comment"
     assert parent_id is None
     assert username == "string"
     assert path == str(comment_data["id"])
     assert reply_count == 0
-
-    client.post(f"/posts/{post_id}/comment", headers=headers, json="my comment")
-    client.post(f"/posts/{post_id}/comment", headers=headers, json="my comment")
-    client.post(f"/posts/{post_id}/comment", headers=headers, json="my comment")
+    assert updated is None
 
 
 class TestGetCommentsBaseCommentsNoReply:
@@ -265,3 +263,69 @@ class TestGetCommentsBaseCommentsWithThreeLevelReply(BaseTest):
                     for two_level in got_comments
                     if (two_level["path"].split(".")) == 4
                 )
+
+
+def test_update_comment(client, headers, payload):
+    post_id = client.post("/posts", headers=headers, json=payload).json()["id"]
+    comment_id = client.post(
+        f"/posts/{post_id}/comment",
+        headers=headers,
+        json="my comment",
+    ).json()["id"]
+
+    response = client.put(
+        f"/comments/{post_id}/{comment_id}",
+        json="updated comment",
+        headers=headers,
+    )
+    assert response.status_code == 200, response.text
+
+    comment_data = response.json()
+    comment, parent_id, username, path, reply_count, updated = (
+        comment_data["comment"],
+        comment_data["parent_id"],
+        comment_data["username"],
+        comment_data["path"],
+        comment_data["reply_count"],
+        comment_data["updated"],
+    )
+    assert comment == "updated comment"
+    assert parent_id is None
+    assert username == "string"
+    assert path == str(comment_data["id"])
+    assert reply_count == 0
+    assert updated is not None
+
+
+def test_update_comment_post_not_found(client, headers, payload):
+    post_id = client.post("/posts", headers=headers, json=payload).json()["id"]
+    comment_id = client.post(
+        f"/posts/{post_id}/comment",
+        headers=headers,
+        json="my comment",
+    ).json()["id"]
+
+    response = client.put(
+        f"/comments/10/{comment_id}",
+        json="updated comment",
+        headers=headers,
+    )
+    assert response.status_code == 404, response.text
+    assert "post" in response.text.lower()
+
+
+def test_update_comment_comment_not_found(client, headers, payload):
+    post_id = client.post("/posts", headers=headers, json=payload).json()["id"]
+    client.post(
+        f"/posts/{post_id}/comment",
+        headers=headers,
+        json="my comment",
+    ).json()["id"]
+
+    response = client.put(
+        f"/comments/{post_id}/10",
+        json="updated comment",
+        headers=headers,
+    )
+    assert response.status_code == 404, response.text
+    assert "comment" in response.text.lower()

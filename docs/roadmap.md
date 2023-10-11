@@ -66,7 +66,7 @@ Now users can comment on each other's posts; also, they can respond to comments 
 Saving the update time of things will be implemented
 
 #### `v4.2.0`
-Comments are now updatable
+Users can update and delete their comments
 
 ----
 ### `v5.0.0`

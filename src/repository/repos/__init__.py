@@ -74,6 +74,9 @@ class OneToManyRelRepoMixin:
         if record is not None:
             return record
 
+    async def exists(self, self_id):
+        return bool(await super().get(self_id))
+
     async def get(self, username, self_id):
         record = await self._get(username, self_id)
         if record is not None:

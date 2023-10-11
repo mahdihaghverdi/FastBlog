@@ -156,6 +156,7 @@ class CommentModel(Base):
         return {
             "id": self.id,
             "created": self.created,
+            "updated": self.updated,
             "post_id": self.post_id,
             "parent_id": self.parent_id,
             "comment": self.comment,

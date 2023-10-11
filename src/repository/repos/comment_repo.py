@@ -40,6 +40,32 @@ class CommentRepo(OneToManyRelRepoMixin, BaseRepo):
         to_ret["reply_count"] = 0
         return to_ret
 
+    async def update(self, username, self_id, data):
+        comment = await super().update(username, self_id, data)
+        if comment is None:
+            return None
+        comment = comment.sync_dict()
+
+        reply_count = (
+            await self.session.execute(
+                select(func.count() - 1).filter(
+                    CommentModel.path.descendant_of(
+                        expression.cast(
+                            expression.cast(
+                                select(CommentModel.path)
+                                .where(CommentModel.id == self_id)
+                                .scalar_subquery(),
+                                String,
+                            ),
+                            LtreeType,
+                        ),
+                    ),
+                ),
+            )
+        ).scalar()
+        comment["reply_count"] = reply_count
+        return comment
+
     @staticmethod
     def _reply_count_of(stmt):
         return (
