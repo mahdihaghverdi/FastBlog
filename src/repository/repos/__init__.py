@@ -1,12 +1,9 @@
 from datetime import datetime
-from typing import Protocol
+from typing import Protocol, TypeVar, Generic
 
 from sqlalchemy import select, insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.repository.models import Base
-from src.service.objects import BusinessObject
 
 
 class RepoProtocol(Protocol):
@@ -26,29 +23,30 @@ class RepoProtocol(Protocol):
         ...
 
 
-class BaseRepo:
+M = TypeVar("M")
+
+
+class BaseRepo(Generic[M]):
     def __init__(
         self,
         session: AsyncSession,
-        model: type[Base],
-        object_: type[BusinessObject],
+        model: type[M],
     ):
         self.model = model
-        self.object = object_
         self.session = session
 
-    async def get(self, self_id):
+    async def get(self, self_id) -> M:
         record = await self.session.get(self.model, self_id)
         if record is not None:
             return record
 
-    async def add(self, data: dict):
+    async def add(self, data: dict) -> M | None:
         stmt = insert(self.model).values(**data).returning(self.model)
         try:
             user = (await self.session.execute(stmt)).scalar_one_or_none()
         except IntegrityError:
             return None
-        return user.sync_dict()
+        return user
 
 
 class OneToManyRelRepoMixin:
@@ -64,7 +62,7 @@ class OneToManyRelRepoMixin:
     let this parent class do the core functionality
     """
 
-    async def _get(self, username, self_id):
+    async def _get(self, username, self_id) -> M | None:
         stmt = (
             select(self.model)
             .where(self.model.username == username)
@@ -74,15 +72,15 @@ class OneToManyRelRepoMixin:
         if record is not None:
             return record
 
-    async def exists(self, self_id):
+    async def exists(self, self_id) -> bool:
         return bool(await super().get(self_id))
 
-    async def get(self, username, self_id):
+    async def get(self, username, self_id) -> M | None:
         record = await self._get(username, self_id)
         if record is not None:
-            return record.sync_dict()
+            return record
 
-    async def add(self, username, data: dict):
+    async def add(self, username, data: dict) -> M:
         """Inserts the model with the provided data and returns it"""
         stmt = (
             insert(self.model).values(**data, username=username).returning(self.model)
@@ -90,7 +88,7 @@ class OneToManyRelRepoMixin:
         record = (await self.session.execute(stmt)).scalar_one_or_none()
         return record
 
-    async def update(self, username, self_id, data: dict):
+    async def update(self, username, self_id, data: dict) -> M | None:
         record = await self._get(username, self_id)
         if record is None:
             return
@@ -101,7 +99,7 @@ class OneToManyRelRepoMixin:
         setattr(record, "updated", datetime.utcnow())
         return record
 
-    async def delete(self, username, /, self_id):
+    async def delete(self, username, /, self_id) -> bool | None:
         record = await self._get(username, self_id)
         if record is None:
             return False

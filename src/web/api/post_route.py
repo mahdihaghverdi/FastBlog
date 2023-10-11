@@ -158,7 +158,8 @@ async def add_reply(
 ):
     async with UnitOfWork(session) as uow:
         repo = CommentRepo(uow.session)
-        service = CommentService(repo)
+        post_repo = PostRepo(uow.session)
+        service = CommentService(repo, post_repo=post_repo)
         comment = await service.reply(user, post_id, comment_id, reply)
         await uow.commit()
         return comment

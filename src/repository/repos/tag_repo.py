@@ -1,17 +1,14 @@
-from fastapi.openapi.models import Tag
 from sqlalchemy import select
 
 from src.repository.models import TagModel
 from src.repository.repos import BaseRepo
 
 
-class TagRepo(BaseRepo):
+class TagRepo(BaseRepo[TagModel]):
     def __init__(self, session):
-        model = TagModel
-        object_ = Tag
-        super().__init__(session, model, object_)
+        super().__init__(session, model=TagModel)
 
-    async def get_or_create(self, names):
+    async def get_or_create(self, names) -> list[TagModel]:
         tags = []
         for name in names:
             tag = (

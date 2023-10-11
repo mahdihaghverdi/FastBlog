@@ -5,15 +5,13 @@ from sqlalchemy import desc, select
 from src.repository.models import DraftModel, PostModel
 from src.repository.repos import BaseRepo, OneToManyRelRepoMixin
 from src.repository.repos.tag_repo import TagRepo
-from src.service.objects import Draft, Post
+from src.service.objects import Post
 from src.web.core.schemas import Sort
 
 
-class DraftRepo(OneToManyRelRepoMixin, BaseRepo):
+class DraftRepo(OneToManyRelRepoMixin, BaseRepo[DraftModel]):
     def __init__(self, session):
-        model = DraftModel
-        object_ = Draft
-        super().__init__(session, model, object_)
+        super().__init__(session, model=DraftModel)
 
     async def list(
         self,
@@ -23,16 +21,11 @@ class DraftRepo(OneToManyRelRepoMixin, BaseRepo):
         per_page: int,
         sort: Sort,
         desc_: bool,
-    ) -> list:
-        """Return a list of Post objects
-
-        This function paginates the results according to page and per_page
-        This function sorts the results according to `Sort` and `SortOrder` values
-        """
-        order_by_column = DraftModel.title if sort is Sort.TITLE else DraftModel.created
+    ) -> list[dict]:
+        order_by_column = self.model.title if sort is Sort.TITLE else self.model.created
         stmt = (
-            select(DraftModel)
-            .where(DraftModel.username == username)
+            select(self.model)
+            .where(self.model.username == username)
             .offset((page - 1) * per_page)
             .limit(per_page)
             .order_by(
@@ -42,9 +35,9 @@ class DraftRepo(OneToManyRelRepoMixin, BaseRepo):
         records = list(
             itertools.chain.from_iterable((await self.session.execute(stmt)).all()),
         )
-        return [self.object(**record.sync_dict(), model=record) for record in records]
+        return [record.sync_dict() for record in records]
 
-    async def publish(self, user, draft_id, tags_and_title_in_url):
+    async def publish(self, user, draft_id, tags_and_title_in_url) -> Post | None:
         draft = await super(OneToManyRelRepoMixin, self).get(draft_id)
         if draft is None:
             return None

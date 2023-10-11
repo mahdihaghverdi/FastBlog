@@ -5,17 +5,14 @@ from sqlalchemy_utils.types.ltree import LQUERY, LtreeType
 
 from src.repository.models import CommentModel, PostModel
 from src.repository.repos import BaseRepo, OneToManyRelRepoMixin
-from src.service.objects import Comment
 from src.web.core.schemas import ReplyLevel
 
 
-class CommentRepo(OneToManyRelRepoMixin, BaseRepo):
+class CommentRepo(OneToManyRelRepoMixin, BaseRepo[CommentModel]):
     def __init__(self, session):
-        model = CommentModel
-        object_ = Comment
-        super().__init__(session=session, model=model, object_=object_)
+        super().__init__(session=session, model=CommentModel)
 
-    async def add(self, username, post_id, parent_id, comment):
+    async def add(self, username, post_id, parent_id, comment) -> dict:
         data = {"post_id": post_id, "parent_id": parent_id, "comment": comment}
         record = await super().add(username, data)
 
@@ -40,7 +37,7 @@ class CommentRepo(OneToManyRelRepoMixin, BaseRepo):
         to_ret["reply_count"] = 0
         return to_ret
 
-    async def update(self, username, self_id, data):
+    async def update(self, username, self_id, data) -> dict | None:
         comment = await super().update(username, self_id, data)
         if comment is None:
             return None
@@ -49,11 +46,11 @@ class CommentRepo(OneToManyRelRepoMixin, BaseRepo):
         reply_count = (
             await self.session.execute(
                 select(func.count() - 1).filter(
-                    CommentModel.path.descendant_of(
+                    self.model.path.descendant_of(
                         expression.cast(
                             expression.cast(
-                                select(CommentModel.path)
-                                .where(CommentModel.id == self_id)
+                                select(self.model.path)
+                                .where(self.model.id == self_id)
                                 .scalar_subquery(),
                                 String,
                             ),
@@ -66,12 +63,11 @@ class CommentRepo(OneToManyRelRepoMixin, BaseRepo):
         comment["reply_count"] = reply_count
         return comment
 
-    @staticmethod
-    def _reply_count_of(stmt):
+    def _reply_count_of(self, stmt):
         return (
             (
                 select(func.count() - 1).filter(
-                    CommentModel.path.descendant_of(
+                    self.model.path.descendant_of(
                         expression.cast(
                             expression.cast(stmt.columns.path, String),
                             LtreeType,
@@ -83,7 +79,7 @@ class CommentRepo(OneToManyRelRepoMixin, BaseRepo):
             .label("reply_count")
         )
 
-    async def list(self, post_id, comment_id, reply_level):
+    async def list(self, post_id, comment_id, reply_level) -> list[dict]:
         # Base query
         """
         select *,
@@ -163,17 +159,17 @@ class CommentRepo(OneToManyRelRepoMixin, BaseRepo):
                 # no reps
                 stmt = (
                     select(
-                        CommentModel.id,
-                        CommentModel.created,
-                        CommentModel.comment,
-                        CommentModel.parent_id,
-                        expression.cast(CommentModel.path, String),
-                        CommentModel.post_id,
-                        CommentModel.username,
+                        self.model.id,
+                        self.model.created,
+                        self.model.comment,
+                        self.model.parent_id,
+                        expression.cast(self.model.path, String),
+                        self.model.post_id,
+                        self.model.username,
                     )
                     .join(PostModel, PostModel.id == post_id)
                     .filter(
-                        CommentModel.path.lquery(
+                        self.model.path.lquery(
                             expression.cast(expression.cast("*{1}", String), LQUERY),
                         ),
                     )
@@ -182,17 +178,17 @@ class CommentRepo(OneToManyRelRepoMixin, BaseRepo):
             else:
                 stmt = (
                     select(
-                        CommentModel.id,
-                        CommentModel.created,
-                        CommentModel.comment,
-                        CommentModel.parent_id,
-                        expression.cast(CommentModel.path, String),
-                        CommentModel.post_id,
-                        CommentModel.username,
+                        self.model.id,
+                        self.model.created,
+                        self.model.comment,
+                        self.model.parent_id,
+                        expression.cast(self.model.path, String),
+                        self.model.post_id,
+                        self.model.username,
                     )
                     .join(PostModel, PostModel.id == post_id)
                     .filter(
-                        CommentModel.path.lquery(
+                        self.model.path.lquery(
                             expression.cast(
                                 expression.cast(
                                     "*{1," + str(int(reply_level.value) + 1) + "}",
@@ -210,16 +206,16 @@ class CommentRepo(OneToManyRelRepoMixin, BaseRepo):
             if reply_level is ReplyLevel.BASE:
                 stmt = (
                     select(
-                        CommentModel.id,
-                        CommentModel.created,
-                        CommentModel.comment,
-                        CommentModel.parent_id,
-                        expression.cast(CommentModel.path, String),
-                        CommentModel.post_id,
-                        CommentModel.username,
+                        self.model.id,
+                        self.model.created,
+                        self.model.comment,
+                        self.model.parent_id,
+                        expression.cast(self.model.path, String),
+                        self.model.post_id,
+                        self.model.username,
                     )
                     .filter(
-                        CommentModel.path.lquery(
+                        self.model.path.lquery(
                             expression.cast(
                                 expression.cast(
                                     "*."
@@ -238,16 +234,16 @@ class CommentRepo(OneToManyRelRepoMixin, BaseRepo):
             else:
                 stmt = (
                     select(
-                        CommentModel.id,
-                        CommentModel.created,
-                        CommentModel.comment,
-                        CommentModel.parent_id,
-                        expression.cast(CommentModel.path, String),
-                        CommentModel.post_id,
-                        CommentModel.username,
+                        self.model.id,
+                        self.model.created,
+                        self.model.comment,
+                        self.model.parent_id,
+                        expression.cast(self.model.path, String),
+                        self.model.post_id,
+                        self.model.username,
                     )
                     .filter(
-                        CommentModel.path.lquery(
+                        self.model.path.lquery(
                             expression.cast(
                                 expression.cast(
                                     "*."
@@ -267,4 +263,4 @@ class CommentRepo(OneToManyRelRepoMixin, BaseRepo):
         comments_mappings = (
             (await self.session.execute(comments.order_by("created"))).mappings().all()
         )
-        return comments_mappings
+        return list(map(dict, comments_mappings))

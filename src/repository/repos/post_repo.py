@@ -9,21 +9,18 @@ from src.repository.models import (
 )
 from src.repository.repos import BaseRepo, OneToManyRelRepoMixin
 from src.repository.repos.tag_repo import TagRepo
-from src.service.objects import Post
 from src.web.core.schemas import Sort
 
 
-class PostRepo(OneToManyRelRepoMixin, BaseRepo):
+class PostRepo(OneToManyRelRepoMixin, BaseRepo[PostModel]):
     def __init__(self, session):
-        model = PostModel
-        object_ = Post
-        super().__init__(session, model, object_)
+        super().__init__(session, PostModel)
 
-    async def get(self, username, self_id):
+    async def get(self, username, self_id) -> dict | None:
         post = (
-            select(PostModel)
-            .where(PostModel.id == self_id)
-            .where(PostModel.username == username)
+            select(self.model)
+            .where(self.model.id == self_id)
+            .where(self.model.username == username)
         ).subquery("post")
 
         post_with_tags = (
@@ -40,20 +37,20 @@ class PostRepo(OneToManyRelRepoMixin, BaseRepo):
         if post is not None:
             return dict(post)
 
-    async def add(self, username, data):
+    async def add(self, username, data: dict) -> dict:
         tags = data.pop("tags")
         tags = await TagRepo(self.session).get_or_create(tags)
 
-        record: PostModel = await super().add(username, data)
+        record = await super().add(username, data)
         for tag in tags:
             record.tags.add(tag)
 
         return record.sync_dict()
 
-    async def update(self, username, post_id, data):
+    async def update(self, username, post_id, data) -> dict | None:
         tags = data.pop("tags")
 
-        record: PostModel = await super().update(username, post_id, data)
+        record = await super().update(username, post_id, data)
         if record is None:
             return
 
@@ -65,11 +62,11 @@ class PostRepo(OneToManyRelRepoMixin, BaseRepo):
 
         return record.sync_dict()
 
-    async def get_post_with_url(self, username, url):
+    async def get_post_with_url(self, username, url) -> dict | None:
         post = (
-            select(PostModel)
-            .join(UserModel, PostModel.username == username)
-            .where(PostModel.url == url)
+            select(self.model)
+            .join(UserModel, self.model.username == username)
+            .where(self.model.url == url)
         ).subquery("post")
 
         post_with_tags = (
@@ -128,17 +125,17 @@ class PostRepo(OneToManyRelRepoMixin, BaseRepo):
         per_page: int,
         sort: Sort,
         desc_: bool,
-    ):
+    ) -> list[dict]:
         """Return a list of Post objects
 
         This function paginates the results according to page and per_page
         This function sorts the results according to `Sort` and `SortOrder` values
         """
-        order_by_column = PostModel.title if sort is Sort.TITLE else self.model.created
+        order_by_column = self.model.title if sort is Sort.TITLE else self.model.created
 
         posts = (
-            select(PostModel)
-            .where(PostModel.username == username)
+            select(self.model)
+            .where(self.model.username == username)
             .offset((page - 1) * per_page)
             .limit(per_page)
         ).subquery("posts")
