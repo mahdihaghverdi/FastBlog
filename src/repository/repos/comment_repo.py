@@ -1,33 +1,24 @@
-from sqlalchemy import insert, update, select, func, String
+from sqlalchemy import update, select, func, String
 from sqlalchemy.sql import expression
 from sqlalchemy_utils import Ltree
 from sqlalchemy_utils.types.ltree import LQUERY, LtreeType
 
 from src.repository.models import CommentModel, PostModel
-from src.repository.repos import BaseRepo
+from src.repository.repos import BaseRepo, OneToManyRelRepoMixin
 from src.service.objects import Comment
 from src.web.core.schemas import ReplyLevel
 
 
-class CommentRepo(BaseRepo):
+class CommentRepo(OneToManyRelRepoMixin, BaseRepo):
     def __init__(self, session):
         model = CommentModel
         object_ = Comment
         super().__init__(session=session, model=model, object_=object_)
 
     async def add(self, username, post_id, parent_id, comment):
-        insert_stmt = (
-            insert(self.model)
-            .values(
-                username=username,
-                post_id=post_id,
-                parent_id=parent_id,
-                comment=comment,
-            )
-            .returning(self.model)
-        )
+        data = {"post_id": post_id, "parent_id": parent_id, "comment": comment}
+        record = await super().add(username, data)
 
-        record = (await self.session.execute(insert_stmt)).scalar_one()
         if parent_id is None:
             add_path_stmt = (
                 update(self.model)
@@ -44,6 +35,7 @@ class CommentRepo(BaseRepo):
                 .values(path=Ltree(parent_path) + Ltree(str(record.id)))
             )
         await self.session.execute(add_path_stmt)
+
         to_ret = record.sync_dict()
         to_ret["reply_count"] = 0
         return to_ret
