@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastblog"
-version = "4.1.0"
+version = "4.2.0"
 description = "A RESTful blog system built with Python and FastAPI ⚡"
 authors = ["MahdiHaghverdi <mahdihaghverdliewpl@gmail.com>"]
 license = 'GPLv3'
