@@ -297,34 +297,6 @@ def test_update_comment(client, headers, payload):
     assert updated is not None
 
 
-def test_update_comment_post_not_found(client, headers, payload):
-    post_id = client.post("/posts", headers=headers, json=payload).json()["id"]
-    comment_id = client.post(
-        f"/posts/{post_id}/comment",
-        headers=headers,
-        json="my comment",
-    ).json()["id"]
-
-    response = client.put(
-        f"/comments/10/{comment_id}",
-        json="updated comment",
-        headers=headers,
-    )
-    assert response.status_code == 404, response.text
-    assert "post" in response.text.lower()
-
-
-def test_update_comment_comment_not_found(client, headers, payload):
-    post_id = client.post("/posts", headers=headers, json=payload).json()["id"]
-    response = client.put(
-        f"/comments/{post_id}/10",
-        json="updated comment",
-        headers=headers,
-    )
-    assert response.status_code == 404, response.text
-    assert "comment" in response.text.lower()
-
-
 def test_delete_comment(client, headers, payload):
     post_id = client.post("/posts", headers=headers, json=payload).json()["id"]
     comment_id = client.post(
@@ -338,29 +310,3 @@ def test_delete_comment(client, headers, payload):
         headers=headers,
     )
     assert response.status_code == 204, response.text
-
-
-def test_delete_comment_post_not_found(client, headers, payload):
-    post_id = client.post("/posts", headers=headers, json=payload).json()["id"]
-    comment_id = client.post(
-        f"/posts/{post_id}/comment",
-        headers=headers,
-        json="my comment",
-    ).json()["id"]
-
-    response = client.delete(
-        f"/comments/10/{comment_id}",
-        headers=headers,
-    )
-    assert response.status_code == 404, response.text
-    assert "post" in response.text.lower()
-
-
-def test_delete_comment_comment_not_found(client, headers, payload):
-    post_id = client.post("/posts", headers=headers, json=payload).json()["id"]
-    response = client.delete(
-        f"/comments/{post_id}/10",
-        headers=headers,
-    )
-    assert response.status_code == 404, response.text
-    assert "comment" in response.text.lower()

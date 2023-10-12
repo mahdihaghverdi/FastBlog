@@ -14,7 +14,6 @@ from src.web.core.schemas import CommentSchema, ReplyLevel, UserInternalSchema
 router = APIRouter(prefix="/comments", tags=["comments"])
 
 
-# TODO: write tests for PostNotFoundError
 @router.get(
     "/{post_id}/basecomments",
     response_model=list[CommentSchema],

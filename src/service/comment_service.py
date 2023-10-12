@@ -10,7 +10,7 @@ def _check_post_existence_decorator(async_method):
     async def decorator(self, **kwargs):
         post_id = kwargs["post_id"]
         if not await self.post_repo.exists(post_id):
-            raise PostNotFoundError(f"Post with id: '{post_id}' is not found")
+            raise PostNotFoundError(post_id)
         return await async_method(self, **kwargs)
 
     return decorator
@@ -32,10 +32,13 @@ def check_post_existence(decorator):
 @check_post_existence(_check_post_existence_decorator)
 class CommentService(Service):
     async def reply(self, *, username, post_id, comment_id, reply):
-        return await self.repo.add(
+        reply = await self.repo.add(
             username,
             {"post_id": post_id, "parent_id": comment_id, "comment": reply},
         )
+        if reply is None:
+            raise CommentNotFoundError(comment_id)
+        return reply
 
     async def get_comments(self, *, post_id, comment_id, reply_level):
         return await self.repo.list(post_id, comment_id, reply_level)
@@ -47,10 +50,10 @@ class CommentService(Service):
             {"comment": comment},
         )
         if comment is None:
-            raise CommentNotFoundError(f"Comment with id: '{comment}' not found")
+            raise CommentNotFoundError(comment_id)
         return comment
 
     async def delete_comment(self, *, username, post_id, comment_id):
         result = await self.repo.delete(username, comment_id)
         if result is False:
-            raise CommentNotFoundError(f"Comment with id: '{comment_id}' is not found")
+            raise CommentNotFoundError(comment_id)

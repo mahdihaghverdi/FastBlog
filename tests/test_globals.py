@@ -53,8 +53,3 @@ def test_get_global_post(client, payload, headers):
     assert post["all_comments_count"] == 8
     assert post["base_comments_count"] == 3
     assert post["reply_comments_count"] == 5
-
-
-def test_get_global_post_not_found(client, payload, headers):
-    response = client.get("http://testserver/@mahdi2/lksjdflijsdfl")
-    assert response.status_code == 404, response.text

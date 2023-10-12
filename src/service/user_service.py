@@ -11,7 +11,7 @@ class UserService(Service):
     async def get_user(self, user_id):
         user = await self.repo.get(user_id)
         if user is None:
-            raise UserNotFoundError(f"user with id: {user_id} is not found!")
+            raise UserNotFoundError(user_id)
         return user
 
     async def create_user(self, data: dict):

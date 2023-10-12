@@ -137,8 +137,9 @@ async def add_comment(
     user: Annotated[UserInternalSchema, Depends(get_current_user)],
 ):
     async with UnitOfWork(session) as uow:
-        repo = CommentRepo(uow.session)
-        service = PostService(repo=None, comment_repo=repo)
+        repo = PostRepo(uow.session)
+        comment_repo = CommentRepo(uow.session)
+        service = PostService(repo=repo, comment_repo=comment_repo)
         comment = await service.add_comment(user.username, post_id, comment)
         await uow.commit()
         return comment

@@ -1,21 +1,25 @@
 class ResourceNotFoundError(Exception):
-    pass
+    def __init__(self, not_found):
+        self.not_found = not_found
+
+    def __str__(self):
+        return f"<{self.kind.upper()}:{self.not_found!r}> is not found!"
 
 
 class PostNotFoundError(ResourceNotFoundError):
-    pass
+    kind = "post"
 
 
 class CommentNotFoundError(ResourceNotFoundError):
-    pass
+    kind = "comment"
 
 
 class DraftNotFoundError(ResourceNotFoundError):
-    pass
+    kind = "draft"
 
 
 class UserNotFoundError(ResourceNotFoundError):
-    pass
+    kind = "user"
 
 
 class DuplicateUsernameError(Exception):

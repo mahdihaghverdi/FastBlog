@@ -1,4 +1,5 @@
 from sqlalchemy import update, select, func, String
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import expression
 from sqlalchemy_utils import Ltree
 from sqlalchemy_utils.types.ltree import LQUERY, LtreeType
@@ -12,8 +13,11 @@ class CommentRepo(OneToManyRelRepoMixin, BaseRepo[CommentModel]):
     def __init__(self, session):
         super().__init__(session=session, model=CommentModel)
 
-    async def add(self, username, data) -> dict:
-        record = await super().add(username, data)
+    async def add(self, username, data) -> dict | None:
+        try:
+            record = await super().add(username, data)
+        except IntegrityError:
+            return None
 
         if data["parent_id"] is None:
             add_path_stmt = (

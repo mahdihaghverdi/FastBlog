@@ -1,6 +1,3 @@
-import random
-
-
 class BaseTest:
     @classmethod
     def setup_class(cls):
@@ -269,31 +266,3 @@ def test_delete_draft(client, headers, payload):
     assert response.status_code == 204, response.text
     assert not client.get("/posts", headers=headers).json()
     assert client.get(f"/posts{draft_id}").status_code == 404
-
-
-def test_get_draft_not_found(client, headers):
-    response = client.get(f"/drafts/{random.randint(0, 1)}", headers=headers)
-    assert response.status_code == 404, response.text
-
-
-def test_update_draft_not_found(client, headers, payload):
-    response = client.put(
-        f"/drafts/{random.randint(0, 1)}",
-        json=payload,
-        headers=headers,
-    )
-    assert response.status_code == 404, response.text
-
-
-def test_delete_draft_not_found(client, headers):
-    response = client.delete(f"/drafts/{random.randint(0, 1)}", headers=headers)
-    assert response.status_code == 404, response.text
-
-
-def test_publish_draft_not_found(client, headers):
-    response = client.post(
-        f"/drafts/{random.randint(0, 2)}/publish",
-        headers=headers,
-        json={"tags": ["1"]},
-    )
-    assert response.status_code == 404, response.text

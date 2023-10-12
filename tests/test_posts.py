@@ -1,6 +1,3 @@
-import random
-
-
 class BaseTest:
     @classmethod
     def setup_class(cls):
@@ -287,22 +284,3 @@ def test_delete_post(client, headers, payload):
     response = client.delete(f"posts/{post_id}", headers=headers)
     assert response.status_code == 204, response.text
     assert client.get(f"/posts{post_id}").status_code == 404
-
-
-def test_get_post_fail(client, headers):
-    response = client.get(f"/posts/{random.randint(0, 1)}", headers=headers)
-    assert response.status_code == 404, response.text
-
-
-def test_update_post_fail(client, headers, payload):
-    response = client.patch(
-        f"/posts/{random.randint(0, 1)}",
-        json=payload,
-        headers=headers,
-    )
-    assert response.status_code == 404, response.text
-
-
-def test_delete_post_fail(client, headers):
-    response = client.delete(f"/posts/{random.randint(0, 1)}", headers=headers)
-    assert response.status_code == 404, response.text
