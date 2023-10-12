@@ -27,7 +27,13 @@ class TestAuth:
         title, body = data["title"], data["body"]
         return title, body
 
-    def test_signup(self, client):
+    def test_signup_fail(self, client):
+        client.post("/users/signup", data=self.data)
+        response = client.post("/users/signup", data=self.data)
+        assert response.status_code == 400, response.text
+        assert "exists" in response.text.lower()
+
+    def test_signup_successful(self, client):
         response = client.post("/users/signup", data=self.data)
         assert response.status_code == 201, response.text
 
@@ -47,9 +53,6 @@ class TestAuth:
 
         drafts = client.get("/drafts", headers=headers).json()
         assert not drafts
-
-        response = client.post("/users/signup", data=self.data)
-        assert response.status_code == 400, response.text
 
     def test_empty_users_me_posts_drafts(self, client):
         client.post("/users/signup", data=self.data)

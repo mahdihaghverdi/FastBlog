@@ -1,4 +1,8 @@
-from src.common.exceptions import UserNotFoundError, UnAuthorizedLoginError
+from src.common.exceptions import (
+    UserNotFoundError,
+    UnAuthorizedLoginError,
+    DuplicateUsernameError,
+)
 from src.service import Service
 from src.web.core.security import verify_password
 
@@ -10,8 +14,13 @@ class UserService(Service):
             raise UserNotFoundError(f"user with id: {user_id} is not found!")
         return user
 
-    async def create_user(self, user_data: dict):
-        return await self.repo.add(user_data)
+    async def create_user(self, data: dict):
+        user = await self.repo.add(data)
+        if user is None:
+            raise DuplicateUsernameError(
+                f"username: {data['username']!r} already exists!",
+            )
+        return user
 
     async def authenticate(self, user_data: dict):
         username, password = user_data["username"], user_data["password"]

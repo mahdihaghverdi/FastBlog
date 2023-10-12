@@ -1,6 +1,5 @@
 from sqlalchemy import select
 
-from src.common.exceptions import DuplicateUsernameError
 from src.repository.models import UserModel
 from src.repository.repos import BaseRepo
 from src.service.objects import User
@@ -27,7 +26,5 @@ class UserRepo(BaseRepo[UserModel]):
         data["password"] = password
         user = await super().add(data)
         if user is None:
-            raise DuplicateUsernameError(
-                f"username: {data['username']!r} already exists!",
-            )
+            return None
         return User(**user.sync_dict())
