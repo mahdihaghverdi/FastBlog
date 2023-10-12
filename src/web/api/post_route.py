@@ -13,7 +13,7 @@ from src.service.post_service import PostService
 from src.web.api import give_domain
 from src.web.core.dependencies import (
     get_db,
-    get_current_user,
+    get_current_user_simple,
     returning_query_parameters,
     QueryParameters,
 )
@@ -37,7 +37,7 @@ async def create_post(
     request: Request,
     post: CreatePostSchema,
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
 ):
     """Create a post"""
     async with UnitOfWork(session) as uow:
@@ -56,7 +56,7 @@ async def create_post(
 async def get_posts(
     request: Request,
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
     query_parameters: Annotated[QueryParameters, Depends(returning_query_parameters)],
 ):
     """Retrieve all the posts"""
@@ -79,7 +79,7 @@ async def get_post(
     request: Request,
     post_id: int,
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
 ):
     """Return details of a specific post"""
     async with UnitOfWork(session) as uow:
@@ -100,7 +100,7 @@ async def update_post(
     post_id: int,
     post: UpdatePostSchema,
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
 ):
     """Updating a post"""
     async with UnitOfWork(session) as uow:
@@ -115,7 +115,7 @@ async def update_post(
 async def delete_post(
     post_id: int,
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
 ):
     """Delete a specific post"""
     async with UnitOfWork(session) as uow:
@@ -134,7 +134,7 @@ async def add_comment(
     post_id: int,
     comment: Annotated[str, Body(min_length=1, max_length=255)],
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
 ):
     async with UnitOfWork(session) as uow:
         repo = PostRepo(uow.session)
@@ -155,7 +155,7 @@ async def add_reply(
     comment_id: int,
     reply: Annotated[str, Body(min_length=1, max_length=255)],
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
 ):
     async with UnitOfWork(session) as uow:
         repo = CommentRepo(uow.session)

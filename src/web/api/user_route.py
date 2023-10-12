@@ -7,7 +7,7 @@ from starlette import status
 from src.repository.repos.user_repo import UserRepo
 from src.repository.unit_of_work import UnitOfWork
 from src.service.user_service import UserService
-from src.web.core.dependencies import get_db, get_current_user
+from src.web.core.dependencies import get_db, get_current_user_simple
 from src.web.core.schemas import UserOutSchema, UserSignUpSchema, UserInternalSchema
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -35,6 +35,6 @@ async def signup_user(
 
 @router.get("/me", response_model=UserOutSchema)
 async def read_users_me(
-    current_user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    current_user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
 ):
     return current_user

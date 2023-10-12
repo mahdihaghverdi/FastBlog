@@ -10,7 +10,7 @@ from src.repository.unit_of_work import UnitOfWork
 from src.service.draft_service import DraftService
 from src.web.api import give_domain
 from src.web.core.dependencies import (
-    get_current_user,
+    get_current_user_simple,
     QueryParameters,
     returning_query_parameters,
     get_db,
@@ -34,7 +34,7 @@ router = APIRouter(prefix="/drafts", tags=["drafts"])
 async def create_draft(
     draft: CreateDraftSchema,
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
 ):
     """Create a draft draft"""
     async with UnitOfWork(session) as uow:
@@ -52,7 +52,7 @@ async def create_draft(
 )
 async def get_drafts(
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
     query_parameters: Annotated[QueryParameters, Depends(returning_query_parameters)],
 ):
     """Retrieve all the draft"""
@@ -73,7 +73,7 @@ async def get_drafts(
 async def get_draft(
     draft_id: int,
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
 ):
     """Return details of a specific draft"""
     async with UnitOfWork(session) as uow:
@@ -87,7 +87,7 @@ async def update_draft(
     draft_id: int,
     draft_detail: CreateDraftSchema,
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
 ):
     """Replace an existing draft"""
     async with UnitOfWork(session) as uow:
@@ -102,7 +102,7 @@ async def update_draft(
 async def delete_draft(
     draft_id: int,
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
 ):
     """Delete a specific draft"""
     async with UnitOfWork(session) as uow:
@@ -122,7 +122,7 @@ async def publish_draft(
     draft_id: int,
     tags_and_title_in_url: PublishSchema,
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
 ):
     """Publish a draft post"""
     async with UnitOfWork(session) as uow:

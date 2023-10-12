@@ -8,7 +8,7 @@ from src.repository.repos.comment_repo import CommentRepo
 from src.repository.repos.post_repo import PostRepo
 from src.repository.unit_of_work import UnitOfWork
 from src.service.comment_service import CommentService
-from src.web.core.dependencies import get_db, get_current_user
+from src.web.core.dependencies import get_db, get_current_user_simple
 from src.web.core.schemas import CommentSchema, ReplyLevel, UserInternalSchema
 
 router = APIRouter(prefix="/comments", tags=["comments"])
@@ -82,7 +82,7 @@ async def update_comment(
     comment_id: int,
     comment: Annotated[str, Body(min_length=1, max_length=255)],
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
 ):
     async with UnitOfWork(session) as uow:
         repo = CommentRepo(uow.session)
@@ -106,7 +106,7 @@ async def delete_comment(
     post_id: int,
     comment_id: int,
     session: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserInternalSchema, Depends(get_current_user)],
+    user: Annotated[UserInternalSchema, Depends(get_current_user_simple)],
 ):
     async with UnitOfWork(session) as uow:
         repo = CommentRepo(uow.session)

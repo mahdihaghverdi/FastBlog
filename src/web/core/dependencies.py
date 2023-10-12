@@ -70,7 +70,7 @@ async def get_user(
         return await service.get_user(user_id)
 
 
-async def get_current_user(
+async def get_current_user_simple(
     session: Annotated[AsyncSession, Depends(get_db)],
     token: Annotated[str, Depends(oauth2_scheme)],
 ):
