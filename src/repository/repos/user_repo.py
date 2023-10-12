@@ -96,9 +96,13 @@ class UserRepo(BaseRepo[UserModel]):
             return user.sync_dict()
 
     async def add(self, data) -> User | None:
-        password = hash_password(data["password"])
-        data["password"] = password
+        data["password"] = hash_password(data["password"])
         user = await super().add(data)
         if user is None:
             return None
-        return User(**user.sync_dict())
+
+        _dict = user.sync_dict()
+        _dict.update(
+            {"posts": [], "drafts": []},
+        )
+        return User(**_dict)

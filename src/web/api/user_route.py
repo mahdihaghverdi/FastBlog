@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from starlette.requests import Request
@@ -21,16 +21,13 @@ router = APIRouter(prefix="/users", tags=["users"])
     status_code=status.HTTP_201_CREATED,
 )
 async def signup_user(
-    username: Annotated[str, Form()],
-    password: Annotated[str, Form()],
+    data: UserSignUpSchema,
     session: Annotated[AsyncSession, Depends(get_db)],
 ):
     async with UnitOfWork(session) as uow:
         repo = UserRepo(uow.session)
         service = UserService(repo)
-        user = await service.create_user(
-            UserSignUpSchema(username=username, password=password).model_dump(),
-        )
+        user = await service.create_user(data.model_dump())
         await uow.commit()
         return user
 

@@ -43,10 +43,10 @@ class BaseRepo(Generic[M]):
     async def add(self, data: dict) -> M | None:
         stmt = insert(self.model).values(**data).returning(self.model)
         try:
-            user = (await self.session.execute(stmt)).scalar_one_or_none()
+            record = (await self.session.execute(stmt)).scalar_one_or_none()
         except IntegrityError:
             return None
-        return user
+        return record
 
 
 class OneToManyRelRepoMixin:
