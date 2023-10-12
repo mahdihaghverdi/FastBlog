@@ -120,8 +120,6 @@ class UserModel(Base):
             "email": self.email,
             "twitter": self.twitter,
             "password": self.password,
-            "posts": self.posts,
-            "drafts": self.drafts,
         }
 
 
