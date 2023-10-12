@@ -43,7 +43,7 @@ async def create_post(
     async with UnitOfWork(session) as uow:
         repo = PostRepo(uow.session)
         service = PostService(repo)
-        post = await service.create_post(user, post)
+        post = await service.create_post(user.username, post)
         await uow.commit()
         return give_domain(str(request.base_url), post)
 
@@ -64,7 +64,7 @@ async def get_posts(
         repo = PostRepo(uow.session)
         service = PostService(repo)
         posts = await service.list_posts(
-            user,
+            user.username,
             page=query_parameters.page,
             per_page=query_parameters.per_page,
             sort=query_parameters.sort,
@@ -85,7 +85,7 @@ async def get_post(
     async with UnitOfWork(session) as uow:
         repo = PostRepo(uow.session)
         service = PostService(repo)
-        post = await service.get_post(user, post_id)
+        post = await service.get_post(user.username, post_id)
         payload = give_domain(str(request.base_url), post)
         return payload
 
@@ -106,7 +106,7 @@ async def update_post(
     async with UnitOfWork(session) as uow:
         repo = PostRepo(uow.session)
         service = PostService(repo)
-        post = await service.update_post(user, post_id, post)
+        post = await service.update_post(user.username, post_id, post)
         await uow.commit()
         return give_domain(str(request.base_url), post)
 
@@ -121,7 +121,7 @@ async def delete_post(
     async with UnitOfWork(session) as uow:
         repo = PostRepo(uow.session)
         service = PostService(repo)
-        await service.delete_post(user, post_id)
+        await service.delete_post(user.username, post_id)
         await uow.commit()
 
 
@@ -139,7 +139,7 @@ async def add_comment(
     async with UnitOfWork(session) as uow:
         repo = CommentRepo(uow.session)
         service = PostService(repo=None, comment_repo=repo)
-        comment = await service.add_comment(user, post_id, comment)
+        comment = await service.add_comment(user.username, post_id, comment)
         await uow.commit()
         return comment
 

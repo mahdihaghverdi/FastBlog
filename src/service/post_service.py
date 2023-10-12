@@ -1,4 +1,4 @@
-from src.common.exceptions import PostNotFoundError
+from src.common.exceptions import PostNotFoundError, UserNotFoundError
 from src.service import Service
 from src.service.objects import Post
 from src.web.core.schemas import Sort
@@ -15,7 +15,7 @@ async def slugify(post, user):
 class PostService(Service):
     async def list_posts(
         self,
-        user,
+        username,
         *,
         page: int,
         per_page: int,
@@ -23,40 +23,39 @@ class PostService(Service):
         desc_: bool,
     ) -> list[Post]:
         return await self.repo.list(
-            user.username,
+            username,
             page=page,
             per_page=per_page,
             sort=sort,
             desc_=desc_,
         )
 
-    async def create_post(self, user, post):
-        post_dict = await slugify(post, user)
-        return await self.repo.add(user.username, post_dict)
+    async def create_post(self, username, post):
+        post_dict = await slugify(post, username)
+        return await self.repo.add(username, post_dict)
 
-    async def get_post(self, user, post_id):
-        post = await self.repo.get(user.username, post_id)
+    async def get_post(self, username, post_id):
+        post = await self.repo.get(username, post_id)
         if post is None:
             raise PostNotFoundError(f"post with id: '{post_id}' is not found")
         return post
 
-    async def update_post(self, user, post_id, post):
-        post_dict = await slugify(post, user)
-        post = await self.repo.update(user.username, post_id, post_dict)
+    async def update_post(self, username, post_id, post):
+        post_dict = await slugify(post, username)
+        post = await self.repo.update(username, post_id, post_dict)
         if post is None:
             raise PostNotFoundError(f"post with id: '{post_id}' is not found")
         return post
 
-    # TODO: write tests for PostNotFoundError
-    async def delete_post(self, user, post_id):
-        deleted = await self.repo.delete(user.username, post_id)
+    async def delete_post(self, username, post_id):
+        deleted = await self.repo.delete(username, post_id)
         if deleted is False:
             raise PostNotFoundError(f"post with id: '{post_id}' is not found")
 
     async def get_post_by_post_url(self, username, post_slug):
         user = await self.user_repo.get_by_username(username)
         if user is None:
-            raise PostNotFoundError(f"post: @{username}/{post_slug} is not found!")
+            raise UserNotFoundError(f"user with username: {username!r} is not found!")
 
         post = await self.repo.get_post_with_url(
             username=user["username"],
@@ -68,7 +67,6 @@ class PostService(Service):
 
         return post
 
-    # TODO: do post existence first
     async def add_comment(self, user, post_id, comment):
         # self.repo = None, self.comment_repo is available
         return await self.comment_repo.add(
