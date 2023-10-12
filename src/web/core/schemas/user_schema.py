@@ -13,7 +13,11 @@ class UserLoginSchema(UserSignUpSchema):
 
 
 class UserOutSchema(BaseModel):
+    name: str | None = None
     username: str
+    bio: str | None = None
+    twitter: str | None = None
+    email: str | None = None
     created: datetime
     updated: datetime | None = None
 
