@@ -72,6 +72,9 @@ Users can update and delete their comments
 ### `v5.0.0`
 User profiles will be implemented!
 
+#### `v5.1.0`
+User following and followers system will be implemented!
+
 ----
 ### `v6.0.0`
 Post recommendation system will be implemented.

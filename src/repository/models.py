@@ -89,19 +89,21 @@ class TagModel(Base):
 class UserModel(Base):
     __tablename__ = "users"
 
+    name: Mapped[str | None] = mapped_column(String(100))
     username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
+    bio: Mapped[str | None] = mapped_column(String(255))
+    twitter: Mapped[str | None]
+    email: Mapped[str | None]
     updated: Mapped[datetime | None]
 
     posts: Mapped[list["PostModel"]] = relationship(
         back_populates="user",
         cascade="delete, delete-orphan",
-        lazy="selectin",
     )
     drafts: Mapped[list["DraftModel"]] = relationship(
         back_populates="user",
         cascade="delete, delete-orphan",
-        lazy="selectin",
     )
     comments: Mapped[list["CommentModel"]] = relationship(
         cascade="delete, delete-orphan",
@@ -113,6 +115,10 @@ class UserModel(Base):
             "created": self.created,
             "updated": self.updated,
             "username": self.username,
+            "name": self.name,
+            "bio": self.bio,
+            "email": self.email,
+            "twitter": self.twitter,
             "password": self.password,
             "posts": self.posts,
             "drafts": self.drafts,
