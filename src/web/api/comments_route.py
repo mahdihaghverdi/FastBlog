@@ -36,8 +36,8 @@ async def get_base_comments(
         post_repo = PostRepo(uow.session)
         service = CommentService(repo, post_repo=post_repo)
         comments = await service.get_comments(
-            post_id,
-            0,
+            post_id=post_id,
+            comment_id=0,
             reply_level=reply_level,
         )
         return comments
@@ -66,8 +66,8 @@ async def get_replies(
         post_repo = PostRepo(uow.session)
         service = CommentService(repo, post_repo=post_repo)
         comments = await service.get_comments(
-            post_id,
-            comment_id,
+            post_id=post_id,
+            comment_id=comment_id,
             reply_level=reply_level,
         )
         return comments
@@ -89,7 +89,12 @@ async def update_comment(
         repo = CommentRepo(uow.session)
         post_repo = PostRepo(uow.session)
         service = CommentService(repo, post_repo=post_repo)
-        comment = await service.update_comment(user, post_id, comment_id, comment)
+        comment = await service.update_comment(
+            username=user.username,
+            post_id=post_id,
+            comment_id=comment_id,
+            comment=comment,
+        )
         await uow.commit()
         return comment
 
@@ -108,5 +113,9 @@ async def delete_comment(
         repo = CommentRepo(uow.session)
         post_repo = PostRepo(uow.session)
         service = CommentService(repo, post_repo=post_repo)
-        await service.delete_comment(user, post_id, comment_id)
+        await service.delete_comment(
+            username=user.username,
+            post_id=post_id,
+            comment_id=comment_id,
+        )
         await uow.commit()

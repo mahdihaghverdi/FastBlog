@@ -99,7 +99,7 @@ class OneToManyRelRepoMixin:
         setattr(record, "updated", datetime.utcnow())
         return record
 
-    async def delete(self, username, /, self_id) -> bool | None:
+    async def delete(self, username, self_id) -> bool | None:
         record = await self._get(username, self_id)
         if record is None:
             return False
