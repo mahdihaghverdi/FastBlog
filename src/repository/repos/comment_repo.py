@@ -12,11 +12,10 @@ class CommentRepo(OneToManyRelRepoMixin, BaseRepo[CommentModel]):
     def __init__(self, session):
         super().__init__(session=session, model=CommentModel)
 
-    async def add(self, username, post_id, parent_id, comment) -> dict:
-        data = {"post_id": post_id, "parent_id": parent_id, "comment": comment}
+    async def add(self, username, data) -> dict:
         record = await super().add(username, data)
 
-        if parent_id is None:
+        if data["parent_id"] is None:
             add_path_stmt = (
                 update(self.model)
                 .where(self.model.id == record.id)
@@ -24,7 +23,9 @@ class CommentRepo(OneToManyRelRepoMixin, BaseRepo[CommentModel]):
             )
         else:
             # new_path: parent_path + self.id
-            parent_path_stmt = select(self.model.path).where(self.model.id == parent_id)
+            parent_path_stmt = select(self.model.path).where(
+                self.model.id == data["parent_id"],
+            )
             parent_path = (await self.session.execute(parent_path_stmt)).scalar_one()
             add_path_stmt = (
                 update(self.model)

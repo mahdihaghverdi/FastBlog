@@ -2,15 +2,14 @@ from src.common.exceptions import CommentNotFoundError, PostNotFoundError
 from src.service import Service
 
 
+# TODO: decorate all methods to check post existence
 class CommentService(Service):
     async def reply(self, user, post_id, comment_id, reply):
         if not await self.post_repo.exists(post_id):
             raise PostNotFoundError(f"Post with id: '{post_id}' is not found")
         return await self.repo.add(
             user.username,
-            post_id,
-            parent_id=comment_id,
-            comment=reply,
+            {"post_id": post_id, "parent_id": comment_id, "comment": reply},
         )
 
     async def get_comments(self, post_id, comment_id, reply_level):

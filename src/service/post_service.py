@@ -73,7 +73,5 @@ class PostService(Service):
         # self.repo = None, self.comment_repo is available
         return await self.comment_repo.add(
             user.username,
-            post_id,
-            parent_id=None,
-            comment=comment,
+            {"post_id": post_id, "parent_id": None, "comment": comment},
         )
