@@ -154,7 +154,11 @@ class CommentModel(Base):
     username: Mapped[str] = mapped_column(ForeignKey("users.username"))
     path: Mapped[str | None] = mapped_column(LtreeType)
     updated: Mapped[datetime | None]
+
     post: Mapped["PostModel"] = relationship(back_populates="comments")
+    children: Mapped[list["CommentModel"]] = relationship(
+        cascade="delete, delete-orphan",
+    )
 
     def sync_dict(self):
         return {

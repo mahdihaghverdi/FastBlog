@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, constr
 
+from src.web.core.schemas import MiniPostSchema, MiniDraftSchema
+
 
 class UserSignUpSchema(BaseModel):
     username: str
@@ -20,6 +22,8 @@ class UserOutSchema(BaseModel):
     email: str | None = None
     created: datetime
     updated: datetime | None = None
+    posts: list[MiniPostSchema]
+    drafts: list[MiniDraftSchema]
 
 
 class UserInternalSchema(UserOutSchema):

@@ -63,11 +63,12 @@ async def returning_query_parameters(
 async def get_user(
     session: Annotated[AsyncSession, Depends(get_db)],
     user_id,
+    full=False,
 ):
     async with UnitOfWork(session) as uow:
         repo = UserRepo(uow.session)
         service = UserService(repo)
-        return await service.get_user(user_id)
+        return await service.get_user(user_id, full)
 
 
 async def get_current_user_simple(
@@ -91,4 +92,28 @@ async def get_current_user_simple(
     except JWTError:
         raise credentials_exception
     user = await get_user(session, int(user_id))
+    return user
+
+
+async def get_current_user_full(
+    session: Annotated[AsyncSession, Depends(get_db)],
+    token: Annotated[str, Depends(oauth2_scheme)],
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(
+            token=token,
+            key=settings.secret_key,
+            algorithms=[settings.algorithm],
+        )
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    user = await get_user(session, int(user_id), full=True)
     return user

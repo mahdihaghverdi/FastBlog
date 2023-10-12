@@ -19,6 +19,11 @@ class DraftSchema(BaseModel):
     body: constr(strip_whitespace=True, min_length=1)
 
 
+class MiniDraftSchema(BaseModel):
+    title: str
+    created: datetime
+
+
 class PublishSchema(BaseModel):
     title_in_url: constr(strip_whitespace=True, min_length=1) | None = None
     tags: conset(

@@ -8,8 +8,11 @@ from src.web.core.security import verify_password
 
 
 class UserService(Service):
-    async def get_user(self, user_id):
-        user = await self.repo.get(user_id)
+    async def get_user(self, user_id, full):
+        if full is False:
+            user = await self.repo.get(user_id)
+        else:
+            user = await self.repo.get_full(user_id)
         if user is None:
             raise UserNotFoundError(user_id)
         return user

@@ -66,6 +66,12 @@ class PostSchema(BaseModel):
     tags: list[str]
 
 
+class MiniPostSchema(BaseModel):
+    title: str
+    url: AnyHttpUrl
+    created: datetime
+
+
 class GlobalPostSchema(PostSchema):
     all_comments_count: int
     base_comments_count: int
