@@ -1,7 +1,7 @@
 # `FastBlog` version roadmap
 
 **Note:** This file is the overview of the upcoming versions
-and features within them of the project,
+and features of the project,
 the full changes will be in changelog and GitHub release notes.
 
 ----
@@ -67,6 +67,9 @@ Saving the update time of things will be implemented
 
 #### `v4.2.0`
 Users can update and delete their comments
+
+#### `v4.2.1`
+Comment system is redesigned
 
 ----
 ### `v5.0.0`
